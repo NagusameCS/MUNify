@@ -1,84 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MUNify</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MUNify – Landing</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script type="module" src="assets/js/auth.js"></script>
-  <script type="module" src="assets/js/settings.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body class="bg-neutral-50 text-neutral-900">
-  <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between">
-    <a href="index.html" class="flex items-center gap-2 font-semibold" style="color:#3e4f5e;">MUNify</a>
-    <nav class="text-sm hidden sm:flex gap-6">
-      <a href="info/index.html" class="hover:underline">Info & Permissions</a>
-      <a href="design/index.html" class="hover:underline">Form Designer</a>
+<body class="bg-gray-50 flex flex-col min-h-screen text-gray-800">
+
+  <!-- Header -->
+  <header class="flex justify-between items-center px-6 py-4 bg-white shadow-sm">
+    <div class="flex items-center gap-3">
+      <img src="favicon.svg" alt="Logo" class="h-8 w-8">
+      <h1 class="text-xl font-bold">MUNify</h1>
+    </div>
+    <nav class="flex gap-6">
+      <a href="info/" class="hover:underline">Info</a>
+      <a href="design/" class="hover:underline">Designer</a>
     </nav>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4">
-    <section class="grid md:grid-cols-2 gap-8 items-center">
-      <div class="space-y-4">
-        <h1 class="text-3xl md:text-5xl font-bold leading-tight">
-          Run MUNify using <span class="underline" style="color:#3e4f5e;">your own</span> Google Sheets.
-        </h1>
-        <p class="text-neutral-700">No servers. No data on us. You sign in with Google, point to your Apps Script Web App and Sheet, and we do the rest in your browser.</p>
-        <div class="flex items-center gap-4">
-          <div id="g_id_signin"></div>
-          <button id="btnContinue" class="px-4 py-2 rounded-2xl bg-black text-white disabled:opacity-40" disabled>Continue</button>
-        </div>
-        <p class="text-xs text-neutral-500">We only store configuration locally in your browser. You can clear it anytime in Settings.</p>
-      </div>
-      <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200">
-        <h2 class="font-semibold mb-2">Quick Setup</h2>
-        <ol class="list-decimal ml-5 space-y-2 text-sm">
-          <li>Click <strong>Sign in with Google</strong>.</li>
-          <li>Paste your <strong>Apps Script Web App URL</strong> and <strong>Sheet ID</strong> in <em>Settings</em>.</li>
-          <li>Go to <strong>Form Designer</strong> and create your form.</li>
-          <li>Share <code>form/#YOUR_HASH</code> with delegates.</li>
-        </ol>
-        <div class="mt-4 flex gap-2">
-          <a href="design/index.html" class="px-3 py-2 rounded-2xl border" style="color:#3e4f5e;">Open Designer</a>
-          <a href="info/index.html" class="px-3 py-2 rounded-2xl border" style="color:#3e4f5e;">Permissions & Help</a>
-        </div>
-      </div>
-    </section>
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col items-center justify-center text-center px-4 py-12">
+    <h2 class="text-4xl font-extrabold mb-4">Run Your MUN Smarter</h2>
+    <p class="max-w-2xl mb-8 text-lg text-gray-600">
+      Create, customize, and deploy MUN forms with Google Sheets & Apps Script integration.
+      You control your data — we never store it.
+    </p>
 
-    <section class="mt-12 bg-white rounded-2xl shadow p-6 border border-neutral-200">
-      <div class="flex items-center justify-between">
-        <h3 class="font-semibold">Settings</h3>
-        <button id="btnClear" class="text-sm underline">Clear local settings</button>
-      </div>
-      <div class="grid md:grid-cols-2 gap-4 mt-4">
-        <label class="text-sm">Apps Script Web App URL
-          <input id="scriptUrl" type="url" placeholder="https://script.google.com/macros/s/AK.../exec" class="mt-1 w-full border rounded-lg p-2" />
-        </label>
-        <label class="text-sm">Google Sheet ID
-          <input id="sheetId" type="text" placeholder="1AbCdefGhIjK..." class="mt-1 w-full border rounded-lg p-2" />
-        </label>
-      </div>
-      <div class="mt-4 flex gap-2">
-        <button id="btnSave" class="px-3 py-2 rounded-2xl bg-neutral-900 text-white">Save</button>
-        <a href="design/index.html" class="px-3 py-2 rounded-2xl border" style="color:#3e4f5e;">Go to Designer</a>
-      </div>
+    <!-- Google Sign-In -->
+    <div id="g_id_signin" class="mb-6"></div>
+
+    <!-- Continue Button -->
+    <button id="btnContinue" disabled class="px-6 py-3 rounded-xl bg-blue-500 text-white font-semibold disabled:opacity-50">
+      Continue
+    </button>
+
+    <!-- Quick Setup -->
+    <section class="mt-12 max-w-xl text-left bg-white shadow-md rounded-xl p-6">
+      <h3 class="text-2xl font-bold mb-4">Quick Setup</h3>
+      <ol class="list-decimal list-inside space-y-3">
+        <li>
+          Open <a href="https://developers.google.com/apps-script/guides/web" target="_blank" class="text-blue-600 underline">Google Apps Script</a> and create a Web App.
+        </li>
+        <li>
+          Get your <a href="https://support.google.com/docs/answer/183965" target="_blank" class="text-blue-600 underline">Google Sheet ID</a> and paste it in Settings.
+        </li>
+        <li>
+          Configure your Web App to execute as <strong>you</strong> and allow <strong>Anyone with the link</strong> to access.
+        </li>
+      </ol>
     </section>
   </main>
 
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200">
-    <div class="flex flex-col md:flex-row justify-center items-center gap-2">
-      <span>© 2025 MUNify</span>
-      <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
-        <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+  <!-- Footer -->
+  <footer class="bg-gray-100 py-6 mt-auto">
+    <div class="flex items-center justify-center gap-3 text-gray-600">
+      <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.1 3.29 9.41 7.86 10.94.57.11.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.2.7-3.88-1.39-3.88-1.39-.52-1.33-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.75 1.18 1.75 1.18 1.02 1.75 2.67 1.24 3.32.95.1-.74.4-1.24.72-1.52-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 2.87-.39c.97 0 1.94.13 2.87.39 2.18-1.49 3.14-1.18 3.14-1.18.62 1.58.24 2.75.12 3.04.74.81 1.18 1.83 1.18 3.09 0 4.43-2.68 5.41-5.24 5.69.41.35.77 1.05.77 2.12 0 1.53-.01 2.77-.01 3.14 0 .31.21.67.79.55A10.99 10.99 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/>
         </svg>
-        GitHub
       </a>
-      <span>Licensed under GNU GPLv3</span>
+      <span>Licensed under <a href="https://www.gnu.org/licenses/gpl-3.0.en.html" class="underline">GNU GPLv3</a></span>
     </div>
   </footer>
+
+  <!-- Scripts -->
+  <script>
+    window.onload = () => {
+      google.accounts.id.initialize({
+        client_id: "73123638661-ai7rhojisd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com",
+        callback: (response) => {
+          console.log("JWT ID Token:", response.credential);
+          document.getElementById("btnContinue").disabled = false;
+        }
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById("g_id_signin"),
+        { theme: "outline", size: "large", shape: "pill" }
+      );
+    };
+
+    document.getElementById("btnContinue").addEventListener("click", () => {
+      window.location.href = "design/";
+    });
+  </script>
 </body>
 </html>
