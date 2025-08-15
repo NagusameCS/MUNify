@@ -4,34 +4,24 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MUNify</title>
-
-  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Google Sign-In API -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-
   <style>
     :root {
       --accent: #3e4f5e;
     }
   </style>
 </head>
-
 <body class="bg-neutral-50 text-neutral-900">
-  <!-- Header -->
   <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between">
-    <a href="./" class="flex items-center gap-2 font-semibold">MUNify</a>
+    <a href="./" class="flex items-center gap-2 text-lg font-semibold">MUNify</a>
     <nav class="text-sm hidden sm:flex gap-6">
       <a href="./info/" class="hover:underline">Info & Permissions</a>
       <a href="./design/" class="hover:underline">Form Designer</a>
     </nav>
   </header>
 
-  <!-- Hero -->
   <main class="max-w-5xl mx-auto px-4">
     <section class="grid md:grid-cols-2 gap-8 items-center">
       <div class="space-y-4">
@@ -39,66 +29,31 @@
           Run MUNify using <span class="underline">your own</span> Google Sheets.
         </h1>
         <p class="text-neutral-700">
-          No servers. No data on us. You sign in with Google, point to your
-          Apps Script Web App and Sheet, and we do the rest in your browser.
+          No servers. No data on us. You sign in with Google, point to your Apps Script Web App and Sheet, and we do the rest in your browser.
         </p>
-
-        <!-- Sign-In and Continue -->
-        <div class="flex items-center gap-4">
-          <div id="g_id_signin"></div>
-          <button id="btnContinue" class="px-4 py-2 rounded-2xl bg-black text-white disabled:opacity-40" disabled>
-            Continue
-          </button>
-        </div>
+        <div id="g_id_signin"></div>
         <p class="text-xs text-neutral-500">
           We only store configuration locally in your browser. You can clear it anytime in Settings.
         </p>
       </div>
-
-      <!-- Setup Card -->
       <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200">
         <h2 class="font-semibold mb-2">Quick Setup</h2>
         <ol class="list-decimal ml-5 space-y-2 text-sm">
-          <li>Click <a href="https://developers.google.com/identity/gsi/web" target="_blank" class="font-semibold text-[var(--accent)] hover:underline">Sign in with Google</a>.</li>
-          <li>Paste your <a href="https://developers.google.com/apps-script/guides/web" target="_blank" class="font-semibold text-[var(--accent)] hover:underline">Apps Script Web App URL</a> and <a href="https://support.google.com/docs/answer/3093313" target="_blank" class="font-semibold text-[var(--accent)] hover:underline">Sheet ID</a> in <em>Settings</em>.</li>
-          <li>Go to <strong class="text-[var(--accent)]">Form Designer</strong> and create your form.</li>
+          <li>Click <a href="https://developers.google.com/identity" target="_blank" class="text-[var(--accent)] underline font-semibold">Sign in with Google</a>.</li>
+          <li>Paste your <a href="https://developers.google.com/apps-script/guides/web" target="_blank" class="text-[var(--accent)] underline font-semibold">Apps Script Web App URL</a> and <a href="https://developers.google.com/sheets/api/guides/concepts" target="_blank" class="text-[var(--accent)] underline font-semibold">Sheet ID</a> in Settings.</li>
+          <li>Go to <strong>Form Designer</strong> and create your form.</li>
           <li>Share <code>/form/#YOUR_HASH</code> with delegates.</li>
         </ol>
-        <div class="mt-4 flex gap-2">
-          <a href="./design/" class="px-3 py-2 rounded-2xl border">Open Designer</a>
-          <a href="./info/" class="px-3 py-2 rounded-2xl border">Permissions & Help</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Settings Section -->
-    <section class="mt-12 bg-white rounded-2xl shadow p-6 border border-neutral-200">
-      <div class="flex items-center justify-between">
-        <h3 class="font-semibold">Settings</h3>
-        <button id="btnClear" class="text-sm underline">Clear local settings</button>
-      </div>
-      <div class="grid md:grid-cols-2 gap-4 mt-4">
-        <label class="text-sm">Apps Script Web App URL
-          <input id="scriptUrl" type="url" placeholder="https://script.google.com/macros/s/AK.../exec" class="mt-1 w-full border rounded-lg p-2" />
-        </label>
-        <label class="text-sm">Google Sheet ID
-          <input id="sheetId" type="text" placeholder="1AbCdefGhIjK..." class="mt-1 w-full border rounded-lg p-2" />
-        </label>
-      </div>
-      <div class="mt-4 flex gap-2">
-        <button id="btnSave" class="px-3 py-2 rounded-2xl bg-neutral-900 text-white">Save</button>
-        <a href="./design/" class="px-3 py-2 rounded-2xl border">Go to Designer</a>
       </div>
     </section>
   </main>
 
-  <!-- Footer -->
   <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
       <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
-        <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 ..."></path>
         </svg>
         GitHub
       </a>
@@ -106,48 +61,19 @@
     </div>
   </footer>
 
-  <!-- Inline Script for Auth + Settings -->
   <script>
-    const CLIENT_ID = "73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com";
-
-    function handleCredentialResponse(response) {
-      const data = parseJwt(response.credential);
-      localStorage.setItem("munifyUser", JSON.stringify(data));
-      document.getElementById("btnContinue").disabled = false;
-    }
-
-    function parseJwt(token) {
-      try {
-        return JSON.parse(atob(token.split('.')[1]));
-      } catch (e) {
-        return {};
-      }
-    }
-
-    window.onload = function () {
+    window.onload = () => {
       google.accounts.id.initialize({
-        client_id: CLIENT_ID,
-        callback: handleCredentialResponse
+        client_id: "YOUR_GOOGLE_CLIENT_ID",
+        callback: (res) => {
+          localStorage.setItem("munifyUser", JSON.stringify(res));
+          window.location.href = "./design/";
+        }
       });
       google.accounts.id.renderButton(
         document.getElementById("g_id_signin"),
         { theme: "outline", size: "large" }
       );
-
-      document.getElementById("btnContinue").addEventListener("click", () => {
-        window.location.href = "./design/";
-      });
-
-      document.getElementById("btnSave").addEventListener("click", () => {
-        localStorage.setItem("munifyScriptUrl", document.getElementById("scriptUrl").value);
-        localStorage.setItem("munifySheetId", document.getElementById("sheetId").value);
-        alert("Settings saved!");
-      });
-
-      document.getElementById("btnClear").addEventListener("click", () => {
-        localStorage.clear();
-        alert("Settings cleared!");
-      });
     };
   </script>
 </body>

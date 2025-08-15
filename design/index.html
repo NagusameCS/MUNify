@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MUNify – Form Designer</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --accent: #3e4f5e;
+    }
+  </style>
+</head>
+<body class="bg-neutral-50 text-neutral-900">
+  <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between">
+    <a href="../" class="flex items-center gap-2 text-lg font-semibold">MUNify</a>
+    <nav class="text-sm hidden sm:flex gap-6">
+      <a href="../info/" class="hover:underline">Info & Permissions</a>
+      <a href="../design/" class="hover:underline font-semibold text-[var(--accent)]">Form Designer</a>
+    </nav>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4">
+    <h1 class="text-3xl font-bold mb-4">Form Designer</h1>
+    <p class="mb-6 text-neutral-700">Create, edit, and preview your MUN forms live. All changes are stored in your linked Google Sheet.</p>
+
+    <section class="bg-white p-6 rounded-2xl shadow border border-neutral-200">
+      <div class="grid md:grid-cols-2 gap-4">
+        <textarea id="formCode" class="border rounded-lg p-2 w-full h-64 font-mono text-sm" placeholder="Write your form HTML here..."></textarea>
+        <iframe id="formPreview" class="w-full h-64 border rounded-lg bg-white"></iframe>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button id="btnSave" class="px-3 py-2 rounded-2xl bg-[var(--accent)] text-white">Save to Sheet</button>
+        <button id="btnLoad" class="px-3 py-2 rounded-2xl border">Load from Sheet</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200">
+    <div class="flex flex-col md:flex-row justify-center items-center gap-2">
+      <span>© 2025 MUN Forms</span>
+      <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16">
+          <path d="M8 0C3.58 0 0 3.58 0 ..."></path>
+        </svg>
+        GitHub
+      </a>
+      <span>Licensed under GNU GPLv3</span>
+    </div>
+  </footer>
+
+  <script>
+    const formCode = document.getElementById('formCode');
+    const formPreview = document.getElementById('formPreview').contentWindow.document;
+
+    document.getElementById('btnSave').onclick = () => {
+      const scriptUrl = localStorage.getItem('munifyScriptUrl');
+      const sheetId = localStorage.getItem('munifySheetId');
+      if (!scriptUrl || !sheetId) {
+        alert("Please set your Apps Script URL and Sheet ID in Settings.");
+        return;
+      }
+      fetch(scriptUrl, {
+        method: 'POST',
+        body: JSON.stringify({ sheetId, formHtml: formCode.value }),
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => res.text()).then(alert);
+    };
+
+    document.getElementById('btnLoad').onclick = () => {
+      const scriptUrl = localStorage.getItem('munifyScriptUrl');
+      const sheetId = localStorage.getItem('munifySheetId');
+      if (!scriptUrl || !sheetId) {
+        alert("Please set your Apps Script URL and Sheet ID in Settings.");
+        return;
+      }
+      fetch(`${scriptUrl}?sheetId=${sheetId}`)
+        .then(res => res.json())
+        .then(data => {
+          formCode.value = data.formHtml || '';
+          formPreview.open();
+          formPreview.write(data.formHtml || '');
+          formPreview.close();
+        });
+    };
+
+    formCode.addEventListener('input', () => {
+      formPreview.open();
+      formPreview.write(formCode.value);
+      formPreview.close();
+    });
+  </script>
+</body>
+</html>
