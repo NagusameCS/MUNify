@@ -6,21 +6,32 @@
   <title>MUNify – Form Designer</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900">
-  <!-- HEADER -->
-  <header class="bg-white border-b shadow-sm">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-      <a href="/MUNify/" class="font-semibold text-lg">MUNify</a>
-      <div class="flex items-center gap-3">
-        <button id="btnSaveForm" class="px-3 py-2 bg-neutral-900 text-white rounded-2xl">Save</button>
-        <button id="btnSettings" class="px-3 py-2 border rounded-2xl">Settings</button>
+
+  <!-- GOOGLE SIGN-IN CONTAINER -->
+  <div id="loginContainer" class="flex justify-center items-center min-h-screen">
+    <div class="text-center">
+      <h1 class="text-3xl font-bold mb-6">Welcome to MUNify</h1>
+      <div id="g_id_onload"
+           data-client_id="YOUR_GOOGLE_CLIENT_ID"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+           data-type="standard"
+           data-size="large"
+           data-theme="outline"
+           data-text="sign_in_with"
+           data-shape="rectangular"
+           data-logo_alignment="left">
       </div>
     </div>
-  </header>
+  </div>
 
-  <!-- MAIN -->
-  <main class="max-w-5xl mx-auto px-4 py-6">
+  <!-- MAIN DESIGNER -->
+  <main class="max-w-5xl mx-auto px-4 py-6 hidden">
     <div id="status" class="mb-4 text-sm"></div>
 
     <!-- Tabs -->
@@ -55,18 +66,43 @@
   </footer>
 
   <script>
-    // --- LOGIN & PERMISSION CHECK ---
-    const loggedIn = localStorage.getItem("munifyLoggedIn") === "true";
-    const scriptUrl = localStorage.getItem("munifyScriptUrl");
-    const sheetId = localStorage.getItem("munifySheetId");
+    // --- GOOGLE SIGN-IN CALLBACK ---
+    function handleCredentialResponse(response) {
+      console.log("JWT ID token:", response.credential);
+      // Save login state
+      localStorage.setItem("munifyLoggedIn", "true");
 
-    if (!loggedIn || !scriptUrl || !sheetId) {
-      alert("You must be signed in and have set up your Apps Script and Google Sheet before using the designer.");
-      window.location.href = "/MUNify/";
+      // Hide login, show main designer
+      document.getElementById("loginContainer").style.display = "none";
+      document.querySelector("main").style.display = "block";
+
+      // Initialize the designer
+      initDesigner();
     }
 
-    // --- BASE TEMPLATE ---
-    const baseTemplate = `
+    // --- CHECK LOGIN ON PAGE LOAD ---
+    const loggedIn = localStorage.getItem("munifyLoggedIn") === "true";
+    if (loggedIn) {
+      document.getElementById("loginContainer").style.display = "none";
+      document.querySelector("main").style.display = "block";
+      initDesigner();
+    }
+
+    // --- INITIALIZE DESIGNER ---
+    function initDesigner() {
+      const scriptUrl = localStorage.getItem("munifyScriptUrl") || "Not set";
+      const sheetId = localStorage.getItem("munifySheetId") || "Not set";
+      const status = document.getElementById("status");
+      const previewTab = document.getElementById("previewTab");
+      const codeTab = document.getElementById("codeTab");
+      const formCode = document.getElementById("formCode");
+      const editablePreview = document.getElementById("editablePreview");
+
+      // Status
+      status.textContent = `✅ Connected to Apps Script at ${scriptUrl} (Sheet ID: ${sheetId})`;
+
+      // Base template
+      const baseTemplate = `
 <div class="max-w-xl mx-auto">
   <h1 class="text-3xl font-bold mb-2">Example MUNify Form</h1>
   <p class="mb-6 text-neutral-700">Please complete this registration form for the upcoming Model UN conference.</p>
@@ -90,66 +126,56 @@
 </div>
 `;
 
-    // --- ELEMENTS ---
-    const status = document.getElementById("status");
-    const previewTab = document.getElementById("previewTab");
-    const codeTab = document.getElementById("codeTab");
-    const formCode = document.getElementById("formCode");
-    const editablePreview = document.getElementById("editablePreview");
+      const savedCode = localStorage.getItem("munifyFormCode") || baseTemplate;
+      formCode.value = savedCode;
+      editablePreview.innerHTML = savedCode;
 
-    status.textContent = `✅ Connected to Apps Script at ${scriptUrl} (Sheet ID: ${sheetId})`;
-
-    // Load form content
-    const savedCode = localStorage.getItem("munifyFormCode") || baseTemplate;
-    formCode.value = savedCode;
-    editablePreview.innerHTML = savedCode;
-
-    // Sync: Code → Preview
-    formCode.addEventListener("input", () => {
-      editablePreview.innerHTML = formCode.value;
-      autoSave();
-    });
-
-    // Sync: Preview → Code
-    editablePreview.addEventListener("input", () => {
-      formCode.value = editablePreview.innerHTML;
-      autoSave();
-    });
-
-    // Auto-save every few seconds
-    function autoSave() {
-      localStorage.setItem("munifyFormCode", formCode.value);
-    }
-
-    // Save button
-    document.getElementById("btnSaveForm").addEventListener("click", () => {
-      autoSave();
-      alert("Form saved locally. Sync to Google Sheet coming soon.");
-    });
-
-    // Tabs
-    document.getElementById("tabPreview").addEventListener("click", () => {
-      previewTab.classList.remove("hidden");
-      codeTab.classList.add("hidden");
-      setActiveTab("tabPreview");
-    });
-
-    document.getElementById("tabCode").addEventListener("click", () => {
-      codeTab.classList.remove("hidden");
-      previewTab.classList.add("hidden");
-      setActiveTab("tabCode");
-    });
-
-    function setActiveTab(activeId) {
-      document.querySelectorAll(".tab-btn").forEach(btn => {
-        if (btn.id === activeId) {
-          btn.classList.add("border-neutral-900", "text-neutral-900");
-          btn.classList.remove("border-transparent", "text-neutral-600");
-        } else {
-          btn.classList.add("border-transparent", "text-neutral-600");
-          btn.classList.remove("border-neutral-900", "text-neutral-900");
-        }
+      // Sync: Code → Preview
+      formCode.addEventListener("input", () => {
+        editablePreview.innerHTML = formCode.value;
+        autoSave();
       });
+
+      // Sync: Preview → Code
+      editablePreview.addEventListener("input", () => {
+        formCode.value = editablePreview.innerHTML;
+        autoSave();
+      });
+
+      function autoSave() {
+        localStorage.setItem("munifyFormCode", formCode.value);
+      }
+
+      // Save button
+      document.getElementById("btnSaveForm").addEventListener("click", () => {
+        autoSave();
+        alert("Form saved locally. Sync to Google Sheet coming soon.");
+      });
+
+      // Tabs
+      document.getElementById("tabPreview").addEventListener("click", () => {
+        previewTab.classList.remove("hidden");
+        codeTab.classList.add("hidden");
+        setActiveTab("tabPreview");
+      });
+
+      document.getElementById("tabCode").addEventListener("click", () => {
+        codeTab.classList.remove("hidden");
+        previewTab.classList.add("hidden");
+        setActiveTab("tabCode");
+      });
+
+      function setActiveTab(activeId) {
+        document.querySelectorAll(".tab-btn").forEach(btn => {
+          if (btn.id === activeId) {
+            btn.classList.add("border-neutral-900", "text-neutral-900");
+            btn.classList.remove("border-transparent", "text-neutral-600");
+          } else {
+            btn.classList.add("border-transparent", "text-neutral-600");
+            btn.classList.remove("border-neutral-900", "text-neutral-900");
+          }
+        });
+      }
     }
   </script>
 </body>
