@@ -5,26 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MUNify</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
   <script type="module" src="assets/js/auth.js"></script>
   <script type="module" src="assets/js/settings.js"></script>
-  <link rel="icon" type="image/svg+xml" href="https://NagusameCSgithub.io/MUNify/favicon.svg" />
-
-  <script src="https://cdn.tailwindcss.com"></script>
-
 </head>
 <body class="bg-neutral-50 text-neutral-900">
   <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2"><span class="font-semibold">MUNify</span></a>
+    <a href="index.html" class="flex items-center gap-2 font-semibold" style="color:#3e4f5e;">MUNify</a>
     <nav class="text-sm hidden sm:flex gap-6">
-      <a href="/info/" class="hover:underline">Info & Permissions</a>
-      <a href="/design/" class="hover:underline">Form Designer</a>
+      <a href="info/index.html" class="hover:underline">Info & Permissions</a>
+      <a href="design/index.html" class="hover:underline">Form Designer</a>
     </nav>
   </header>
 
   <main class="max-w-5xl mx-auto px-4">
     <section class="grid md:grid-cols-2 gap-8 items-center">
       <div class="space-y-4">
-        <h1 class="text-3xl md:text-5xl font-bold leading-tight">Run MUNinfy using <span class="underline">your own</span> Google Sheets.</h1>
+        <h1 class="text-3xl md:text-5xl font-bold leading-tight">
+          Run MUNify using <span class="underline" style="color:#3e4f5e;">your own</span> Google Sheets.
+        </h1>
         <p class="text-neutral-700">No servers. No data on us. You sign in with Google, point to your Apps Script Web App and Sheet, and we do the rest in your browser.</p>
         <div class="flex items-center gap-4">
           <div id="g_id_signin"></div>
@@ -38,11 +37,11 @@
           <li>Click <strong>Sign in with Google</strong>.</li>
           <li>Paste your <strong>Apps Script Web App URL</strong> and <strong>Sheet ID</strong> in <em>Settings</em>.</li>
           <li>Go to <strong>Form Designer</strong> and create your form.</li>
-          <li>Share <code>/form/#YOUR_HASH</code> with delegates.</li>
+          <li>Share <code>form/#YOUR_HASH</code> with delegates.</li>
         </ol>
         <div class="mt-4 flex gap-2">
-          <a href="/design/" class="px-3 py-2 rounded-2xl border">Open Designer</a>
-          <a href="/info/" class="px-3 py-2 rounded-2xl border">Permissions & Help</a>
+          <a href="design/index.html" class="px-3 py-2 rounded-2xl border" style="color:#3e4f5e;">Open Designer</a>
+          <a href="info/index.html" class="px-3 py-2 rounded-2xl border" style="color:#3e4f5e;">Permissions & Help</a>
         </div>
       </div>
     </section>
@@ -62,26 +61,24 @@
       </div>
       <div class="mt-4 flex gap-2">
         <button id="btnSave" class="px-3 py-2 rounded-2xl bg-neutral-900 text-white">Save</button>
-        <a href="/design/" class="px-3 py-2 rounded-2xl border">Go to Designer</a>
+        <a href="design/index.html" class="px-3 py-2 rounded-2xl border" style="color:#3e4f5e;">Go to Designer</a>
       </div>
     </section>
   </main>
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script type="module" src="/assets/js/auth.js"></script>
-  <script type="module" src="/assets/js/settings.js"></script>
-</body>
 
-<footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200">
-  <div class="flex flex-col md:flex-row justify-center items-center gap-2">
-    <span>© 2025 MUN Forms</span>
-    <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
-      <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-      </svg>
-      GitHub
-    </a>
-    <span>Licensed under GNU GPLv3</span>
-  </div>
-</footer>
+  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200">
+    <div class="flex flex-col md:flex-row justify-center items-center gap-2">
+      <span>© 2025 MUNify</span>
+      <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        GitHub
+      </a>
+      <span>Licensed under GNU GPLv3</span>
+    </div>
+  </footer>
+</body>
 </html>
