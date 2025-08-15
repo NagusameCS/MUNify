@@ -31,7 +31,7 @@
 
     <!-- Preview Tab -->
     <div id="previewTab" class="bg-white p-6 rounded-lg border shadow-sm">
-      <iframe id="formPreview" class="w-full h-[500px] border rounded-lg"></iframe>
+      <div id="editablePreview" contenteditable="true" class="min-h-[500px] outline-none"></div>
     </div>
 
     <!-- Code Tab -->
@@ -55,56 +55,83 @@
   </footer>
 
   <script>
+    // --- LOGIN & PERMISSION CHECK ---
+    const loggedIn = localStorage.getItem("munifyLoggedIn") === "true";
     const scriptUrl = localStorage.getItem("munifyScriptUrl");
     const sheetId = localStorage.getItem("munifySheetId");
 
+    if (!loggedIn || !scriptUrl || !sheetId) {
+      alert("You must be signed in and have set up your Apps Script and Google Sheet before using the designer.");
+      window.location.href = "/MUNify/";
+    }
+
+    // --- BASE TEMPLATE ---
     const baseTemplate = `
-<h2>Example MUNify Form</h2>
-<p>Please fill out this form.</p>
-<label>Name: <input type="text" name="name"></label><br><br>
-<label>Country: <input type="text" name="country"></label><br><br>
-<label>Speech: <textarea name="speech"></textarea></label><br><br>
-<button type="submit">Submit</button>
+<div class="max-w-xl mx-auto">
+  <h1 class="text-3xl font-bold mb-2">Example MUNify Form</h1>
+  <p class="mb-6 text-neutral-700">Please complete this registration form for the upcoming Model UN conference.</p>
+  
+  <label class="block mb-4">
+    <span class="block font-medium">Full Name</span>
+    <input type="text" name="name" class="mt-1 block w-full border rounded-lg p-2" required>
+  </label>
+
+  <label class="block mb-4">
+    <span class="block font-medium">Country</span>
+    <input type="text" name="country" class="mt-1 block w-full border rounded-lg p-2" required>
+  </label>
+
+  <label class="block mb-6">
+    <span class="block font-medium">Opening Speech</span>
+    <textarea name="speech" rows="4" class="mt-1 block w-full border rounded-lg p-2" required></textarea>
+  </label>
+
+  <button type="submit" class="bg-neutral-900 text-white px-4 py-2 rounded-lg">Submit</button>
+</div>
 `;
 
+    // --- ELEMENTS ---
     const status = document.getElementById("status");
     const previewTab = document.getElementById("previewTab");
     const codeTab = document.getElementById("codeTab");
     const formCode = document.getElementById("formCode");
-    const formPreview = document.getElementById("formPreview");
+    const editablePreview = document.getElementById("editablePreview");
 
-    // Check settings
-    if (!scriptUrl || !sheetId) {
-      status.textContent = "⚠ Please configure your Apps Script Web App URL and Sheet ID on the homepage before using the designer.";
-    } else {
-      status.textContent = `✅ Connected to Apps Script at ${scriptUrl} (Sheet ID: ${sheetId})`;
+    status.textContent = `✅ Connected to Apps Script at ${scriptUrl} (Sheet ID: ${sheetId})`;
+
+    // Load form content
+    const savedCode = localStorage.getItem("munifyFormCode") || baseTemplate;
+    formCode.value = savedCode;
+    editablePreview.innerHTML = savedCode;
+
+    // Sync: Code → Preview
+    formCode.addEventListener("input", () => {
+      editablePreview.innerHTML = formCode.value;
+      autoSave();
+    });
+
+    // Sync: Preview → Code
+    editablePreview.addEventListener("input", () => {
+      formCode.value = editablePreview.innerHTML;
+      autoSave();
+    });
+
+    // Auto-save every few seconds
+    function autoSave() {
+      localStorage.setItem("munifyFormCode", formCode.value);
     }
-
-    // Load base template if none exists
-    formCode.value = localStorage.getItem("munifyFormCode") || baseTemplate;
-
-    // Render preview
-    function updatePreview() {
-      const doc = formPreview.contentDocument || formPreview.contentWindow.document;
-      doc.open();
-      doc.write(formCode.value);
-      doc.close();
-    }
-    updatePreview();
 
     // Save button
     document.getElementById("btnSaveForm").addEventListener("click", () => {
-      localStorage.setItem("munifyFormCode", formCode.value);
-      updatePreview();
+      autoSave();
       alert("Form saved locally. Sync to Google Sheet coming soon.");
     });
 
-    // Tab switching
+    // Tabs
     document.getElementById("tabPreview").addEventListener("click", () => {
       previewTab.classList.remove("hidden");
       codeTab.classList.add("hidden");
       setActiveTab("tabPreview");
-      updatePreview();
     });
 
     document.getElementById("tabCode").addEventListener("click", () => {
