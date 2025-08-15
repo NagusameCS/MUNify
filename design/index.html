@@ -8,31 +8,39 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900">
-  <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between">
-    <a href="/MUNify/" class="flex items-center gap-2 font-semibold">MUNify</a>
-    <nav class="text-sm hidden sm:flex gap-6">
-      <a href="/MUNify/info/" class="hover:underline">Info & Permissions</a>
-      <a href="/MUNify/design/" class="hover:underline font-semibold text-[#3e4f5e]">Form Designer</a>
-    </nav>
+  <!-- HEADER -->
+  <header class="bg-white border-b shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="/MUNify/" class="font-semibold text-lg">MUNify</a>
+      <div class="flex items-center gap-3">
+        <button id="btnSaveForm" class="px-3 py-2 bg-neutral-900 text-white rounded-2xl">Save</button>
+        <button id="btnSettings" class="px-3 py-2 border rounded-2xl">Settings</button>
+      </div>
+    </div>
   </header>
 
-  <main class="max-w-5xl mx-auto px-4 space-y-6">
-    <h1 class="text-3xl font-bold">Form Designer</h1>
-    <p class="text-neutral-700">Create and customize your MUN forms here. All changes are saved in your connected Google Sheet via Apps Script.</p>
+  <!-- MAIN -->
+  <main class="max-w-5xl mx-auto px-4 py-6">
+    <div id="status" class="mb-4 text-sm"></div>
 
-    <div id="status" class="p-4 rounded-lg border bg-white"></div>
+    <!-- Tabs -->
+    <div class="border-b mb-4 flex">
+      <button id="tabPreview" class="tab-btn px-4 py-2 border-b-2 border-neutral-900 font-medium">Preview</button>
+      <button id="tabCode" class="tab-btn px-4 py-2 border-b-2 border-transparent text-neutral-600">Code</button>
+    </div>
 
-    <div id="designerUI" class="hidden">
-      <div class="bg-white border rounded-lg p-4 shadow">
-        <h2 class="font-semibold mb-3">Live Preview</h2>
-        <textarea id="formCode" class="w-full h-40 border rounded-lg p-2 font-mono"></textarea>
-        <div class="mt-4 flex gap-2">
-          <button id="btnSaveForm" class="px-3 py-2 rounded-2xl bg-neutral-900 text-white">Save Form</button>
-        </div>
-      </div>
+    <!-- Preview Tab -->
+    <div id="previewTab" class="bg-white p-6 rounded-lg border shadow-sm">
+      <iframe id="formPreview" class="w-full h-[500px] border rounded-lg"></iframe>
+    </div>
+
+    <!-- Code Tab -->
+    <div id="codeTab" class="hidden">
+      <textarea id="formCode" class="w-full h-[500px] border rounded-lg p-3 font-mono text-sm"></textarea>
     </div>
   </main>
 
+  <!-- FOOTER -->
   <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
@@ -50,16 +58,72 @@
     const scriptUrl = localStorage.getItem("munifyScriptUrl");
     const sheetId = localStorage.getItem("munifySheetId");
 
+    const baseTemplate = `
+<h2>Example MUNify Form</h2>
+<p>Please fill out this form.</p>
+<label>Name: <input type="text" name="name"></label><br><br>
+<label>Country: <input type="text" name="country"></label><br><br>
+<label>Speech: <textarea name="speech"></textarea></label><br><br>
+<button type="submit">Submit</button>
+`;
+
+    const status = document.getElementById("status");
+    const previewTab = document.getElementById("previewTab");
+    const codeTab = document.getElementById("codeTab");
+    const formCode = document.getElementById("formCode");
+    const formPreview = document.getElementById("formPreview");
+
+    // Check settings
     if (!scriptUrl || !sheetId) {
-      document.getElementById("status").textContent = "⚠ Please configure your Apps Script Web App URL and Sheet ID on the homepage before using the designer.";
+      status.textContent = "⚠ Please configure your Apps Script Web App URL and Sheet ID on the homepage before using the designer.";
     } else {
-      document.getElementById("status").textContent = `✅ Connected to Apps Script at ${scriptUrl} (Sheet ID: ${sheetId})`;
-      document.getElementById("designerUI").classList.remove("hidden");
+      status.textContent = `✅ Connected to Apps Script at ${scriptUrl} (Sheet ID: ${sheetId})`;
     }
 
-    document.getElementById("btnSaveForm")?.addEventListener("click", () => {
-      alert("Form saving will be implemented here.");
+    // Load base template if none exists
+    formCode.value = localStorage.getItem("munifyFormCode") || baseTemplate;
+
+    // Render preview
+    function updatePreview() {
+      const doc = formPreview.contentDocument || formPreview.contentWindow.document;
+      doc.open();
+      doc.write(formCode.value);
+      doc.close();
+    }
+    updatePreview();
+
+    // Save button
+    document.getElementById("btnSaveForm").addEventListener("click", () => {
+      localStorage.setItem("munifyFormCode", formCode.value);
+      updatePreview();
+      alert("Form saved locally. Sync to Google Sheet coming soon.");
     });
+
+    // Tab switching
+    document.getElementById("tabPreview").addEventListener("click", () => {
+      previewTab.classList.remove("hidden");
+      codeTab.classList.add("hidden");
+      setActiveTab("tabPreview");
+      updatePreview();
+    });
+
+    document.getElementById("tabCode").addEventListener("click", () => {
+      codeTab.classList.remove("hidden");
+      previewTab.classList.add("hidden");
+      setActiveTab("tabCode");
+    });
+
+    function setActiveTab(activeId) {
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        if (btn.id === activeId) {
+          btn.classList.add("border-neutral-900", "text-neutral-900");
+          btn.classList.remove("border-transparent", "text-neutral-600");
+        } else {
+          btn.classList.add("border-transparent", "text-neutral-600");
+          btn.classList.remove("border-neutral-900", "text-neutral-900");
+        }
+      });
+    }
   </script>
 </body>
 </html>
