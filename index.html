@@ -1,2 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MUNify Forms — Setup</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900">
+  <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2"><img src="/favicon.svg" class="h-8 w-8" alt="Logo"/><span class="font-semibold">MUN Forms</span></a>
+    <nav class="text-sm hidden sm:flex gap-6">
+      <a href="/info/" class="hover:underline">Info & Permissions</a>
+      <a href="/design/" class="hover:underline">Form Designer</a>
+    </nav>
+  </header>
 
-MUNIFY
+  <main class="max-w-5xl mx-auto px-4">
+    <section class="grid md:grid-cols-2 gap-8 items-center">
+      <div class="space-y-4">
+        <h1 class="text-3xl md:text-5xl font-bold leading-tight">Run MUN forms using your <span class="underline">own</span> Google Sheets.</h1>
+        <p class="text-neutral-700">No servers. No data on us. You sign in with Google, point to your Apps Script Web App and Sheet, and we do the rest in your browser.</p>
+        <div class="flex items-center gap-4">
+          <div id="g_id_signin"></div>
+          <button id="btnContinue" class="px-4 py-2 rounded-2xl bg-black text-white disabled:opacity-40" disabled>Continue</button>
+        </div>
+        <p class="text-xs text-neutral-500">We only store configuration locally in your browser. You can clear it anytime in Settings.</p>
+      </div>
+      <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200">
+        <h2 class="font-semibold mb-2">Quick Setup</h2>
+        <ol class="list-decimal ml-5 space-y-2 text-sm">
+          <li>Click <strong>Sign in with Google</strong>.</li>
+          <li>Paste your <strong>Apps Script Web App URL</strong> and <strong>Sheet ID</strong> in <em>Settings</em>.</li>
+          <li>Go to <strong>Form Designer</strong> and create your form.</li>
+          <li>Share <code>/form/#YOUR_HASH</code> with delegates.</li>
+        </ol>
+        <div class="mt-4 flex gap-2">
+          <a href="/design/" class="px-3 py-2 rounded-2xl border">Open Designer</a>
+          <a href="/info/" class="px-3 py-2 rounded-2xl border">Permissions & Help</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="mt-12 bg-white rounded-2xl shadow p-6 border border-neutral-200">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold">Settings</h3>
+        <button id="btnClear" class="text-sm underline">Clear local settings</button>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <label class="text-sm">Apps Script Web App URL
+          <input id="scriptUrl" type="url" placeholder="https://script.google.com/macros/s/AK.../exec" class="mt-1 w-full border rounded-lg p-2" />
+        </label>
+        <label class="text-sm">Google Sheet ID
+          <input id="sheetId" type="text" placeholder="1AbCdefGhIjK..." class="mt-1 w-full border rounded-lg p-2" />
+        </label>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <button id="btnSave" class="px-3 py-2 rounded-2xl bg-neutral-900 text-white">Save</button>
+        <a href="/design/" class="px-3 py-2 rounded-2xl border">Go to Designer</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script type="module" src="/assets/js/auth.js"></script>
+  <script type="module" src="/assets/js/settings.js"></script>
+</body>
+</html>
