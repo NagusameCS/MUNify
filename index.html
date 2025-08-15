@@ -92,7 +92,8 @@
     window.onload = function () {
       google.accounts.id.initialize({
         client_id: CLIENT_ID,
-        callback: handleCredentialResponse
+        callback: handleCredentialResponse,
+        scope: "https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/script.external_request https://www.googleapis.com/auth/script.scriptapp https://www.googleapis.com/auth/script.deployments https://www.googleapis.com/auth/script.projects https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive"
       });
       google.accounts.id.renderButton(
         document.getElementById("g_id_signin"),
