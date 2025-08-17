@@ -94,6 +94,8 @@
       const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.setClearColor(0x000000, 0); // transparent
       renderer.setSize(width, height);
+      renderer.domElement.style.filter = 'blur(1.5px) brightness(0.85)';
+      renderer.domElement.style.opacity = '0.55';
       container.appendChild(renderer.domElement);
 
       const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
@@ -106,7 +108,9 @@
       scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
       const loader = new THREE.GLTFLoader();
-      loader.load('assets/earth.glb', function(gltf) {
+      // Use absolute path for GitHub Pages or fallback to relative
+      let earthPath = window.location.pathname.includes('/MUNify/') ? '/MUNify/assets/earth.glb' : 'assets/earth.glb';
+      loader.load(earthPath, function(gltf) {
         const earth = gltf.scene;
         earth.scale.set(2.2, 2.2, 2.2);
         earth.position.set(0, 0, 0);
@@ -116,6 +120,22 @@
           requestAnimationFrame(animate);
           earth.rotation.y += 0.002;
           renderer.render(scene, camera);
+        }
+      }, undefined, function(error) {
+        // fallback: try relative path if absolute fails
+        if (earthPath !== 'assets/earth.glb') {
+          loader.load('assets/earth.glb', function(gltf) {
+            const earth = gltf.scene;
+            earth.scale.set(2.2, 2.2, 2.2);
+            earth.position.set(0, 0, 0);
+            scene.add(earth);
+            animate();
+            function animate() {
+              requestAnimationFrame(animate);
+              earth.rotation.y += 0.002;
+              renderer.render(scene, camera);
+            }
+          });
         }
       });
 
