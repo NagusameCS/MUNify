@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MUNify</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <!-- Tailwind (CDN for now; replace with built CSS for production build) -->
+  <!-- Tailwind (CDN for now; replace with compiled CSS for production) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Identity -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -91,8 +91,9 @@
   <script type="module">
     async function initLazyThree() {
       try {
-        const THREE = await import('https://cdn.skypack.dev/three@0.155.0');
-        const { GLTFLoader } = await import('https://cdn.skypack.dev/three@0.155.0/examples/jsm/loaders/GLTFLoader.js');
+        // Use esm.sh CDN for reliability
+        const THREE = await import('https://esm.sh/three@0.155.0');
+        const { GLTFLoader } = await import('https://esm.sh/three@0.155.0/examples/jsm/loaders/GLTFLoader.js');
 
         const container = document.getElementById('earth-bg');
         if (!container) return;
@@ -111,18 +112,15 @@
         camera.position.set(0, 0, 7);
 
         const scene = new THREE.Scene();
-        scene.add(new THREE.DirectionalLight(0xffffff, 0.7).position.set(5, 10, 7));
-        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        const directional = new THREE.DirectionalLight(0xffffff, 0.7);
+        directional.position.set(5,10,7);
+        scene.add(directional);
+        scene.add(new THREE.AmbientLight(0xffffff,0.5));
 
         renderer.setPixelRatio(window.devicePixelRatio || 1);
 
         const loader = new GLTFLoader();
-        const rawGithub = 'https://raw.githubusercontent.com/NagusameCS/MUNify/gh-pages/assets/earth.glb';
-        const ghPagesPath = window.location.pathname.includes('/MUNify/')
-          ? '/MUNify/assets/earth.glb'
-          : '/assets/earth.glb';
-        const localPath = 'assets/earth.glb';
-        const candidates = [rawGithub, ghPagesPath, localPath];
+        const candidates = ['./earth.glb'];
 
         let earthObj = null;
 
@@ -133,10 +131,10 @@
             metalness: 0.1,
             roughness: 0.8,
             emissive: 0x072434,
-            emissiveIntensity: 0.02,
+            emissiveIntensity: 0.02
           });
           const sphere = new THREE.Mesh(geom, mat);
-          sphere.scale.set(1.8, 1.8, 1.8);
+          sphere.scale.set(1.8,1.8,1.8);
           scene.add(sphere);
           earthObj = sphere;
           console.warn('Using fallback procedural globe.');
@@ -144,98 +142,88 @@
 
         function animate() {
           requestAnimationFrame(animate);
-          if (earthObj) earthObj.rotation.y += 0.0025;
-          renderer.render(scene, camera);
+          if(earthObj) earthObj.rotation.y += 0.0025;
+          renderer.render(scene,camera);
         }
         animate();
 
-        function tryLoad(i) {
-          if (i >= candidates.length) {
+        function tryLoad(i){
+          if(i >= candidates.length){
             console.error('All GLB candidate URLs failed. Using fallback sphere.');
             createFallbackSphere();
             return;
           }
-          const path = candidates[i];
-          loader.load(
-            path,
-            (gltf) => {
-              try {
+          loader.load(candidates[i],
+            (gltf)=>{
+              try{
                 const earth = gltf.scene || (gltf.scenes && gltf.scenes[0]);
-                if (!earth) throw new Error('GLTF has no scene');
-                earth.scale.set(2.2, 2.2, 2.2);
+                if(!earth) throw new Error('GLTF has no scene');
+                earth.scale.set(2.2,2.2,2.2);
                 scene.add(earth);
                 earthObj = earth;
-                console.log('3D model loaded successfully from', path);
-              } catch (e) {
+                console.log('3D model loaded successfully from', candidates[i]);
+              }catch(e){
                 console.error('Error parsing GLTF', e);
-                tryLoad(i + 1);
+                tryLoad(i+1);
               }
             },
             undefined,
-            (error) => {
-              console.error('Failed to load GLTF from', path, error);
-              tryLoad(i + 1);
+            (err)=>{
+              console.error('Failed to load GLTF from', candidates[i], err);
+              tryLoad(i+1);
             }
           );
         }
         tryLoad(0);
 
-        window.addEventListener('resize', () => {
-          const w = window.innerWidth;
-          const h = window.innerHeight;
-          renderer.setSize(w, h);
-          camera.aspect = w / h;
+        window.addEventListener('resize',()=>{
+          const w=window.innerWidth,h=window.innerHeight;
+          renderer.setSize(w,h);
+          camera.aspect=w/h;
           camera.updateProjectionMatrix();
         });
-      } catch (e) {
-        console.error('Lazy import failed or initialization error:', e);
+
+      } catch(e){
+        console.error('Lazy import failed or initialization error:',e);
       }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(() => initLazyThree(), { timeout: 2000 });
+    window.addEventListener('DOMContentLoaded',()=>{
+      if('requestIdleCallback' in window){
+        requestIdleCallback(()=>initLazyThree(),{timeout:2000});
       } else {
-        setTimeout(initLazyThree, 1000);
+        setTimeout(initLazyThree,1000);
       }
     });
 
     // Google Sign-In
     const CLIENT_ID = "73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com";
 
-    function handleCredentialResponse(response) {
-      const data = JSON.parse(atob(response.credential.split('.')[1]));
+    function handleCredentialResponse(response){
+      const data=JSON.parse(atob(response.credential.split('.')[1]));
       localStorage.setItem("munifyUser", JSON.stringify(data));
-      window.location.href = "/MUNify/design/";
+      window.location.href="/MUNify/design/";
     }
 
-    window.onload = function () {
+    window.onload = function(){
       google.accounts.id.initialize({
         client_id: CLIENT_ID,
-        callback: handleCredentialResponse,
-        scope:
-          "https://www.googleapis.com/auth/spreadsheets " +
-          "https://www.googleapis.com/auth/script.external_request " +
-          "https://www.googleapis.com/auth/script.scriptapp " +
-          "https://www.googleapis.com/auth/script.deployments " +
-          "https://www.googleapis.com/auth/script.projects " +
-          "https://www.googleapis.com/auth/drive.file " +
-          "https://www.googleapis.com/auth/drive",
+        callback: handleCredentialResponse
       });
       google.accounts.id.renderButton(
         document.getElementById("g_id_signin"),
-        { theme: "outline", size: "large" }
+        { theme:"outline", size:"large" }
       );
     };
 
     // Settings
-    document.getElementById("btnSave").addEventListener("click", () => {
+    document.getElementById("btnSave").addEventListener("click",()=>{
       localStorage.setItem("munifyScriptUrl", document.getElementById("scriptUrl").value);
       localStorage.setItem("munifySheetId", document.getElementById("sheetId").value);
       alert("Settings saved locally.");
     });
 
-    document.getElementById("btnClear").addEventListener("click", () => {
+    document.getElementById("btnClear").addEventListener("click",()=>{
       localStorage.clear();
       alert("Local settings cleared.");
     });
