@@ -148,16 +148,19 @@
           emissiveIntensity: 0.02
         });
         const sphere = new THREE.Mesh(geom, mat);
-        sphere.scale.set(1.8, 1.8, 1.8);
+        // Make the fallback larger and move it down so roughly half is offscreen
+        sphere.scale.set(4, 4, 4);
+        sphere.position.y = -4;
         scene.add(sphere);
         earthObj = sphere;
-        console.warn('Using fallback procedural globe.');
+        console.warn('Using fallback procedural globe (scaled/offset).');
       }
 
       // Animate
       function animate() {
         requestAnimationFrame(animate);
-        if (earthObj) earthObj.rotation.y += 0.003; // slow rotation
+        // Reduce rotation speed by 10x (was 0.003)
+        if (earthObj) earthObj.rotation.y += 0.0003;
         renderer.render(scene, camera);
       }
       animate();
@@ -189,11 +192,12 @@
                 // Compute a reasonable scale if the model is unusually small/large
                 const maxDim = Math.max(size.x, size.y, size.z);
                 if (maxDim > 0) {
-                  const desired = 3.5; // target size in world units
+                  // Increase desired size so the planet appears larger
+                  const desired = 7.0; // target size in world units (was 3.5)
                   const scale = desired / maxDim;
                   earth.scale.setScalar(scale);
                 } else {
-                  earth.scale.set(2.2, 2.2, 2.2);
+                  earth.scale.set(4.4, 4.4, 4.4);
                 }
 
                 // Position the camera to frame the model
@@ -204,10 +208,14 @@
                 camera.position.set(0, 0, distance);
                 camera.lookAt(0, 0, 0);
 
+                // Move the model downward so roughly half is off-screen
+                // Move by a fraction of the computed world radius
+                earth.position.y -= radius * 0.6;
+
                 earth.rotation.x = 0.4; // tilt for realism
 
                 earthObj = earth;
-                console.log('3D model loaded and fitted from ./earth.glb');
+                console.log('3D model loaded and fitted from ./earth.glb (scaled/offset)');
               } catch (e) {
                 console.error('Error parsing GLTF', e);
                 createFallbackSphere();
