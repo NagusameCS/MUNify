@@ -83,94 +83,82 @@
   </footer>
 
   <script type="module">
-    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
-    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/loaders/GLTFLoader.js';
+    // Lazy-load three.js and the GLTFLoader when the browser is idle or after a short delay.
+    async function initLazyThree() {
+      try {
+        const THREE = await import('https://unpkg.com/three@0.155.0/build/three.module.js');
+        const { GLTFLoader } = await import('https://unpkg.com/three@0.155.0/examples/jsm/loaders/GLTFLoader.js');
 
-    // --- Rotating Earth GLB Background (module) ---
-    window.addEventListener('DOMContentLoaded', () => {
-      const container = document.getElementById('earth-bg');
-      if (!container) return;
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      renderer.setClearColor(0x000000, 0); // transparent
-      renderer.setSize(width, height);
-      renderer.domElement.style.filter = 'blur(1.5px) brightness(0.85)';
-      renderer.domElement.style.opacity = '0.55';
-      container.appendChild(renderer.domElement);
+        // --- Rotating Earth GLB Background (lazy init) ---
+        const container = document.getElementById('earth-bg');
+        if (!container) return;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setClearColor(0x000000, 0); // transparent
+        renderer.setSize(width, height);
+        renderer.domElement.style.filter = 'blur(1.5px) brightness(0.85)';
+        renderer.domElement.style.opacity = '0.55';
+        container.appendChild(renderer.domElement);
 
-      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-      camera.position.set(0, 0, 7);
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+        camera.position.set(0, 0, 7);
 
-      const scene = new THREE.Scene();
-      const light = new THREE.DirectionalLight(0xffffff, 0.7);
-      light.position.set(5, 10, 7);
-      scene.add(light);
-      scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        const scene = new THREE.Scene();
+        const light = new THREE.DirectionalLight(0xffffff, 0.7);
+        light.position.set(5, 10, 7);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
-      // improve rendering quality on high-dpi displays
-      renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
+        // improve rendering quality on high-dpi displays
+        renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
 
-      const loader = new GLTFLoader();
-      // Use absolute path for GitHub Pages or fallback to relative
-      let earthPath = window.location.pathname.includes('/MUNify/') ? '/MUNify/assets/earth.glb' : 'assets/earth.glb';
+        const loader = new GLTFLoader();
+        // Try multiple candidate URLs: raw GitHub file, GitHub Pages path, then local relative
+        const rawGithub = 'https://raw.githubusercontent.com/NagusameCS/MUNify/gh-pages/assets/earth.glb';
+        const ghPagesPath = window.location.pathname.includes('/MUNify/') ? '/MUNify/assets/earth.glb' : '/assets/earth.glb';
+        const localPath = 'assets/earth.glb';
+        const candidates = [rawGithub, ghPagesPath, localPath];
 
-      let earthObj = null;
+        let earthObj = null;
 
-      function createFallbackSphere() {
-        // subtle low-poly globe as fallback
-        const geom = new THREE.SphereGeometry(2.0, 32, 32);
-        const mat = new THREE.MeshStandardMaterial({
-          color: 0x4aa3df,
-          metalness: 0.1,
-          roughness: 0.8,
-          emissive: 0x072434,
-          emissiveIntensity: 0.02
-        });
-        const sphere = new THREE.Mesh(geom, mat);
-        sphere.scale.set(1.8, 1.8, 1.8);
-        sphere.position.set(0, 0, 0);
-        scene.add(sphere);
-        earthObj = sphere;
-        console.warn('Using fallback procedural globe.');
-      }
-
-      function animate() {
-        requestAnimationFrame(animate);
-        if (earthObj) {
-          earthObj.rotation.y += 0.0025;
+        function createFallbackSphere() {
+          // subtle low-poly globe as fallback
+          const geom = new THREE.SphereGeometry(2.0, 32, 32);
+          const mat = new THREE.MeshStandardMaterial({
+            color: 0x4aa3df,
+            metalness: 0.1,
+            roughness: 0.8,
+            emissive: 0x072434,
+            emissiveIntensity: 0.02
+          });
+          const sphere = new THREE.Mesh(geom, mat);
+          sphere.scale.set(1.8, 1.8, 1.8);
+          sphere.position.set(0, 0, 0);
+          scene.add(sphere);
+          earthObj = sphere;
+          console.warn('Using fallback procedural globe.');
         }
-        renderer.render(scene, camera);
-      }
-      animate();
 
-      // Try loading the GLB
-      console.log('Loading 3D model from', earthPath);
-      loader.load(earthPath, function(gltf) {
-        try {
-          const earth = gltf.scene || (gltf.scenes && gltf.scenes[0]);
-          if (!earth) throw new Error('GLTF has no scene');
-          earth.scale.set(2.2, 2.2, 2.2);
-          earth.position.set(0, 0, 0);
-          scene.add(earth);
-          earthObj = earth;
-          console.log('3D model loaded successfully');
-        } catch (e) {
-          console.error('Error initializing GLTF scene:', e);
-          createFallbackSphere();
+        function animate() {
+          requestAnimationFrame(animate);
+          if (earthObj) {
+            earthObj.rotation.y += 0.0025;
+          }
+          renderer.render(scene, camera);
         }
-      }, function(progress) {
-        if (progress && progress.total) {
-          const p = (progress.loaded / progress.total * 100).toFixed(1);
-          console.log(`GLTF load progress: ${p}%`);
-        }
-      }, function(error) {
-        console.error('Failed to load GLTF from', earthPath, error);
-        // fallback: try relative path if absolute was used
-        if (earthPath !== 'assets/earth.glb') {
-          const alt = 'assets/earth.glb';
-          console.log('Retrying with', alt);
-          loader.load(alt, function(gltf) {
+        animate();
+
+        // Try each candidate sequentially until one loads
+        function tryLoad(i) {
+          if (i >= candidates.length) {
+            console.error('All GLB candidate URLs failed. Using fallback sphere.');
+            createFallbackSphere();
+            return;
+          }
+          const path = candidates[i];
+          console.log(`Attempting to load 3D model from [${i + 1}/${candidates.length}]:`, path);
+          loader.load(path, function(gltf) {
             try {
               const earth = gltf.scene || (gltf.scenes && gltf.scenes[0]);
               if (!earth) throw new Error('GLTF has no scene');
@@ -178,28 +166,42 @@
               earth.position.set(0, 0, 0);
               scene.add(earth);
               earthObj = earth;
-              console.log('3D model loaded successfully from fallback path');
+              console.log('3D model loaded successfully from', path);
             } catch (e) {
-              console.error('Error initializing fallback GLTF scene:', e);
-              createFallbackSphere();
+              console.error('Error initializing GLTF scene from', path, e);
+              tryLoad(i + 1);
             }
-          }, undefined, function(err2) {
-            console.error('Fallback GLTF also failed:', err2);
-            createFallbackSphere();
+          }, function(progress) {
+            if (progress && progress.total) {
+              const p = (progress.loaded / progress.total * 100).toFixed(1);
+              console.log(`GLTF load progress: ${p}% (${path})`);
+            }
+          }, function(error) {
+            console.error('Failed to load GLTF from', path, error);
+            tryLoad(i + 1);
           });
-        } else {
-          createFallbackSphere();
         }
-      });
+        tryLoad(0);
 
-      // Responsive
-      window.addEventListener('resize', () => {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        renderer.setSize(w, h);
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-      });
+        // Responsive
+        window.addEventListener('resize', () => {
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          renderer.setSize(w, h);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+        });
+      } catch (e) {
+        console.error('Lazy import failed or initialization error:', e);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => initLazyThree(), { timeout: 2000 });
+      } else {
+        setTimeout(initLazyThree, 1000);
+      }
     });
 
     const CLIENT_ID = "73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com";
