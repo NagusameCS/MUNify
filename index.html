@@ -107,35 +107,88 @@
       scene.add(light);
       scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
+      // improve rendering quality on high-dpi displays
+      renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
+
       const loader = new THREE.GLTFLoader();
       // Use absolute path for GitHub Pages or fallback to relative
       let earthPath = window.location.pathname.includes('/MUNify/') ? '/MUNify/assets/earth.glb' : 'assets/earth.glb';
-      loader.load(earthPath, function(gltf) {
-        const earth = gltf.scene;
-        earth.scale.set(2.2, 2.2, 2.2);
-        earth.position.set(0, 0, 0);
-        scene.add(earth);
-        animate();
-        function animate() {
-          requestAnimationFrame(animate);
-          earth.rotation.y += 0.002;
-          renderer.render(scene, camera);
+
+      let earthObj = null;
+
+      function createFallbackSphere() {
+        // subtle low-poly globe as fallback
+        const geom = new THREE.SphereGeometry(2.0, 32, 32);
+        const mat = new THREE.MeshStandardMaterial({
+          color: 0x4aa3df,
+          metalness: 0.1,
+          roughness: 0.8,
+          emissive: 0x072434,
+          emissiveIntensity: 0.02
+        });
+        const sphere = new THREE.Mesh(geom, mat);
+        sphere.scale.set(1.8, 1.8, 1.8);
+        sphere.position.set(0, 0, 0);
+        scene.add(sphere);
+        earthObj = sphere;
+        console.warn('Using fallback procedural globe.');
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        if (earthObj) {
+          earthObj.rotation.y += 0.0025;
         }
-      }, undefined, function(error) {
-        // fallback: try relative path if absolute fails
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Try loading the GLB
+      console.log('Loading 3D model from', earthPath);
+      loader.load(earthPath, function(gltf) {
+        try {
+          const earth = gltf.scene || gltf.scenes?.[0];
+          if (!earth) throw new Error('GLTF has no scene');
+          earth.scale.set(2.2, 2.2, 2.2);
+          earth.position.set(0, 0, 0);
+          scene.add(earth);
+          earthObj = earth;
+          console.log('3D model loaded successfully');
+        } catch (e) {
+          console.error('Error initializing GLTF scene:', e);
+          createFallbackSphere();
+        }
+      }, function(progress) {
+        if (progress && progress.total) {
+          const p = (progress.loaded / progress.total * 100).toFixed(1);
+          // keep logs minimal
+          console.log(`GLTF load progress: ${p}%`);
+        }
+      }, function(error) {
+        console.error('Failed to load GLTF from', earthPath, error);
+        // fallback: try relative path if absolute was used
         if (earthPath !== 'assets/earth.glb') {
-          loader.load('assets/earth.glb', function(gltf) {
-            const earth = gltf.scene;
-            earth.scale.set(2.2, 2.2, 2.2);
-            earth.position.set(0, 0, 0);
-            scene.add(earth);
-            animate();
-            function animate() {
-              requestAnimationFrame(animate);
-              earth.rotation.y += 0.002;
-              renderer.render(scene, camera);
+          const alt = 'assets/earth.glb';
+          console.log('Retrying with', alt);
+          loader.load(alt, function(gltf) {
+            try {
+              const earth = gltf.scene || gltf.scenes?.[0];
+              if (!earth) throw new Error('GLTF has no scene');
+              earth.scale.set(2.2, 2.2, 2.2);
+              earth.position.set(0, 0, 0);
+              scene.add(earth);
+              earthObj = earth;
+              console.log('3D model loaded successfully from fallback path');
+            } catch (e) {
+              console.error('Error initializing fallback GLTF scene:', e);
+              createFallbackSphere();
             }
+          }, undefined, function(err2) {
+            console.error('Fallback GLTF also failed:', err2);
+            createFallbackSphere();
           });
+        } else {
+          createFallbackSphere();
         }
       });
 
