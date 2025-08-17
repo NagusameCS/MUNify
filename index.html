@@ -101,8 +101,10 @@
       const container = document.getElementById('earth-bg');
       if (!container) return;
 
-      const width = window.innerWidth;
-      const height = window.innerHeight;
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  // Desired fraction of screen width the earth should occupy
+  const screenFraction = 0.6; // 3/5
 
   // Renderer
   const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
@@ -159,7 +161,7 @@
 
       // Fallback sphere if GLB fails
       function createFallbackSphere() {
-        const geom = new THREE.SphereGeometry(2.0, 32, 32);
+  const geom = new THREE.SphereGeometry(2.0, 32, 32);
         const mat = new THREE.MeshStandardMaterial({
           color: 0x4aa3df,
           metalness: 0.1,
@@ -168,9 +170,14 @@
           emissiveIntensity: 0.02
         });
         const sphere = new THREE.Mesh(geom, mat);
-        // Make the fallback larger and move it down so roughly half is offscreen
-        sphere.scale.set(4, 4, 4);
-        sphere.position.y = -4;
+  // Scale the fallback so its diameter occupies the desired fraction of the screen width
+  const fov = camera.fov * (Math.PI / 180);
+  const aspect = width / height;
+  const desiredWorldWidth = 2 * camera.position.z * Math.tan(fov / 2) * aspect * screenFraction;
+  const sphereScale = desiredWorldWidth / 4; // geom diameter is 4 (radius 2)
+  sphere.scale.setScalar(sphereScale || 1);
+  // Center the fallback vertically
+  sphere.position.y = 0;
         scene.add(sphere);
         earthObj = sphere;
         console.warn('Using fallback procedural globe (scaled/offset).');
@@ -210,29 +217,30 @@
                 earth.position.z = center.z;
 
                 // Compute a reasonable scale if the model is unusually small/large
-                const maxDim = Math.max(size.x, size.y, size.z);
-                if (maxDim > 0) {
-                  // Increase desired size so the planet appears larger
-                  const desired = 7.0; // target size in world units (was 3.5)
-                  const scale = desired / maxDim;
-                  earth.scale.setScalar(scale);
-                } else {
-                  earth.scale.set(4.4, 4.4, 4.4);
-                }
+                  // Compute scale so the model occupies the desired fraction of screen width
+                  const boundingSphere = box.getBoundingSphere(new THREE.Sphere());
+                  const radiusModel = boundingSphere.radius; // in model units
 
-                // Position the camera to frame the model
-                const fov = camera.fov * (Math.PI / 180);
-                const boundingSphere = box.getBoundingSphere(new THREE.Sphere());
-                const radius = boundingSphere.radius * (earth.scale.x || 1);
-                const distance = Math.abs(radius / Math.sin(fov / 2)) * 1.2; // padding
-                camera.position.set(0, 0, distance);
-                camera.lookAt(0, 0, 0);
+                  // Convert camera FOV and aspect to world width at a certain distance
+                  const fov = camera.fov * (Math.PI / 180);
+                  // We want the model projected width (2 * radiusModel * scale) to equal desiredWorldWidth
+                  const desiredWorldWidth = 2 * camera.position.z * Math.tan(fov / 2) * (width / height) * screenFraction;
+                  const scale = desiredWorldWidth / (2 * radiusModel);
+                  earth.scale.setScalar(scale || 1);
 
-                // Move the model downward so roughly half is off-screen
-                // Move by a fraction of the computed world radius
-                earth.position.y -= radius * 0.6;
+                  // Recompute radius after scaling and position camera to frame model
+                  const radius = radiusModel * (earth.scale.x || 1);
+                  const distance = Math.abs(radius / Math.sin(fov / 2)) * 1.05; // small padding
+                  camera.position.set(0, 0, distance);
+                  camera.lookAt(0, 0, 0);
 
-                earth.rotation.x = 0.4; // tilt for realism
+                  // Center model vertically (no downward offset)
+                  earth.position.y = 0;
+
+                  earth.rotation.x = 0.4; // tilt for realism
+
+                  earthObj = earth;
+                  console.log('3D model loaded and fitted from ./earth.glb (screen-fitted)');
 
                 // Boost material vibrancy: increase saturation, reduce roughness slightly, add subtle emissive tint
                 earth.traverse((node) => {
