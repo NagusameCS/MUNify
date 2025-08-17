@@ -84,10 +84,11 @@
 
   <script type="module">
     // Lazy-load three.js and the GLTFLoader when the browser is idle or after a short delay.
+
     async function initLazyThree() {
       try {
-        const THREE = await import('https://unpkg.com/three@0.155.0/build/three.module.js');
-        const { GLTFLoader } = await import('https://unpkg.com/three@0.155.0/examples/jsm/loaders/GLTFLoader.js');
+        const THREE = await import('https://cdn.skypack.dev/three@0.155.0');
+        const { GLTFLoader } = await import('https://cdn.skypack.dev/three@0.155.0/examples/jsm/loaders/GLTFLoader.js');
 
         // --- Rotating Earth GLB Background (lazy init) ---
         const container = document.getElementById('earth-bg');
