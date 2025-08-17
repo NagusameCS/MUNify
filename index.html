@@ -187,6 +187,29 @@
   sphere.position.y = 0;
         scene.add(sphere);
         earthObj = sphere;
+        // Add a thin atmosphere glow for the fallback globe
+        try {
+          const worldRadius = (sphere.geometry.parameters.radius || 2) * (sphere.scale.x || 1);
+          const atmGeom = new THREE.SphereGeometry(worldRadius * 1.06, 48, 48);
+          const atmMat = new THREE.ShaderMaterial({
+            uniforms: {
+              coeficient: { value: 0.06 },
+              power: { value: 2.2 },
+              glowColor: { value: new THREE.Color(0x7aa9db) }
+            },
+            vertexShader: `varying vec3 vNormal; varying vec3 vPosition; void main(){ vNormal = normalize(normalMatrix * normal); vPosition = (modelViewMatrix * vec4(position,1.0)).xyz; gl_Position = projectionMatrix * vec4(vPosition,1.0); }`,
+            fragmentShader: `uniform vec3 glowColor; uniform float coeficient; uniform float power; varying vec3 vNormal; varying vec3 vPosition; void main(){ float intensity = pow(coeficient + dot(vNormal, normalize(-vPosition)), power); gl_FragColor = vec4(glowColor, intensity); }`,
+            side: THREE.BackSide,
+            blending: THREE.AdditiveBlending,
+            transparent: true,
+            depthWrite: false
+          });
+          const atm = new THREE.Mesh(atmGeom, atmMat);
+          atm.position.copy(sphere.position);
+          scene.add(atm);
+        } catch (e) {
+          console.warn('Could not create atmosphere for fallback', e);
+        }
         console.warn('Using fallback procedural globe (scaled/offset).');
       }
 
