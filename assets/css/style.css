@@ -58,3 +58,22 @@ button,input,textarea,select{font:inherit}
 @media (prefers-reduced-motion: reduce) {
 	.pop-target, .pop-animate { transition: none !important; animation: none !important; opacity: 1 !important; transform: none !important }
 }
+
+/* Frosted glass text container */
+.text-container{
+	background: rgba(255,255,255,0.6);
+	backdrop-filter: blur(6px);
+	-webkit-backdrop-filter: blur(6px);
+	border-radius: 12px;
+	padding: 1rem;
+}
+
+/* Subtle radial gradient page background: white inner, very light blue outer at 10% */
+body::before{
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(122,156,198,0.10) 100%);
+}
