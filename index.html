@@ -8,8 +8,6 @@
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/loaders/GLTFLoader.js"></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900">
   <!-- Rotating Earth Background -->
@@ -75,8 +73,8 @@
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
       <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
-        <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16">
-          <path d="M8 0C3.58 0 0 3.58..."/>
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 018 4.59c.68 0 1.36.09 2 .26 1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/>
         </svg>
         GitHub
       </a>
@@ -84,8 +82,11 @@
     </div>
   </footer>
 
-  <script>
-    // --- Rotating Earth GLB Background ---
+  <script type="module">
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.module.js';
+    import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.155.0/examples/jsm/loaders/GLTFLoader.js';
+
+    // --- Rotating Earth GLB Background (module) ---
     window.addEventListener('DOMContentLoaded', () => {
       const container = document.getElementById('earth-bg');
       if (!container) return;
@@ -110,7 +111,7 @@
       // improve rendering quality on high-dpi displays
       renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
 
-      const loader = new THREE.GLTFLoader();
+      const loader = new GLTFLoader();
       // Use absolute path for GitHub Pages or fallback to relative
       let earthPath = window.location.pathname.includes('/MUNify/') ? '/MUNify/assets/earth.glb' : 'assets/earth.glb';
 
@@ -147,7 +148,7 @@
       console.log('Loading 3D model from', earthPath);
       loader.load(earthPath, function(gltf) {
         try {
-          const earth = gltf.scene || gltf.scenes?.[0];
+          const earth = gltf.scene || (gltf.scenes && gltf.scenes[0]);
           if (!earth) throw new Error('GLTF has no scene');
           earth.scale.set(2.2, 2.2, 2.2);
           earth.position.set(0, 0, 0);
@@ -161,7 +162,6 @@
       }, function(progress) {
         if (progress && progress.total) {
           const p = (progress.loaded / progress.total * 100).toFixed(1);
-          // keep logs minimal
           console.log(`GLTF load progress: ${p}%`);
         }
       }, function(error) {
@@ -172,7 +172,7 @@
           console.log('Retrying with', alt);
           loader.load(alt, function(gltf) {
             try {
-              const earth = gltf.scene || gltf.scenes?.[0];
+              const earth = gltf.scene || (gltf.scenes && gltf.scenes[0]);
               if (!earth) throw new Error('GLTF has no scene');
               earth.scale.set(2.2, 2.2, 2.2);
               earth.position.set(0, 0, 0);
