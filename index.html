@@ -11,271 +11,97 @@
   <!-- Google Identity -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body class="bg-neutral-50 text-neutral-900">
+<body class="bg-neutral-950 text-neutral-50 relative">
   <!-- Rotating Earth Background -->
-  <div id="earth-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;overflow:hidden;"></div>
+  <div id="earth-bg" class="fixed inset-0 -z-10 pointer-events-none"></div>
+  <div class="fixed inset-0 bg-gradient-to-b from-black/60 to-black/90 -z-10"></div>
 
   <!-- Header -->
-  <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between" style="position:relative;z-index:1;">
-  <a href="./" class="flex items-center gap-2 font-semibold">MUNify</a>
-    <nav class="text-sm hidden sm:flex gap-6">
-  <a href="info/" class="hover:underline">Info & Permissions</a>
-  <a href="design/" class="hover:underline">Form Designer</a>
+  <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between relative z-10">
+    <a href="./" class="flex items-center gap-2 text-xl font-bold tracking-tight text-cyan-300">
+      🌍 MUNify
+    </a>
+    <nav class="hidden sm:flex gap-8 text-sm font-medium">
+      <a href="info/" class="hover:text-cyan-300 transition">Info & Permissions</a>
+      <a href="design/" class="hover:text-cyan-300 transition">Form Designer</a>
     </nav>
   </header>
 
   <!-- Main -->
-  <main class="max-w-5xl mx-auto px-4" style="position:relative;z-index:1;">
-    <section class="grid md:grid-cols-2 gap-8 items-center">
-      <div class="space-y-4">
-        <h1 class="text-3xl md:text-5xl font-bold leading-tight">
-          Run MUNify using <span class="underline">your own</span> Google Sheets.
+  <main class="max-w-6xl mx-auto px-6 relative z-10">
+    <section class="grid md:grid-cols-2 gap-10 items-center mt-12">
+      <div class="space-y-6">
+        <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">
+          Run <span class="text-cyan-300">MUNify</span> using your own Google Sheets.
         </h1>
-        <p class="text-neutral-700">
-          No servers. No data on us. You sign in with Google, point to your Apps Script Web App and Sheet, and we do the rest in your browser.
+        <p class="text-neutral-300 text-lg leading-relaxed">
+          No servers. No data on us. You sign in with Google, point to your Apps Script Web App and Sheet,
+          and we do the rest right in your browser.
         </p>
         <div id="g_id_signin"></div>
-        <p class="text-xs text-neutral-500">
+        <p class="text-xs text-neutral-400">
           We only store configuration locally in your browser. You can clear it anytime in Settings.
         </p>
       </div>
-      <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200">
-        <h2 class="font-semibold mb-2">Quick Setup</h2>
-        <ol class="list-decimal ml-5 space-y-2 text-sm">
-          <li>Click <strong><a href="https://developers.google.com/identity/gsi/web" target="_blank" class="underline">Sign in with Google</a></strong>.</li>
-          <li>Paste your <strong><a href="https://developers.google.com/apps-script/guides/web" target="_blank" class="underline">Apps Script Web App URL</a></strong> and <strong><a href="https://support.google.com/docs/answer/3540681" target="_blank" class="underline">Sheet ID</a></strong> in <em>Settings</em>.</li>
-          <li>Go to <strong><a href="design/" class="underline">Form Designer</a></strong> and create your form.</li>
+      <div class="bg-white/10 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-white/20">
+        <h2 class="font-semibold mb-4 text-lg text-cyan-200">🚀 Quick Setup</h2>
+        <ol class="list-decimal ml-5 space-y-3 text-sm text-neutral-200">
+          <li>Click <strong>Sign in with Google</strong>.</li>
+          <li>Paste your <em>Apps Script Web App URL</em> and <em>Sheet ID</em> in <strong>Settings</strong>.</li>
+          <li>Go to the <strong>Form Designer</strong> and create your form.</li>
           <li>Share <code>form/#YOUR_HASH</code> with delegates.</li>
         </ol>
-        <div class="mt-4 flex gap-2">
-          <a href="design/" class="px-3 py-2 rounded-2xl border">Open Designer</a>
-          <a href="info/" class="px-3 py-2 rounded-2xl border">Permissions & Help</a>
+        <div class="mt-6 flex gap-3">
+          <a href="design/" class="px-4 py-2 rounded-xl bg-cyan-500 text-black font-semibold hover:bg-cyan-400 transition">Open Designer</a>
+          <a href="info/" class="px-4 py-2 rounded-xl border border-white/20 hover:border-cyan-400 transition">Permissions & Help</a>
         </div>
       </div>
     </section>
 
-    <section class="mt-12 bg-white rounded-2xl shadow p-6 border border-neutral-200">
+    <section class="mt-16 bg-white/10 backdrop-blur-md rounded-2xl shadow-xl p-8 border border-white/20">
       <div class="flex items-center justify-between">
-        <h3 class="font-semibold">Settings</h3>
-        <button id="btnClear" class="text-sm underline">Clear local settings</button>
+        <h3 class="font-semibold text-cyan-200">⚙️ Settings</h3>
+        <button id="btnClear" class="text-sm underline text-neutral-300 hover:text-cyan-300 transition">
+          Clear local settings
+        </button>
       </div>
-      <div class="grid md:grid-cols-2 gap-4 mt-4">
+      <div class="grid md:grid-cols-2 gap-6 mt-6">
         <label class="text-sm">Apps Script Web App URL
-          <input id="scriptUrl" type="url" placeholder="https://script.google.com/macros/s/AK.../exec" class="mt-1 w-full border rounded-lg p-2" />
+          <input id="scriptUrl" type="url"
+            placeholder="https://script.google.com/macros/s/AK.../exec"
+            class="mt-2 w-full border border-white/20 bg-black/40 text-neutral-100 rounded-lg p-2 placeholder-neutral-500 focus:ring-2 focus:ring-cyan-400 outline-none" />
         </label>
         <label class="text-sm">Google Sheet ID
-          <input id="sheetId" type="text" placeholder="1AbCdefGhIjK..." class="mt-1 w-full border rounded-lg p-2" />
+          <input id="sheetId" type="text" placeholder="1AbCdefGhIjK..."
+            class="mt-2 w-full border border-white/20 bg-black/40 text-neutral-100 rounded-lg p-2 placeholder-neutral-500 focus:ring-2 focus:ring-cyan-400 outline-none" />
         </label>
       </div>
-      <div class="mt-4 flex gap-2">
-        <button id="btnSave" class="px-3 py-2 rounded-2xl bg-neutral-900 text-white">Save</button>
-  <a href="design/" class="px-3 py-2 rounded-2xl border">Go to Designer</a>
+      <div class="mt-6 flex gap-3">
+        <button id="btnSave" class="px-4 py-2 rounded-xl bg-cyan-500 text-black font-semibold hover:bg-cyan-400 transition">
+          Save
+        </button>
+        <a href="design/" class="px-4 py-2 rounded-xl border border-white/20 hover:border-cyan-400 transition">
+          Go to Designer
+        </a>
       </div>
     </section>
   </main>
 
   <!-- Footer -->
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200" style="position:relative;z-index:1;">
-    <div class="flex flex-col md:flex-row justify-center items-center gap-2">
+  <footer class="mt-16 py-8 text-center text-sm text-neutral-400 border-t border-white/10 relative z-10">
+    <div class="flex flex-col md:flex-row justify-center items-center gap-3">
       <span>© 2025 MUN Forms</span>
-      <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
+      <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages"
+         class="flex items-center gap-1 hover:text-cyan-300 transition"
+         target="_blank" rel="noopener">
         <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16" aria-hidden="true">
-          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 018 4.59c.68 0 1.36.09 2 .26 1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          <path d="M8 0C3.58...z"/>
         </svg>
         GitHub
       </a>
       <span>Licensed under GNU GPLv3</span>
     </div>
   </footer>
-
-  <!-- App Script -->
-  <script type="module">
-  async function initLazyThree() {
-    try {
-      // Import Three.js + GLTFLoader
-      const THREE = await import('https://esm.sh/three@0.155.0');
-      const { GLTFLoader } = await import('https://esm.sh/three@0.155.0/examples/jsm/loaders/GLTFLoader.js');
-
-      const container = document.getElementById('earth-bg');
-      if (!container) return;
-
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-
-      // Renderer
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      renderer.setClearColor(0x000000, 0);
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(window.devicePixelRatio || 1);
-
-  // Ensure the canvas covers the viewport and doesn't block UI interactions
-  renderer.domElement.style.position = 'fixed';
-  renderer.domElement.style.top = '0';
-  renderer.domElement.style.left = '0';
-  renderer.domElement.style.width = '100%';
-  renderer.domElement.style.height = '100%';
-  renderer.domElement.style.zIndex = '0';
-  renderer.domElement.style.pointerEvents = 'none';
-  // Optional styling hooks (uncomment to tweak visuals)
-  // renderer.domElement.style.filter = 'blur(1.5px) brightness(0.85)';
-  // renderer.domElement.style.opacity = '0.55';
-
-  container.appendChild(renderer.domElement);
-
-      // Camera
-      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-      camera.position.set(0, 0, 7);
-
-      // Scene + Lighting
-      const scene = new THREE.Scene();
-      scene.add(new THREE.HemisphereLight(0xffffff, 0x222222, 1.0));
-
-      const directional = new THREE.DirectionalLight(0xffffff, 0.7);
-      directional.position.set(5, 10, 7);
-      scene.add(directional);
-
-      let earthObj = null;
-      const loader = new GLTFLoader();
-
-      // Fallback sphere if GLB fails
-      function createFallbackSphere() {
-        const geom = new THREE.SphereGeometry(2.0, 32, 32);
-        const mat = new THREE.MeshStandardMaterial({
-          color: 0x4aa3df,
-          metalness: 0.1,
-          roughness: 0.8,
-          emissive: 0x072434,
-          emissiveIntensity: 0.02
-        });
-        const sphere = new THREE.Mesh(geom, mat);
-        sphere.scale.set(1.8, 1.8, 1.8);
-        scene.add(sphere);
-        earthObj = sphere;
-        console.warn('Using fallback procedural globe.');
-      }
-
-      // Animate
-      function animate() {
-        requestAnimationFrame(animate);
-        if (earthObj) earthObj.rotation.y += 0.003; // slow rotation
-        renderer.render(scene, camera);
-      }
-      animate();
-
-      // Load model
-      function tryLoad() {
-        loader.load(
-          './earth.glb',
-          (gltf) => {
-              try {
-                const earth = gltf.scene || (gltf.scenes && gltf.scenes[0]);
-                if (!earth) throw new Error('GLTF has no scene');
-
-                // Add to scene first
-                scene.add(earth);
-
-                // Compute bounding box and center the model
-                const box = new THREE.Box3().setFromObject(earth);
-                const size = new THREE.Vector3();
-                box.getSize(size);
-                const center = new THREE.Vector3();
-                box.getCenter(center);
-
-                // Recenter model so its bounding box center is at the origin
-                earth.position.x -= center.x;
-                earth.position.y -= center.y;
-                earth.position.z -= center.z;
-
-                // Compute a reasonable scale if the model is unusually small/large
-                const maxDim = Math.max(size.x, size.y, size.z);
-                if (maxDim > 0) {
-                  const desired = 3.5; // target size in world units
-                  const scale = desired / maxDim;
-                  earth.scale.setScalar(scale);
-                } else {
-                  earth.scale.set(2.2, 2.2, 2.2);
-                }
-
-                // Position the camera to frame the model
-                const fov = camera.fov * (Math.PI / 180);
-                const boundingSphere = box.getBoundingSphere(new THREE.Sphere());
-                const radius = boundingSphere.radius * (earth.scale.x || 1);
-                const distance = Math.abs(radius / Math.sin(fov / 2)) * 1.2; // padding
-                camera.position.set(0, 0, distance);
-                camera.lookAt(0, 0, 0);
-
-                earth.rotation.x = 0.4; // tilt for realism
-
-                earthObj = earth;
-                console.log('3D model loaded and fitted from ./earth.glb');
-              } catch (e) {
-                console.error('Error parsing GLTF', e);
-                createFallbackSphere();
-              }
-          },
-          undefined,
-          (err) => {
-            console.error('Failed to load GLTF ./earth.glb', err);
-            createFallbackSphere();
-          }
-        );
-      }
-      tryLoad();
-
-      // Resize handling
-      window.addEventListener('resize', () => {
-        const w = window.innerWidth, h = window.innerHeight;
-        renderer.setSize(w, h);
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
-      });
-
-    } catch (e) {
-      console.error('Lazy import failed or initialization error:', e);
-    }
-  }
-
-  // Initialize after page loads
-  window.addEventListener('DOMContentLoaded', () => {
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => initLazyThree(), { timeout: 2000 });
-    } else {
-      setTimeout(initLazyThree, 1000);
-    }
-  });
-
-  // Google Sign-In
-  const CLIENT_ID = "73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com";
-
-  function handleCredentialResponse(response) {
-    const data = JSON.parse(atob(response.credential.split('.')[1]));
-    localStorage.setItem("munifyUser", JSON.stringify(data));
-  window.location.href = "design/";
-  }
-
-  window.onload = function () {
-    google.accounts.id.initialize({
-      client_id: CLIENT_ID,
-      callback: handleCredentialResponse
-    });
-    google.accounts.id.renderButton(
-      document.getElementById("g_id_signin"),
-      { theme: "outline", size: "large" }
-    );
-  };
-
-  // Settings
-  document.getElementById("btnSave").addEventListener("click", () => {
-    localStorage.setItem("munifyScriptUrl", document.getElementById("scriptUrl").value);
-    localStorage.setItem("munifySheetId", document.getElementById("sheetId").value);
-    alert("Settings saved locally.");
-  });
-
-  document.getElementById("btnClear").addEventListener("click", () => {
-    localStorage.clear();
-    alert("Local settings cleared.");
-  });
-</script>
-
 </body>
+
 </html>
