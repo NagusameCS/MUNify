@@ -13,7 +13,7 @@
   <!-- GOOGLE SIGN-IN CONTAINER -->
   <div id="loginContainer" class="flex justify-center items-center min-h-screen">
     <div class="text-center">
-      <h1 class="text-3xl font-bold mb-6">Sign in to access this page/h1>
+  <h1 class="text-3xl font-bold mb-6">Sign in to access this page</h1>
    <div id="g_id_onload"
      data-client_id="73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com"
      data-callback="handleCredentialResponse"
@@ -34,6 +34,16 @@
   <!-- MAIN DESIGNER -->
   <main class="max-w-5xl mx-auto px-4 py-6 hidden">
     <div id="status" class="mb-4 text-sm"></div>
+
+    <!-- Toolbar -->
+    <div class="flex justify-between items-center mb-4">
+      <div class="text-sm text-neutral-600">Designer</div>
+      <div class="flex items-center gap-2">
+        <button id="btnSaveForm" class="px-3 py-1 bg-neutral-900 text-white rounded">Save</button>
+        <button id="btnResetTemplate" class="px-3 py-1 border rounded">Reset</button>
+        <button id="btnSignOut" class="px-3 py-1 text-neutral-700 hover:underline">Sign out</button>
+      </div>
+    </div>
 
     <!-- Tabs -->
     <div class="border-b mb-4 flex">
@@ -127,7 +137,7 @@
 </div>
 `;
 
-      const savedCode = localStorage.getItem("munifyFormCode") || baseTemplate;
+  const savedCode = localStorage.getItem("munifyFormCode") || baseTemplate;
       formCode.value = savedCode;
       editablePreview.innerHTML = savedCode;
 
@@ -153,7 +163,50 @@
         alert("Form saved locally. Sync to Google Sheet coming soon.");
       });
 
-      // Tabs
+      // Reset template button
+      document.getElementById("btnResetTemplate").addEventListener("click", () => {
+        if (!confirm('Reset the form to the default template? This will overwrite your current code.')) return;
+        formCode.value = baseTemplate;
+        editablePreview.innerHTML = baseTemplate;
+        autoSave();
+        status.textContent = 'Template reset to default.';
+      });
+
+      // Sign out button
+      document.getElementById("btnSignOut").addEventListener("click", () => {
+        // Clear login flag and show sign-in container
+        localStorage.removeItem('munifyLoggedIn');
+        document.querySelector('main').style.display = 'none';
+        document.getElementById('loginContainer').style.display = 'flex';
+      });
+
+      // Intercept form submissions inside the editable preview so the page doesn't navigate.
+      document.addEventListener('submit', (e) => {
+        try {
+          if (editablePreview.contains(e.target)) {
+            e.preventDefault();
+            const form = e.target;
+            const fd = new FormData(form);
+            const obj = {};
+            for (const [k, v] of fd.entries()) {
+              if (Object.prototype.hasOwnProperty.call(obj, k)) {
+                if (Array.isArray(obj[k])) obj[k].push(v);
+                else obj[k] = [obj[k], v];
+              } else {
+                obj[k] = v;
+              }
+            }
+            console.log('Intercepted form submission (local):', obj);
+            localStorage.setItem('munifyLastSubmission', JSON.stringify(obj));
+            status.textContent = 'Form submitted (saved locally).';
+            alert('Form submission intercepted and saved locally.');
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }, true);
+
+  // Tabs
       document.getElementById("tabPreview").addEventListener("click", () => {
         previewTab.classList.remove("hidden");
         codeTab.classList.add("hidden");
@@ -165,6 +218,9 @@
         previewTab.classList.add("hidden");
         setActiveTab("tabCode");
       });
+
+  // Ensure a default active tab
+  setActiveTab('tabPreview');
 
       function setActiveTab(activeId) {
         document.querySelectorAll(".tab-btn").forEach(btn => {
