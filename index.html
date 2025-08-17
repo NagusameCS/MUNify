@@ -155,48 +155,70 @@
         });
 
       let earthObj = null;
-      let groundShadowMesh = null;
+      let groundShadowEl = null;
+      let groundShadowRadius = 1;
+      let groundShadowWorldPos = new THREE.Vector3(0, 0, 0);
 
-      function createGroundShadow(radius, worldY) {
+      // Create a 2D shadow DOM element and position/size it by projecting model coords to screen space
+      function createGroundShadow(radius, worldPos) {
         try {
-          // remove previous
-          if (groundShadowMesh) {
-            scene.remove(groundShadowMesh);
-            groundShadowMesh.geometry.dispose();
-            if (groundShadowMesh.material.map) groundShadowMesh.material.map.dispose();
-            groundShadowMesh.material.dispose();
-            groundShadowMesh = null;
+          groundShadowRadius = radius || 1;
+          if (worldPos && worldPos.isVector3) groundShadowWorldPos.copy(worldPos);
+
+          // create element if missing
+          if (!groundShadowEl) {
+            groundShadowEl = document.createElement('div');
+            groundShadowEl.style.position = 'absolute';
+            groundShadowEl.style.pointerEvents = 'none';
+            groundShadowEl.style.borderRadius = '50%';
+            groundShadowEl.style.transform = 'translate(-50%, -50%)';
+            groundShadowEl.style.zIndex = '0';
+            groundShadowEl.style.filter = 'blur(12px)';
+            groundShadowEl.style.background = 'radial-gradient(ellipse at center, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0) 80%)';
+            // append to earth-bg container so it sits behind content
+            const containerEl = document.getElementById('earth-bg');
+            if (containerEl) {
+              containerEl.style.position = containerEl.style.position || 'fixed';
+              containerEl.appendChild(groundShadowEl);
+            } else {
+              document.body.appendChild(groundShadowEl);
+            }
           }
-
-          const shadowSize = Math.max(1, radius * 3.5);
-          const sizePx = 1024;
-          const canvas = document.createElement('canvas');
-          canvas.width = canvas.height = sizePx;
-          const ctx = canvas.getContext('2d');
-          const cx = sizePx / 2;
-          const cy = sizePx / 2;
-          const grad = ctx.createRadialGradient(cx, cy, sizePx * 0.02, cx, cy, sizePx * 0.5);
-          grad.addColorStop(0, 'rgba(0,0,0,0.75)');
-          grad.addColorStop(0.5, 'rgba(0,0,0,0.35)');
-          grad.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.fillStyle = grad;
-          ctx.fillRect(0, 0, sizePx, sizePx);
-
-          const tex = new THREE.CanvasTexture(canvas);
-          tex.encoding = THREE.sRGBEncoding;
-          tex.needsUpdate = true;
-
-          const geo = new THREE.PlaneGeometry(shadowSize * 2, shadowSize * 2);
-          const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
-          const mesh = new THREE.Mesh(geo, mat);
-          mesh.rotation.x = -Math.PI / 2;
-          mesh.position.set(0, (worldY || 0) - (radius * 0.02), 0);
-          mesh.renderOrder = 0;
-          groundShadowMesh = mesh;
-          scene.add(mesh);
+          updateGroundShadow();
         } catch (err) {
           console.warn('createGroundShadow failed', err);
         }
+      }
+
+      function worldToScreen(pos) {
+        const vec = pos.clone();
+        vec.project(camera);
+        const x = (vec.x + 1) / 2 * renderer.domElement.clientWidth;
+        const y = (-vec.y + 1) / 2 * renderer.domElement.clientHeight;
+        return { x, y, ndcZ: vec.z };
+      }
+
+      function updateGroundShadow() {
+        if (!groundShadowEl || !earthObj) return;
+        // compute screen position of the world center
+        const centerWorld = groundShadowWorldPos.clone();
+        // project center
+        const screen = worldToScreen(centerWorld);
+
+        // compute a second world point offset by radius along model X to find pixel diameter
+        const offsetWorld = centerWorld.clone().add(new THREE.Vector3(groundShadowRadius, 0, 0));
+        const screenOffset = worldToScreen(offsetWorld);
+        const dx = screenOffset.x - screen.x;
+        const dy = screenOffset.y - screen.y;
+        const diameterPx = Math.max(24, Math.hypot(dx, dy) * 2);
+
+        groundShadowEl.style.width = diameterPx + 'px';
+        groundShadowEl.style.height = (diameterPx * 0.6) + 'px'; // elliptical shadow
+        groundShadowEl.style.left = screen.x + 'px';
+        groundShadowEl.style.top = screen.y + 'px';
+        // slightly reduce opacity when model is far
+        const opacity = Math.max(0.15, Math.min(0.9, 1.6 - Math.abs(screen.ndcZ || 0)));
+        groundShadowEl.style.opacity = opacity.toFixed(2);
       }
       const loader = new GLTFLoader();
 
@@ -216,8 +238,8 @@
   sphere.position.y = 0;
   scene.add(sphere);
   earthObj = sphere;
-  // create shadow under fallback
-  createGroundShadow( (sphere.geometry.parameters.radius || 2.0) * sphere.scale.x, sphere.position.y );
+  // create shadow under fallback (pass center as Vector3)
+  createGroundShadow( (sphere.geometry.parameters.radius || 2.0) * sphere.scale.x, new THREE.Vector3(0, sphere.position.y, 0) );
   console.warn('Using fallback procedural globe (scaled/offset).');
       }
 
@@ -226,6 +248,8 @@
         requestAnimationFrame(animate);
         // Reduce rotation speed by 10x (was 0.003)
         if (earthObj) earthObj.rotation.y += 0.0003;
+  // Update 2D ground shadow position/size
+  try { updateGroundShadow(); } catch (e) { /* ignore */ }
         renderer.render(scene, camera);
       }
       animate();
@@ -281,8 +305,8 @@
 
                 earth.position.y -= radius * 0.6;
 
-                // Create ground shadow under model
-                createGroundShadow(radius, earth.position.y);
+                // Create ground shadow under model (pass model center)
+                createGroundShadow(radius, new THREE.Vector3(0, earth.position.y, 0));
 
                 earth.rotation.x = 0.4; // tilt for realism
 
