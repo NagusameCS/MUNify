@@ -129,9 +129,16 @@
 
   container.appendChild(renderer.domElement);
 
-      // Camera
-      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-      camera.position.set(0, 0, 7);
+  // Camera
+  const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+  camera.position.set(0, 0, 7);
+  // Scroll-interaction targets (will be initialized further after model fits)
+  let baseDistance = camera.position.z;
+  let desiredCameraY = 0;
+  let desiredCameraZ = baseDistance;
+  // tuning: how far up/down and how much z shift with scrolling
+  const cameraYRange = 4.0; // world units up/down total
+  const cameraZRangeFactor = 0.5; // +/- 50% of baseDistance
 
 
       // Scene + Lighting
@@ -188,6 +195,13 @@
         requestAnimationFrame(animate);
         // Reduce rotation speed by 10x (was 0.003)
         if (earthObj) earthObj.rotation.y += 0.0003;
+
+        // Smoothly interpolate camera towards desired targets
+        // (using a simple lerp for smooth motion)
+        camera.position.y += (desiredCameraY - camera.position.y) * 0.08;
+        camera.position.z += (desiredCameraZ - camera.position.z) * 0.08;
+        camera.lookAt(0, 0, 0);
+
         renderer.render(scene, camera);
       }
       animate();
@@ -236,6 +250,21 @@
 
                   // Center model vertically (no downward offset)
                   earth.position.y = 0;
+
+                  // initialize baseDistance and desired targets so scroll math can use them
+                  baseDistance = camera.position.z;
+                  desiredCameraZ = baseDistance;
+                  desiredCameraY = 0;
+
+                  // add scroll listener to update desired camera positions
+                  window.addEventListener('scroll', () => {
+                    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+                    const frac = Math.min(1, window.scrollY / maxScroll);
+                    // center around 0: -0.5..+0.5
+                    const centered = frac - 0.5;
+                    desiredCameraY = centered * cameraYRange * -1; // invert so scrolling down moves camera up visually
+                    desiredCameraZ = baseDistance * (1 + centered * cameraZRangeFactor);
+                  }, { passive: true });
 
                   earth.rotation.x = 0.4; // tilt for realism
 
