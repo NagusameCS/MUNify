@@ -171,7 +171,7 @@
         });
         const sphere = new THREE.Mesh(geom, mat);
   // Make the fallback larger and keep it centered
-  sphere.scale.set(2, 2, 2);
+  sphere.scale.set(4, 4, 4);
   sphere.position.y = 0;
   scene.add(sphere);
   earthObj = sphere;
@@ -222,8 +222,8 @@
                   earth.scale.set(4.4, 4.4, 4.4);
                 }
 
-                // Apply an additional global scale multiplier (4x) to make the planet much larger
-                earth.scale.multiplyScalar(4);
+                // Apply an additional global scale multiplier (8x) to make the planet much larger
+                earth.scale.multiplyScalar(8);
 
                 // Position the camera to frame the model
                 const fov = camera.fov * (Math.PI / 180);
@@ -236,8 +236,7 @@
                 // Keep the model centered vertically so page content can be arranged around it
                 earth.position.y = 0;
 
-                // Create ground shadow under model (pass model center at origin)
-                createGroundShadow(radius, new THREE.Vector3(0, 0, 0));
+                // (Shadow removed) no DOM shadow is created for the model
 
                 earth.rotation.x = 0.4; // tilt for realism
 
