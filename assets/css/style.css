@@ -91,3 +91,16 @@ body::before{
 .frosted-text--hero{ 
 	text-shadow: 0 1px 0 rgba(255,255,255,0.8), 0 14px 38px rgba(122,156,198,0.12), 0 4px 12px rgba(2,6,23,0.14);
 }
+
+/* Canvas fade-in for the 3D earth background */
+#earth-bg canvas.earth-canvas{
+	opacity: 0;
+	transition: opacity 900ms cubic-bezier(.2,.9,.2,1);
+	will-change: opacity;
+	/* slight visual polish before fully visible */
+	filter: saturate(0.98) contrast(0.99);
+}
+#earth-bg canvas.earth-canvas.earth-canvas--visible{
+	opacity: 1;
+	filter: none;
+}

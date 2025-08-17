@@ -32,11 +32,15 @@
           Run MUNify using <span class="underline">your own</span> Google Sheets.
         </h1>
         <p class="text-neutral-700">
-          No servers. No data on us. You sign in with Google, point to your Apps Script Web App and Sheet, and we do the rest in your browser.
+          No servers. No data with us. 
+          You sign in with Google, 
+          point to your Apps Script Web App and Sheet, 
+          and we do the rest in your browser.
         </p>
         <div id="g_id_signin"></div>
         <p class="text-xs text-neutral-500">
-          We only store configuration locally in your browser. You can clear it anytime in Settings.
+          We only store configuration locally in your browser. 
+          You can clear it anytime in Settings.
         </p>
       </div>
       <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200">
@@ -123,6 +127,8 @@
   renderer.domElement.style.height = '100%';
   renderer.domElement.style.zIndex = '0';
   renderer.domElement.style.pointerEvents = 'none';
+  // Mark canvas so CSS can target it; start hidden for fade-in once content ready
+  renderer.domElement.classList.add('earth-canvas');
   // Optional styling hooks (uncomment to tweak visuals)
   // renderer.domElement.style.filter = 'blur(1.5px) brightness(0.85)';
   // renderer.domElement.style.opacity = '0.55';
@@ -187,6 +193,8 @@
   sphere.position.y = 0;
         scene.add(sphere);
         earthObj = sphere;
+  // fade-in when fallback is ready
+  fadeInEarth();
         // Add a thin atmosphere glow for the fallback globe
         try {
           const worldRadius = (sphere.geometry.parameters.radius || 2) * (sphere.scale.x || 1);
@@ -211,6 +219,16 @@
           console.warn('Could not create atmosphere for fallback', e);
         }
         console.warn('Using fallback procedural globe (scaled/offset).');
+      }
+
+      // Fade the canvas in when the 3D content (model or fallback) is ready
+      function fadeInEarth(){
+        try {
+          const canvas = container.querySelector('canvas.earth-canvas');
+          if (!canvas) return;
+          // small timeout so the first frame can render before fading
+          setTimeout(() => canvas.classList.add('earth-canvas--visible'), 80);
+        } catch(e){ console.warn('fadeInEarth failed', e); }
       }
 
       // Animate
