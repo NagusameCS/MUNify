@@ -155,6 +155,9 @@
         });
 
   let earthObj = null;
+  // pivot Group to ensure consistent rotation across GLTF and fallback
+  const earthPivot = new THREE.Group();
+  scene.add(earthPivot);
 
   // (Shadow removed) No DOM shadow is created; the earth will be centered and visible behind content.
       const loader = new GLTFLoader();
@@ -173,8 +176,8 @@
   // Make the fallback larger and keep it centered
   sphere.scale.set(4, 4, 4);
   sphere.position.y = 0;
-  scene.add(sphere);
-  earthObj = sphere;
+  earthPivot.add(sphere);
+  earthObj = earthPivot;
   console.warn('Using fallback procedural globe (centered, scaled).');
       }
 
@@ -196,8 +199,8 @@
                 const earth = gltf.scene || (gltf.scenes && gltf.scenes[0]);
                 if (!earth) throw new Error('GLTF has no scene');
 
-                // Add to scene first
-                scene.add(earth);
+                // Add to pivot (not directly to scene) so we can rotate the pivot reliably
+                earthPivot.add(earth);
 
                 // Compute bounding box and center the model
                 const box = new THREE.Box3().setFromObject(earth);
@@ -301,7 +304,8 @@
                   }
                 });
 
-                earthObj = earth;
+                // set the pivot as the object to rotate each frame
+                earthObj = earthPivot;
                 console.log('3D model loaded and fitted from ./earth.glb (scaled/offset, materials enhanced)');
               } catch (e) {
                 console.error('Error parsing GLTF', e);
