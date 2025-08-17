@@ -155,6 +155,49 @@
         });
 
       let earthObj = null;
+      let groundShadowMesh = null;
+
+      function createGroundShadow(radius, worldY) {
+        try {
+          // remove previous
+          if (groundShadowMesh) {
+            scene.remove(groundShadowMesh);
+            groundShadowMesh.geometry.dispose();
+            if (groundShadowMesh.material.map) groundShadowMesh.material.map.dispose();
+            groundShadowMesh.material.dispose();
+            groundShadowMesh = null;
+          }
+
+          const shadowSize = Math.max(1, radius * 3.5);
+          const sizePx = 1024;
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = sizePx;
+          const ctx = canvas.getContext('2d');
+          const cx = sizePx / 2;
+          const cy = sizePx / 2;
+          const grad = ctx.createRadialGradient(cx, cy, sizePx * 0.02, cx, cy, sizePx * 0.5);
+          grad.addColorStop(0, 'rgba(0,0,0,0.75)');
+          grad.addColorStop(0.5, 'rgba(0,0,0,0.35)');
+          grad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, sizePx, sizePx);
+
+          const tex = new THREE.CanvasTexture(canvas);
+          tex.encoding = THREE.sRGBEncoding;
+          tex.needsUpdate = true;
+
+          const geo = new THREE.PlaneGeometry(shadowSize * 2, shadowSize * 2);
+          const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+          const mesh = new THREE.Mesh(geo, mat);
+          mesh.rotation.x = -Math.PI / 2;
+          mesh.position.set(0, (worldY || 0) - (radius * 0.02), 0);
+          mesh.renderOrder = 0;
+          groundShadowMesh = mesh;
+          scene.add(mesh);
+        } catch (err) {
+          console.warn('createGroundShadow failed', err);
+        }
+      }
       const loader = new GLTFLoader();
 
       // Fallback sphere if GLB fails
@@ -170,10 +213,12 @@
         const sphere = new THREE.Mesh(geom, mat);
   // Make the fallback larger and move it down so roughly half is offscreen
   sphere.scale.set(16, 16, 16);
-        sphere.position.y = 0;
-        scene.add(sphere);
-        earthObj = sphere;
-        console.warn('Using fallback procedural globe (scaled/offset).');
+  sphere.position.y = 0;
+  scene.add(sphere);
+  earthObj = sphere;
+  // create shadow under fallback
+  createGroundShadow( (sphere.geometry.parameters.radius || 2.0) * sphere.scale.x, sphere.position.y );
+  console.warn('Using fallback procedural globe (scaled/offset).');
       }
 
       // Animate
@@ -233,7 +278,11 @@
 
                 // Move the model downward so roughly half is off-screen
                 // Move by a fraction of the computed world radius
+
                 earth.position.y -= radius * 0.6;
+
+                // Create ground shadow under model
+                createGroundShadow(radius, earth.position.y);
 
                 earth.rotation.x = 0.4; // tilt for realism
 
