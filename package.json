@@ -1,0 +1,12 @@
+{
+  "name": "munify",
+  "version": "0.0.0",
+  "private": true,
+  "devDependencies": {
+    "tailwindcss": "^3.5.0"
+  },
+  "scripts": {
+    "build:css": "tailwindcss -i src/styles/tailwind-input.css -o assets/css/style.css --minify",
+    "watch:css": "tailwindcss -i src/styles/tailwind-input.css -o assets/css/style.css --watch"
+  }
+}
