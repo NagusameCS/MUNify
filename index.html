@@ -27,7 +27,7 @@
   <!-- Main -->
   <main class="max-w-5xl mx-auto px-4 pop-target" style="position:relative;z-index:1;">
     <section class="grid md:grid-cols-2 gap-8 items-center">
-  <div class="space-y-4 text-container">
+  <div class="space-y-4">
         <h1 class="text-3xl md:text-5xl font-bold leading-tight">
           Run MUNify using <span class="underline">your own</span> Google Sheets.
         </h1>
@@ -39,7 +39,7 @@
           We only store configuration locally in your browser. You can clear it anytime in Settings.
         </p>
       </div>
-  <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200 text-container">
+      <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200">
         <h2 class="font-semibold mb-2">Quick Setup</h2>
         <ol class="list-decimal ml-5 space-y-2 text-sm">
           <li>Click <strong><a href="https://developers.google.com/identity/gsi/web" target="_blank" class="underline">Sign in with Google</a></strong>.</li>
@@ -379,6 +379,66 @@
       setTimeout(() => el.classList.add('pop-animate'), delay);
     });
   });
+</script>
+
+<script>
+  // On non-mobile devices, shift page content to avoid the earth's screen-space circle.
+  (function(){
+    const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 640;
+    if (isMobile) return; // keep current system for mobile
+
+    const main = document.querySelector('main');
+    const adjust = () => {
+      const canvas = document.querySelector('#earth-bg canvas');
+      if (!canvas || !main) return;
+
+      // Compute circle: center is canvas center, radius = screenFraction * viewportWidth / 2
+      const rect = canvas.getBoundingClientRect();
+      const cx = rect.left + rect.width/2;
+      const cy = rect.top + rect.height/2;
+      const radius = Math.min(window.innerWidth, window.innerHeight) * screenFraction / 2;
+
+      // Main bounding box
+      const mb = main.getBoundingClientRect();
+
+      // Simple circle-rect overlap test: find closest point from circle center to rect
+      const closestX = Math.max(mb.left, Math.min(cx, mb.right));
+      const closestY = Math.max(mb.top, Math.min(cy, mb.bottom));
+      const dx = closestX - cx;
+      const dy = closestY - cy;
+      const distSq = dx*dx + dy*dy;
+
+      if (distSq < radius*radius) {
+        // overlap — compute minimal vertical shift to move rect out of circle
+        // move main up or down depending on which requires smaller shift
+        const overlap = Math.sqrt(radius*radius - distSq);
+        // try moving upward by overlap + margin
+        const margin = 24; // px
+        const shiftUp = (cy - (mb.top)) - (radius + margin);
+        const shiftDown = (mb.bottom) - (cy + radius + margin);
+        let translateY = 0;
+        if (Math.abs(shiftUp) < Math.abs(shiftDown)) {
+          // move up (negative)
+          translateY = Math.min(0, shiftUp - margin);
+        } else {
+          // move down (positive)
+          translateY = Math.max(0, -shiftDown + margin);
+        }
+        main.style.transform = `translateY(${translateY}px)`;
+        main.style.transition = 'transform 420ms cubic-bezier(.2,.9,.2,1)';
+      } else {
+        main.style.transform = '';
+        main.style.transition = 'transform 420ms cubic-bezier(.2,.9,.2,1)';
+      }
+    };
+
+    // Update on resize and a short timeout after load to allow canvas to initialize
+    window.addEventListener('resize', adjust);
+    setTimeout(adjust, 600);
+    // try a few times in case the renderer attaches later
+    setTimeout(adjust, 1200);
+    setTimeout(adjust, 2200);
+  })();
 </script>
 
 </body>
