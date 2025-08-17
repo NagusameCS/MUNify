@@ -222,8 +222,8 @@
                   earth.scale.set(4.4, 4.4, 4.4);
                 }
 
-                // Apply an additional global scale multiplier (4x) to make the planet much larger
-                earth.scale.multiplyScalar(4);
+                // Apply an additional global scale multiplier (8x) to make the planet larger
+                earth.scale.multiplyScalar(8);
 
                 // Position the camera to frame the model
                 const fov = camera.fov * (Math.PI / 180);
@@ -235,9 +235,6 @@
 
                 // Keep the model centered vertically so page content can be arranged around it
                 earth.position.y = 0;
-
-                // Create ground shadow under model (pass model center at origin)
-                createGroundShadow(radius, new THREE.Vector3(0, 0, 0));
 
                 earth.rotation.x = 0.4; // tilt for realism
 
