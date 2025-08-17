@@ -16,7 +16,7 @@
   <div id="earth-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;overflow:hidden;"></div>
 
   <!-- Header -->
-  <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between" style="position:relative;z-index:1;">
+  <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between pop-target" style="position:relative;z-index:1;">
   <a href="./" class="flex items-center gap-2 font-semibold">MUNify</a>
     <nav class="text-sm hidden sm:flex gap-6">
   <a href="info/" class="hover:underline">Info & Permissions</a>
@@ -25,7 +25,7 @@
   </header>
 
   <!-- Main -->
-  <main class="max-w-5xl mx-auto px-4" style="position:relative;z-index:1;">
+  <main class="max-w-5xl mx-auto px-4 pop-target" style="position:relative;z-index:1;">
     <section class="grid md:grid-cols-2 gap-8 items-center">
       <div class="space-y-4">
         <h1 class="text-3xl md:text-5xl font-bold leading-tight">
@@ -75,7 +75,7 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200" style="position:relative;z-index:1;">
+  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200 pop-target" style="position:relative;z-index:1;">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
       <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
@@ -168,9 +168,9 @@
           emissiveIntensity: 0.02
         });
         const sphere = new THREE.Mesh(geom, mat);
-        // Make the fallback larger and move it down so roughly half is offscreen
-        sphere.scale.set(4, 4, 4);
-        sphere.position.y = -4;
+  // Make the fallback larger and move it down so roughly half is offscreen
+  sphere.scale.set(16, 16, 16);
+        sphere.position.y = 0;
         scene.add(sphere);
         earthObj = sphere;
         console.warn('Using fallback procedural globe (scaled/offset).');
@@ -219,6 +219,9 @@
                 } else {
                   earth.scale.set(4.4, 4.4, 4.4);
                 }
+
+                // Apply an additional global scale multiplier (4x) to make the planet much larger
+                earth.scale.multiplyScalar(4);
 
                 // Position the camera to frame the model
                 const fov = camera.fov * (Math.PI / 180);
@@ -330,6 +333,17 @@
   document.getElementById("btnClear").addEventListener("click", () => {
     localStorage.clear();
     alert("Local settings cleared.");
+  });
+</script>
+
+<script>
+  // Staggered pop-up animations for elements with .pop-target
+  document.addEventListener('DOMContentLoaded', () => {
+    const items = Array.from(document.querySelectorAll('.pop-target'));
+    items.forEach((el, i) => {
+      const delay = i * 80 + 60; // stagger
+      setTimeout(() => el.classList.add('pop-animate'), delay);
+    });
   });
 </script>
 

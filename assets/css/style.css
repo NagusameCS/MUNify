@@ -44,3 +44,17 @@ button,input,textarea,select{font:inherit}
 .border-t{border-top:1px solid #e5e7eb}
 .min-h-screen{min-height:100vh}
 #earth-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+
+/* Load pop-up animation */
+@keyframes popUp {
+	0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+	60% { opacity: 1; transform: translateY(-6px) scale(1.02); }
+	100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.pop-target{opacity:0;transform:translateY(12px) scale(0.98);will-change:transform,opacity}
+.pop-animate{animation-name:popUp;animation-duration:420ms;animation-timing-function:cubic-bezier(.2,.9,.2,1);animation-fill-mode:forwards}
+
+@media (prefers-reduced-motion: reduce) {
+	.pop-target, .pop-animate { transition: none !important; animation: none !important; opacity: 1 !important; transform: none !important }
+}
