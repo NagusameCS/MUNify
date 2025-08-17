@@ -155,9 +155,6 @@
         });
 
   let earthObj = null;
-  // pivot Group to ensure consistent rotation across GLTF and fallback
-  const earthPivot = new THREE.Group();
-  scene.add(earthPivot);
 
   // (Shadow removed) No DOM shadow is created; the earth will be centered and visible behind content.
       const loader = new GLTFLoader();
@@ -174,10 +171,10 @@
         });
         const sphere = new THREE.Mesh(geom, mat);
   // Make the fallback larger and keep it centered
-  sphere.scale.set(4, 4, 4);
+  sphere.scale.set(2, 2, 2);
   sphere.position.y = 0;
-  earthPivot.add(sphere);
-  earthObj = earthPivot;
+  scene.add(sphere);
+  earthObj = sphere;
   console.warn('Using fallback procedural globe (centered, scaled).');
       }
 
@@ -199,8 +196,8 @@
                 const earth = gltf.scene || (gltf.scenes && gltf.scenes[0]);
                 if (!earth) throw new Error('GLTF has no scene');
 
-                // Add to pivot (not directly to scene) so we can rotate the pivot reliably
-                earthPivot.add(earth);
+                // Add to scene first
+                scene.add(earth);
 
                 // Compute bounding box and center the model
                 const box = new THREE.Box3().setFromObject(earth);
@@ -225,54 +222,22 @@
                   earth.scale.set(4.4, 4.4, 4.4);
                 }
 
-                // Apply an additional global scale multiplier (8x) to make the planet much larger
-                earth.scale.multiplyScalar(8);
+                // Apply an additional global scale multiplier (4x) to make the planet much larger
+                earth.scale.multiplyScalar(4);
 
-
-                // Position the camera and then adjust the model scale so its on-screen diameter
-                // equals 3/5 of the viewport width.
+                // Position the camera to frame the model
                 const fov = camera.fov * (Math.PI / 180);
                 const boundingSphere = box.getBoundingSphere(new THREE.Sphere());
-                // initial world radius after current scaling
-                let radius = boundingSphere.radius * (earth.scale.x || 1);
-
-                // place camera at a conservative framing distance based on current radius
-                let distance = Math.abs(radius / Math.sin(fov / 2)) * 1.2; // padding
+                const radius = boundingSphere.radius * (earth.scale.x || 1);
+                const distance = Math.abs(radius / Math.sin(fov / 2)) * 1.2; // padding
                 camera.position.set(0, 0, distance);
                 camera.lookAt(0, 0, 0);
-
-                // helper: project a world position to screen pixels
-                function worldToScreenPixels(pos) {
-                  const vec = pos.clone().project(camera);
-                  const x = (vec.x + 1) / 2 * renderer.domElement.clientWidth;
-                  const y = (-vec.y + 1) / 2 * renderer.domElement.clientHeight;
-                  return { x, y, ndcZ: vec.z };
-                }
-
-                // compute current on-screen diameter by projecting center and a point radius units to the right
-                const centerWorld = new THREE.Vector3(0, 0, 0);
-                const offsetWorld = centerWorld.clone().add(new THREE.Vector3(radius, 0, 0));
-                const screenCenter = worldToScreenPixels(centerWorld);
-                const screenOffset = worldToScreenPixels(offsetWorld);
-                const currentPx = Math.hypot(screenOffset.x - screenCenter.x, screenOffset.y - screenCenter.y) * 2;
-
-                // desired pixel diameter = 3/5 of viewport width
-                const desiredPx = window.innerWidth * 0.6;
-
-                if (currentPx > 0) {
-                  const scaleFactor = desiredPx / currentPx;
-                  earth.scale.multiplyScalar(scaleFactor);
-                  // update radius and reposition camera to frame the new scaled model
-                  radius *= scaleFactor;
-                  distance = Math.abs(radius / Math.sin(fov / 2)) * 1.2;
-                  camera.position.set(0, 0, distance);
-                  camera.lookAt(0, 0, 0);
-                }
 
                 // Keep the model centered vertically so page content can be arranged around it
                 earth.position.y = 0;
 
-                // (Shadow removed) no DOM shadow is created for the model
+                // Create ground shadow under model (pass model center at origin)
+                createGroundShadow(radius, new THREE.Vector3(0, 0, 0));
 
                 earth.rotation.x = 0.4; // tilt for realism
 
@@ -304,8 +269,7 @@
                   }
                 });
 
-                // set the pivot as the object to rotate each frame
-                earthObj = earthPivot;
+                earthObj = earth;
                 console.log('3D model loaded and fitted from ./earth.glb (scaled/offset, materials enhanced)');
               } catch (e) {
                 console.error('Error parsing GLTF', e);
