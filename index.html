@@ -182,7 +182,7 @@
       function animate() {
         requestAnimationFrame(animate);
         // Reduce rotation speed by 10x (was 0.003)
-        if (earthObj) earthObj.rotation.y += 0.03;
+        if (earthObj) earthObj.rotation.y += 0.003;
         renderer.render(scene, camera);
       }
       animate();
