@@ -156,16 +156,7 @@
 
   let earthObj = null;
 
-      // (Shadow removed) No DOM shadow is created; the earth will be centered and visible behind content.
-
-      // Helper: project a world-space position to screen coordinates (pixels)
-      function worldToScreen(pos) {
-        const vec = pos.clone();
-        vec.project(camera);
-        const x = (vec.x + 1) / 2 * renderer.domElement.clientWidth;
-        const y = (-vec.y + 1) / 2 * renderer.domElement.clientHeight;
-        return { x, y, ndcZ: vec.z };
-      }
+  // (Shadow removed) No DOM shadow is created; the earth will be centered and visible behind content.
       const loader = new GLTFLoader();
 
       // Fallback sphere if GLB fails
@@ -231,71 +222,16 @@
                   earth.scale.set(4.4, 4.4, 4.4);
                 }
 
-                // Apply an additional global scale multiplier (4x) as a starting point
+                // Apply an additional global scale multiplier (4x) to make the planet much larger
                 earth.scale.multiplyScalar(4);
 
-                // Function to scale the model so its on-screen width == fraction * window width
-                function fitModelToScreenWidth(fractionWidth) {
-                  try {
-                    fractionWidth = fractionWidth || 0.6; // default 3/5
-
-                    // recompute bounds after current scaling
-                    const bb = new THREE.Box3().setFromObject(earth);
-                    const sizeBB = new THREE.Vector3();
-                    bb.getSize(sizeBB);
-
-                    // points at left/right extremes in local space
-                    const leftLocal = new THREE.Vector3(-sizeBB.x / 2, 0, 0);
-                    const rightLocal = new THREE.Vector3(sizeBB.x / 2, 0, 0);
-
-                    const leftWorld = leftLocal.clone();
-                    const rightWorld = rightLocal.clone();
-                    earth.localToWorld(leftWorld);
-                    earth.localToWorld(rightWorld);
-
-                    const leftScreen = worldToScreen(leftWorld);
-                    const rightScreen = worldToScreen(rightWorld);
-                    const currentPx = Math.max(1, Math.hypot(rightScreen.x - leftScreen.x, rightScreen.y - leftScreen.y));
-                    const desiredPx = Math.max(32, window.innerWidth * fractionWidth);
-
-                    const scaleFactor = desiredPx / currentPx;
-                    if (isFinite(scaleFactor) && scaleFactor > 0 && Math.abs(scaleFactor - 1) > 0.001) {
-                      earth.scale.multiplyScalar(scaleFactor);
-                    }
-
-                    // Recompute bounding sphere and reposition camera to frame the (now scaled) model
-                    const fov = camera.fov * (Math.PI / 180);
-                    const boundingSphere = bb.getBoundingSphere(new THREE.Sphere());
-                    const radius = boundingSphere.radius * (earth.scale.x || 1);
-                    const distance = Math.abs(radius / Math.sin(fov / 2)) * 1.2; // padding
-                    camera.position.set(0, 0, distance);
-                    camera.lookAt(0, 0, 0);
-                  } catch (err) {
-                    console.warn('fitModelToScreenWidth failed', err);
-                  }
-                }
-
-                // Initial camera framing (will be refined by fitModelToScreenWidth)
+                // Position the camera to frame the model
                 const fov = camera.fov * (Math.PI / 180);
                 const boundingSphere = box.getBoundingSphere(new THREE.Sphere());
                 const radius = boundingSphere.radius * (earth.scale.x || 1);
                 const distance = Math.abs(radius / Math.sin(fov / 2)) * 1.2; // padding
                 camera.position.set(0, 0, distance);
                 camera.lookAt(0, 0, 0);
-
-                // Fit the model so it occupies ~3/5 of the screen width
-                fitModelToScreenWidth(0.6);
-
-                // Keep it responsive: refit on resize
-                window.addEventListener('resize', () => {
-                  // Update renderer size first
-                  const w = window.innerWidth, h = window.innerHeight;
-                  renderer.setSize(w, h);
-                  camera.aspect = w / h;
-                  camera.updateProjectionMatrix();
-                  // Refit model
-                  fitModelToScreenWidth(0.6);
-                });
 
                 // Keep the model centered vertically so page content can be arranged around it
                 earth.position.y = 0;
