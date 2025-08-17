@@ -121,9 +121,9 @@
   renderer.domElement.style.height = '100%';
   renderer.domElement.style.zIndex = '0';
   renderer.domElement.style.pointerEvents = 'none';
-  // Optional styling hooks (uncomment to tweak visuals)
-  // renderer.domElement.style.filter = 'blur(1.5px) brightness(0.85)';
-  // renderer.domElement.style.opacity = '0.55';
+  // Optional styling hooks 
+  renderer.domElement.style.filter = 'blur(1.5px) brightness(0.85)';
+  renderer.domElement.style.opacity = '0.55';
 
   container.appendChild(renderer.domElement);
 
@@ -247,7 +247,7 @@
       function animate() {
         requestAnimationFrame(animate);
         // Reduce rotation speed by 10x (was 0.003)
-        if (earthObj) earthObj.rotation.y += 0.0003;
+        if (earthObj) earthObj.rotation.y += 0.03;
   // Update 2D ground shadow position/size
   try { updateGroundShadow(); } catch (e) { /* ignore */ }
         renderer.render(scene, camera);
@@ -300,13 +300,11 @@
                 camera.position.set(0, 0, distance);
                 camera.lookAt(0, 0, 0);
 
-                // Move the model downward so roughly half is off-screen
-                // Move by a fraction of the computed world radius
+                // Keep the model centered vertically so page content can be arranged around it
+                earth.position.y = 0;
 
-                earth.position.y -= radius * 0.6;
-
-                // Create ground shadow under model (pass model center)
-                createGroundShadow(radius, new THREE.Vector3(0, earth.position.y, 0));
+                // Create ground shadow under model (pass model center at origin)
+                createGroundShadow(radius, new THREE.Vector3(0, 0, 0));
 
                 earth.rotation.x = 0.4; // tilt for realism
 
