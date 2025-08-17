@@ -205,9 +205,9 @@
                 box.getCenter(center);
 
                 // Recenter model so its bounding box center is at the origin
-                earth.position.x -= center.x;
-                earth.position.y -= center.y;
-                earth.position.z -= center.z;
+                earth.position.x = center.x;
+                earth.position.y = center.y;
+                earth.position.z = center.z;
 
                 // Compute a reasonable scale if the model is unusually small/large
                 const maxDim = Math.max(size.x, size.y, size.z);
