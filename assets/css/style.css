@@ -12,28 +12,9 @@
 */
 
 /* Minimal fallback styles */
-a-root{--bg:#f8fafc;--text:#111827;--muted:#6b7280}
-:root{
-	/* Spacey, desaturated palette while keeping a mostly monochrome feel */
-	--bg-top: #02040a;        /* deepest tone */
-	--bg-mid: #07122a;        /* mid galaxy */
-	--bg-bottom: #06172a;     /* subtle deep blue */
-	--text: rgba(236,240,255,0.98); /* light text for hero/primary */
-	--muted: rgba(170,180,195,0.7);
-	--card-text: #0f1724;     /* dark text for white cards */
-	--accent: #7aa9db;        /* subtle cool accent */
-}
+:root{--bg:#f8fafc;--text:#111827;--muted:#6b7280}
 html,body{height:100%}
-body{
-	/* layered nebula + deep-space gradient */
-	background:
-		radial-gradient(800px 400px at 10% 20%, rgba(122,156,198,0.035), transparent 20%),
-		radial-gradient(600px 300px at 85% 75%, rgba(90,120,160,0.03), transparent 18%),
-		linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 45%, var(--bg-bottom) 100%);
-	color: var(--text);
-	font-family: Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-	margin:0;
-}
+body{background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin:0}
 a{color:inherit}
 button,input,textarea,select{font:inherit}
 
@@ -80,31 +61,12 @@ button,input,textarea,select{font:inherit}
 
 /* Subtle radial gradient page background: white inner, very light blue outer at 10% */
 body::before{
-		/* soft center halo (nebula-ish) */
-		content: '';
-		position: fixed;
-		inset: 0;
-		z-index: -1;
-		pointer-events: none;
-		background: radial-gradient(circle at 30% 30%, rgba(122,156,198,0.06) 0%, transparent 25%),
-								radial-gradient(circle at 75% 70%, rgba(90,120,160,0.05) 0%, transparent 30%);
-}
-
-body::after{
-	/* faint stars layer using small radial gradients for a hand-placed starfield feel */
 	content: '';
 	position: fixed;
 	inset: 0;
 	z-index: -1;
 	pointer-events: none;
-	background-image:
-		radial-gradient(1px 1px at 4% 8%, rgba(255,255,255,0.95) 0%, transparent 60%),
-		radial-gradient(1px 1px at 14% 32%, rgba(255,255,255,0.9) 0%, transparent 60%),
-		radial-gradient(1px 1px at 28% 22%, rgba(255,255,255,0.85) 0%, transparent 60%),
-		radial-gradient(1px 1px at 62% 18%, rgba(255,255,255,0.85) 0%, transparent 60%),
-		radial-gradient(1px 1px at 78% 56%, rgba(255,255,255,0.8) 0%, transparent 60%),
-		radial-gradient(1px 1px at 92% 82%, rgba(255,255,255,0.75) 0%, transparent 60%);
-	opacity: 0.18;
+	background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(122,156,198,0.10) 100%);
 }
 
 /* Frosted glass style shadow for headings/text
@@ -113,21 +75,19 @@ body::after{
 	 Use by adding the `frosted-text` class to headings or other text elements.
 */
 .frosted-text{
-	color: var(--text);
+	color: rgba(17,24,39,0.98);
 	/* bright thin top highlight */
-	text-shadow: 0 1px 0 rgba(255,255,255,0.08),
-							 /* soft cool glow */
-							 0 10px 30px rgba(122,156,198,0.12),
-							 /* darker soft shadow for contrast close to card surfaces */
-							 0 3px 8px rgba(2,6,23,0.18);
+	text-shadow: 0 1px 0 rgba(255,255,255,0.75),
+							 /* soft colored glow */
+							 0 8px 20px rgba(122,156,198,0.10),
+							 /* darker soft shadow for contrast */
+							 0 2px 6px rgba(2,6,23,0.12);
+	/* slight lift and smoothing on webkit */
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 /* Stronger variant for large hero titles */
 .frosted-text--hero{ 
-	text-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 20px 50px rgba(122,156,198,0.14), 0 6px 18px rgba(2,6,23,0.2);
+	text-shadow: 0 1px 0 rgba(255,255,255,0.8), 0 14px 38px rgba(122,156,198,0.12), 0 4px 12px rgba(2,6,23,0.14);
 }
-
-/* Ensure text inside white cards stays readable (dark) */
-.bg-white{background:#fff; color:var(--card-text)}
