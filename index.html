@@ -25,7 +25,7 @@
   </header>
 
   <!-- Main -->
-  <main class="max-w-5xl mx-auto px-4 pop-target" style="position:relative;z-index:1;">
+  <main class="max-w-5xl mx-auto px-4 pop-target" style="position:relative;z-index:1; text-align:left;">
     <section class="grid md:grid-cols-2 gap-8 items-center">
   <div class="space-y-4">
   <h1 class="text-3xl md:text-5xl font-bold leading-tight frosted-text frosted-text--hero">
@@ -134,8 +134,8 @@
 
   // Camera
   const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-  // start the camera a bit farther back so the globe feels smaller by default
-  camera.position.set(0, 0, 9);
+  // prefer the z=6 distance which the user requested
+  camera.position.set(0, 0, 6);
   // Scroll-interaction targets (will be initialized further after model fits)
   let baseDistance = camera.position.z;
   let desiredCameraY = 0;
@@ -311,8 +311,8 @@
                   // Recompute radius after scaling and position camera to frame model
                   const radius = radiusModel * (earth.scale.x || 1);
                   const distance = Math.abs(radius / Math.sin(fov / 2)) * 1.05; // small padding
-                  // Move the camera to frame the model. use a slightly larger fraction so the camera sits a bit farther back
-                  camera.position.set(0, 0, distance * 0.75);
+                  // Use a fixed camera distance preferred by the user so the globe appears at the chosen scale
+                  camera.position.set(0, 0, 6);
                   camera.lookAt(0, 0, 0);
 
                   // Center model vertically (no downward offset)
@@ -475,62 +475,77 @@
 </script>
 
 <script>
-  // On non-mobile devices, shift page content to avoid the earth's screen-space circle.
+  // On non-mobile devices, shift page content smoothly to avoid the earth's screen-space circle.
   (function(){
     const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 640;
     if (isMobile) return; // keep current system for mobile
 
     const main = document.querySelector('main');
-    const adjust = () => {
-      const canvas = document.querySelector('#earth-bg canvas');
-      if (!canvas || !main) return;
+    if (!main) return;
 
-      // Compute circle: center is canvas center, radius = screenFraction * viewportWidth / 2
+    let targetTX = 0; // target translateX (px)
+    let targetTY = 0; // target translateY (px)
+    let curTX = 0;
+    let curTY = 0;
+
+    const ease = 0.08; // lerp factor (smaller -> more fluid)
+
+    function updateTargets() {
+      const canvas = document.querySelector('#earth-bg canvas');
+      if (!canvas) { targetTX = 0; targetTY = 0; return; }
+
       const rect = canvas.getBoundingClientRect();
       const cx = rect.left + rect.width/2;
       const cy = rect.top + rect.height/2;
       const radius = Math.min(window.innerWidth, window.innerHeight) * screenFraction / 2;
 
-      // Main bounding box
       const mb = main.getBoundingClientRect();
 
-      // Simple circle-rect overlap test: find closest point from circle center to rect
+      // find overlap in X (prefer moving left/right only when necessary)
       const closestX = Math.max(mb.left, Math.min(cx, mb.right));
       const closestY = Math.max(mb.top, Math.min(cy, mb.bottom));
       const dx = closestX - cx;
       const dy = closestY - cy;
-      const distSq = dx*dx + dy*dy;
+      const dist = Math.sqrt(dx*dx + dy*dy);
 
-      if (distSq < radius*radius) {
-        // overlap — compute minimal vertical shift to move rect out of circle
-        // move main up or down depending on which requires smaller shift
-        const overlap = Math.sqrt(radius*radius - distSq);
-        // try moving upward by overlap + margin
-        const margin = 24; // px
-        const shiftUp = (cy - (mb.top)) - (radius + margin);
-        const shiftDown = (mb.bottom) - (cy + radius + margin);
-        let translateY = 0;
-        if (Math.abs(shiftUp) < Math.abs(shiftDown)) {
-          // move up (negative)
-          translateY = Math.min(0, shiftUp - margin);
-        } else {
-          // move down (positive)
-          translateY = Math.max(0, -shiftDown + margin);
-        }
-        main.style.transform = `translateY(${translateY}px)`;
-        main.style.transition = 'transform 420ms cubic-bezier(.2,.9,.2,1)';
+      if (dist < radius) {
+        // compute minimal vector to push the rect out of the circle plus small margin
+        const overlap = radius - dist + 20; // px margin
+        // determine direction from circle center to rect center
+        const rectCx = mb.left + mb.width/2;
+        const dirX = rectCx >= cx ? 1 : -1; // push horizontally away from circle center
+
+        // bias to moving horizontally (liquid feel) and allow small vertical nudges
+        targetTX = curTX + dirX * overlap * 0.6;
+        // small vertical adjustment to aid avoidance without large jumps
+        targetTY = (mb.top < cy) ? -Math.min(overlap * 0.15, 40) : Math.min(overlap * 0.15, 40);
       } else {
-        main.style.transform = '';
-        main.style.transition = 'transform 420ms cubic-bezier(.2,.9,.2,1)';
+        targetTX = 0;
+        targetTY = 0;
       }
-    };
+    }
 
-    // Update on resize and a short timeout after load to allow canvas to initialize
-    window.addEventListener('resize', adjust);
-    setTimeout(adjust, 600);
-    // try a few times in case the renderer attaches later
-    setTimeout(adjust, 1200);
-    setTimeout(adjust, 2200);
+    function tick() {
+      // lerp current toward target for a liquid motion
+      curTX += (targetTX - curTX) * ease;
+      curTY += (targetTY - curTY) * ease;
+      // apply transform but keep left-justified text by translating only (not changing text-align)
+      main.style.transform = `translate(${curTX}px, ${curTY}px)`;
+      main.style.willChange = 'transform';
+      requestAnimationFrame(tick);
+    }
+
+    // observe layout changes and resize to recompute targets
+    const ro = new ResizeObserver(() => updateTargets());
+    ro.observe(document.body);
+    window.addEventListener('resize', updateTargets);
+    // update periodically while the renderer initializes
+    setTimeout(updateTargets, 300);
+    setTimeout(updateTargets, 900);
+    setTimeout(updateTargets, 1600);
+
+    // kick off
+    tick();
   })();
 </script>
 
