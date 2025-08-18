@@ -132,6 +132,119 @@
 
   container.appendChild(renderer.domElement);
 
+  // Add a subtle gradient background to the earth container (behind the WebGL canvas)
+  container.style.background = 'linear-gradient(135deg, #041122 0%, #072235 50%, #081a2a 100%)';
+
+  // --- Lightweight stars layer (canvas) ---
+  // We'll render a small number of simple points to a separate canvas. The renderer's canvas is
+  // appended after this so it naturally sits above the stars. Drawing is throttled to reduce CPU.
+  const starsCanvas = document.createElement('canvas');
+  starsCanvas.style.position = 'fixed';
+  starsCanvas.style.top = '0';
+  starsCanvas.style.left = '0';
+  starsCanvas.style.width = '100%';
+  starsCanvas.style.height = '100%';
+  // place the stars behind the WebGL canvas but above the gradient
+  starsCanvas.style.zIndex = '-1';
+  starsCanvas.style.pointerEvents = 'none';
+  container.appendChild(starsCanvas);
+
+  const starsCtx = starsCanvas.getContext('2d');
+  let dpr = window.devicePixelRatio || 1;
+  let stars = [];
+  let starsCount = 80; // modest number to keep CPU/GPU usage low
+  let lastStarDraw = 0;
+  let targetParallax = { x: 0, y: 0 };
+  let currentParallax = { x: 0, y: 0 };
+
+  function initStars() {
+    dpr = window.devicePixelRatio || 1;
+    const w = Math.max(1, Math.floor(window.innerWidth));
+    const h = Math.max(1, Math.floor(window.innerHeight));
+    starsCanvas.width = Math.floor(w * dpr);
+    starsCanvas.height = Math.floor(h * dpr);
+    starsCanvas.style.width = w + 'px';
+    starsCanvas.style.height = h + 'px';
+    starsCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // adaptive count: fewer on small screens
+    starsCount = Math.max(40, Math.min(140, Math.round((w * h) / 15000)));
+    stars = new Array(starsCount).fill(0).map(() => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      r: Math.random() * 1.4 + 0.3,
+      baseA: Math.random() * 0.6 + 0.4,
+      twinkle: Math.random() * 2 + 0.5,
+      phase: Math.random() * Math.PI * 2
+    }));
+    // initial parallax reset
+    currentParallax.x = targetParallax.x = 0;
+    currentParallax.y = targetParallax.y = 0;
+  }
+
+  function drawStars(now) {
+    // throttle to ~20 FPS
+    if (now - lastStarDraw < 50) return;
+    lastStarDraw = now;
+    const w = starsCanvas.width / dpr;
+    const h = starsCanvas.height / dpr;
+
+    // ease parallax
+    currentParallax.x += (targetParallax.x - currentParallax.x) * 0.08;
+    currentParallax.y += (targetParallax.y - currentParallax.y) * 0.08;
+
+    starsCtx.clearRect(0, 0, w, h);
+
+    // small passive drift based on time
+    const t = now * 0.001;
+    const driftX = Math.sin(t * 0.07) * 6; // very slow
+    const driftY = Math.cos(t * 0.05) * 4;
+
+    for (let i = 0; i < stars.length; i++) {
+      const s = stars[i];
+      const tw = s.baseA + Math.sin(t * s.twinkle + s.phase) * 0.25;
+      const x = s.x + currentParallax.x * (0.2 + (s.r / 2)) + driftX * (0.15 + (s.r / 3));
+      const y = s.y + currentParallax.y * (0.2 + (s.r / 2)) + driftY * (0.15 + (s.r / 3));
+
+      // tiny glow for larger stars
+      if (s.r > 1.2) {
+        starsCtx.beginPath();
+        const grad = starsCtx.createRadialGradient(x, y, 0, x, y, s.r * 6);
+        grad.addColorStop(0, 'rgba(255,255,255,' + (tw * 0.9) + ')');
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
+        starsCtx.fillStyle = grad;
+        starsCtx.fillRect(x - s.r * 6, y - s.r * 6, s.r * 12, s.r * 12);
+      }
+
+      starsCtx.beginPath();
+      starsCtx.fillStyle = 'rgba(255,255,255,' + tw + ')';
+      starsCtx.arc(x, y, s.r, 0, Math.PI * 2);
+      starsCtx.fill();
+    }
+  }
+
+  // Update target parallax based on scroll position (gentle parallax)
+  function updateParallaxOnScroll() {
+    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const frac = Math.min(1, window.scrollY / maxScroll);
+    const centered = frac - 0.5; // -0.5 .. +0.5
+    // parallax range in px — fairly small to keep subtle and cheap
+    targetParallax.x = centered * 40; // horizontal
+    targetParallax.y = centered * -18; // vertical (invert slightly)
+  }
+
+  window.addEventListener('scroll', () => {
+    updateParallaxOnScroll();
+  }, { passive: true });
+
+  window.addEventListener('resize', () => {
+    initStars();
+  });
+
+  // initialize stars now
+  initStars();
+
+
   // Camera
   const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
   // prefer the z=6 distance which the user requested
@@ -229,7 +342,9 @@
         camera.position.z += (desiredCameraZ - camera.position.z) * 0.08;
         camera.lookAt(0, 0, 0);
 
-        renderer.render(scene, camera);
+  // update stars layer (throttled inside)
+  try { if (typeof drawStars === 'function') drawStars(performance.now()); } catch (e) { /* ignore */ }
+  renderer.render(scene, camera);
       }
       animate();
 
