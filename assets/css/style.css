@@ -74,26 +74,47 @@ body::before{
 	 - subtle translucent stroke to lift text from background
 	 Use by adding the `frosted-text` class to headings or other text elements.
 */
-.frosted-text{
+/* Frosted glass style for headings/text */
+.frosted-text {
 	color: rgba(17,24,39,0.98);
-	/* bright thin top highlight */
-	text-shadow: 0 1px 0 rgba(255,255,255,0.75),
-							 /* soft colored glow */
-							 0 8px 20px rgba(122,156,198,0.10),
-							 /* darker soft shadow for contrast */
-							 0 2px 6px rgba(2,6,23,0.12);
-	/* slight lift and smoothing on webkit */
+
+	/* keep your existing shadows */
+	text-shadow: 
+		0 1px 0 rgba(255,255,255,0.75),
+		0 8px 20px rgba(122,156,198,0.10),
+		0 2px 6px rgba(2,6,23,0.12);
+
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+
+	/* new backdrop glass effect */
+	background: rgba(255,255,255,0.4); /* semi-transparent white */
+	backdrop-filter: blur(6px) saturate(160%) contrast(90%);
+	-webkit-backdrop-filter: blur(6px) saturate(160%) contrast(90%);
+	border-radius: 0.5rem;
+	padding: 0.15em 0.4em; /* minimal padding to avoid giant boxes */
+	display: inline-block;
 }
 
 /* Stronger variant for large hero titles */
-.frosted-text--hero{ 
-	text-shadow: 0 1px 0 rgba(255,255,255,0.8), 0 14px 38px rgba(122,156,198,0.12), 0 4px 12px rgba(2,6,23,0.14);
+.frosted-text--hero { 
+	text-shadow: 
+		0 1px 0 rgba(255,255,255,0.8), 
+		0 14px 38px rgba(122,156,198,0.12), 
+		0 4px 12px rgba(2,6,23,0.14);
+
+	background: rgba(255,255,255,0.25);
+	backdrop-filter: blur(8px) saturate(180%) contrast(95%);
+	-webkit-backdrop-filter: blur(8px) saturate(180%) contrast(95%);
+	border-radius: 0.75rem;
+	padding: 0.25em 0.6em;
+	display: inline-block;
 }
+
 
 /* Muted paragraph variant requested: RGB(212,212,212) with a soft shadow */
 .muted-paragraph{
 	color: rgb(212,212,212);
 	text-shadow: 0 8px 24px rgba(2,6,23,0.18), 0 1px 0 rgba(255,255,255,0.03);
 }
+
