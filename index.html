@@ -147,16 +147,7 @@
 
       // Scene + Lighting
   const scene = new THREE.Scene();
-  /*
-  // Reduce overall lighting intensity to make shading on the earth ~50% as strong
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x222222, 0.2)); //og 0.5
-
-  const directional = new THREE.DirectionalLight(0xffffff, 0.3); //og .6
-  directional.position.set(5, 10, 7);
-  scene.add(directional);
-  // Small ambient to lift shadows and make materials pop (halved)
-  scene.add(new THREE.AmbientLight(0xffffff, 0.175));
-*/
+      
       // --- HDRI ENVIRONMENT ---
       // Use a small, public domain HDRI from Polyhaven (2k, ~1MB)
       // You can swap this for any .hdr you prefer
