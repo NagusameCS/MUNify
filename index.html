@@ -31,11 +31,11 @@
   <h1 class="text-3xl md:text-5xl font-bold leading-tight frosted-text frosted-text--hero">
           Run MUNify using <span class="underline">your own</span> Google Sheets.
         </h1>
-        <p class="text-neutral-700">
+        <p class="muted-paragraph">
           No servers. No data on us. You sign in with Google, point to your Apps Script Web App and Sheet, and we do the rest in your browser.
         </p>
         <div id="g_id_signin"></div>
-        <p class="text-xs text-neutral-500">
+        <p class="muted-paragraph text-xs">
           We only store configuration locally in your browser. You can clear it anytime in Settings.
         </p>
       </div>
@@ -193,8 +193,8 @@
           const atmGeom = new THREE.SphereGeometry(worldRadius * 1.06, 48, 48);
           const atmMat = new THREE.ShaderMaterial({
             uniforms: {
-              coeficient: { value: 0.06 },
-              power: { value: 2.2 },
+              coeficient: { value: 0.08 },
+              power: { value: 2.6 },
               glowColor: { value: new THREE.Color(0x7aa9db) }
             },
             vertexShader: `varying vec3 vNormal; varying vec3 vPosition; void main(){ vNormal = normalize(normalMatrix * normal); vPosition = (modelViewMatrix * vec4(position,1.0)).xyz; gl_Position = projectionMatrix * vec4(vPosition,1.0); }`,
@@ -301,8 +301,8 @@
                     const atmGeom = new THREE.SphereGeometry(worldRadius * 1.06, 64, 64);
                     const atmMat = new THREE.ShaderMaterial({
                       uniforms: {
-                        coeficient: { value: 0.06 },
-                        power: { value: 2.2 },
+                        coeficient: { value: 0.08 },
+                        power: { value: 2.6 },
                         glowColor: { value: new THREE.Color(0x7aa9db) }
                       },
                       vertexShader: `varying vec3 vNormal; varying vec3 vPosition; void main(){ vNormal = normalize(normalMatrix * normal); vPosition = (modelViewMatrix * vec4(position,1.0)).xyz; gl_Position = projectionMatrix * vec4(vPosition,1.0); }`,

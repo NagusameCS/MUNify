@@ -91,3 +91,9 @@ body::before{
 .frosted-text--hero{ 
 	text-shadow: 0 1px 0 rgba(255,255,255,0.8), 0 14px 38px rgba(122,156,198,0.12), 0 4px 12px rgba(2,6,23,0.14);
 }
+
+/* Muted paragraph variant requested: RGB(212,212,212) with a soft shadow */
+.muted-paragraph{
+	color: rgb(212,212,212);
+	text-shadow: 0 8px 24px rgba(2,6,23,0.18), 0 1px 0 rgba(255,255,255,0.03);
+}
