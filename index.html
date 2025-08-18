@@ -24,25 +24,34 @@
     </nav>
   </header>
   <script>
+  // Rotating words: wait until DOM is ready and guard missing elements
+  document.addEventListener('DOMContentLoaded', () => {
     const words = ["simplicity", "privacy", "security", "freedom", "efficiency", "trust", "flexibility"];
     let index = 0;
     const wordElements = [document.getElementById("word1"), document.getElementById("word2")];
-    
+
     function fadeWord(el, newWord) {
+        if (!el) return; // element might not exist in some pages
         el.style.transition = "opacity 0.5s";
         el.style.opacity = 0;
-    
+
         setTimeout(() => {
             el.textContent = newWord;
             el.style.opacity = 1;
         }, 500); // matches the transition duration
     }
-    
+
+    // initialize texts if elements exist
+    wordElements.forEach((el, i) => {
+      if (el) el.textContent = words[0];
+    });
+
     setInterval(() => {
         index = (index + 1) % words.length;
         wordElements.forEach(el => fadeWord(el, words[index]));
     }, 2000);
-    </script>
+  });
+  </script>
     
     <style>
     #word1, #word2 {
@@ -502,11 +511,14 @@
       const canvas = document.querySelector('#earth-bg canvas');
       if (!canvas || !main) return;
 
-      // Compute circle: center is canvas center, radius = screenFraction * viewportWidth / 2
+      // local default for how much of the screen the earth should occupy
+      const screenFractionLocal = 0.5; // matches the Three.js screenFraction used when building the scene
+
+      // Compute circle: center is canvas center, radius = screenFractionLocal * viewportWidth / 2
       const rect = canvas.getBoundingClientRect();
       const cx = rect.left + rect.width/2;
       const cy = rect.top + rect.height/2;
-      const radius = Math.min(window.innerWidth, window.innerHeight) * screenFraction / 2;
+      const radius = Math.min(window.innerWidth, window.innerHeight) * screenFractionLocal / 2;
 
       // Main bounding box
       const mb = main.getBoundingClientRect();
