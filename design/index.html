@@ -8,6 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../assets/css/style.css">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="../assets/js/auth.js"></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900">
 
@@ -59,7 +60,8 @@
 
     <!-- Code Tab -->
     <div id="codeTab" class="hidden">
-      <textarea id="formCode" class="w-full h-[500px] border rounded-lg p-3 font-mono text-sm"></textarea>
+  <label for="formCode" class="sr-only">Form HTML code editor</label>
+  <textarea id="formCode" title="Form HTML code editor" placeholder="Paste or edit your form HTML here" class="w-full h-[500px] border rounded-lg p-3 font-mono text-sm"></textarea>
     </div>
   </main>
 
@@ -82,7 +84,9 @@
     function handleCredentialResponse(response) {
       console.log("JWT ID token:", response.credential);
       // Save login state
-      localStorage.setItem("munifyLoggedIn", "true");
+  localStorage.setItem("munifyLoggedIn", "true");
+
+  // store token in our auth helper as well (MUNauth reads google.accounts.id after initialize)
 
       // Hide login, show main designer
       document.getElementById("loginContainer").style.display = "none";
@@ -102,6 +106,11 @@
 
     // --- INITIALIZE DESIGNER ---
     function initDesigner() {
+      // Sync with MUNauth config if available
+      if (window.MUNauth) {
+        const cfg = window.MUNauth.getConfig();
+        if (cfg.sheetId) localStorage.setItem('munifySheetId', cfg.sheetId);
+      }
       const scriptUrl = localStorage.getItem("munifyScriptUrl") || "Not set";
       const sheetId = localStorage.getItem("munifySheetId") || "Not set";
       const status = document.getElementById("status");

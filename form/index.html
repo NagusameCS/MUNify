@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MUNify orm</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="../assets/js/auth.js"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900">
+  <main class="max-w-3xl mx-auto px-4 py-8">
+    <h1 class="text-2xl font-bold mb-4">Delegate Registration</h1>
+    <div id="msg" class="mb-4 text-sm text-neutral-700"></div>
+
+    <form id="delegateForm" class="bg-white p-6 rounded shadow">
+      <label class="block mb-3">
+        <span class="block font-medium">Full name</span>
+        <input id="name" name="name" required class="mt-1 block w-full border rounded-lg p-2" />
+      </label>
+      <label class="block mb-3">
+        <span class="block font-medium">Email</span>
+        <input id="email" name="email" type="email" required class="mt-1 block w-full border rounded-lg p-2" />
+      </label>
+      <label class="block mb-3">
+        <span class="block font-medium">Year</span>
+        <input id="year" name="year" class="mt-1 block w-full border rounded-lg p-2" />
+      </label>
+
+      <div id="selections" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+        <!-- dynamic select lists will be inserted here -->
+      </div>
+
+      <div class="flex gap-2">
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Submit</button>
+        <button id="btnSignIn" type="button" class="px-4 py-2 border rounded">Sign in</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    // Read key from hash like #key-goes-here
+    const rawHash = location.hash ? location.hash.slice(1) : null;
+    const msg = document.getElementById('msg');
+    const cfg = window.MUNauth && window.MUNauth.getConfig ? window.MUNauth.getConfig() : {};
+    const keyFromHash = rawHash ? rawHash.split('-')[0] : null;
+
+    if (!cfg.sheetId && keyFromHash) {
+      // if user provided a key we don't have, show limited message
+      msg.textContent = 'This form is in public-key mode. You will need to sign in to submit.';
+    }
+
+    document.getElementById('btnSignIn').addEventListener('click', async () => {
+      try { await window.MUNauth.requestAccess(); alert('Signed in. You can now submit.'); } catch(e){ alert('Could not sign in'); }
+    });
+
+    // Build 5 selection dropdowns (non-repeating enforced client-side)
+    const selectionsEl = document.getElementById('selections');
+    const selects = [];
+    for (let i=1;i<=5;i++){
+      const wrap = document.createElement('label'); wrap.className='block';
+      wrap.innerHTML = `<span class="block font-medium">Delegate Selection ${i}</span>`;
+      const select = document.createElement('select'); select.name = 'sel'+i; select.className='mt-1 block w-full border rounded-lg p-2';
+      select.innerHTML = `<option value="">-- choose --</option>`;
+      wrap.appendChild(select);
+      selectionsEl.appendChild(wrap);
+      selects.push(select);
+    }
+
+    // Load committee list from Forms sheet if signed in
+    async function loadOptions(){
+      const conf = window.MUNauth.getConfig();
+      if (!conf || !conf.sheetId) return;
+      const token = window.MUNauth && window.MUNauth.getConfig && window.MUNauth.getConfig().idToken ? window.MUNauth.getConfig().idToken : null;
+      try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${conf.sheetId}/values/Forms!B2:B100`;
+        const res = await fetch(url, { headers: { Authorization: 'Bearer ' + window.MUNauth.getConfig().idToken } });
+        if (!res.ok) throw new Error('Could not fetch options');
+        const data = await res.json();
+        const rows = (data.values||[]).flat();
+        // populate selects
+        selects.forEach(s => {
+          // remove old options except first
+          while (s.options.length>1) s.remove(1);
+          rows.forEach(r => { const o=document.createElement('option'); o.value=r; o.textContent=r; s.appendChild(o); });
+        });
+      } catch(e){ console.warn('Could not load options', e); }
+    }
+
+    loadOptions();
+
+    // Prevent duplicate selections
+    selectionsEl.addEventListener('change', (e)=>{
+      const chosen = new Set([...selects].map(s=>s.value).filter(Boolean));
+      selects.forEach(s=>{
+        [...s.options].forEach(o=>{
+          if (!o.value) return; // allow empty
+          const disabled = chosen.has(o.value) && s.value !== o.value;
+          o.disabled = disabled;
+        });
+      });
+    });
+
+    document.getElementById('delegateForm').addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const form = e.target;
+      const vals = new FormData(form);
+      const row = [];
+      row.push(vals.get('name')||'');
+      row.push(vals.get('email')||'');
+      row.push(vals.get('year')||'');
+      row.push(cryptoRandom(8)); // Delegate ID
+      for (let i=1;i<=5;i++) row.push(vals.get('sel'+i)||'');
+
+      // append to Delegates sheet via Sheets API
+      const conf = window.MUNauth.getConfig();
+      if (!conf || !conf.sheetId) { alert('No sheet configured. Please sign in and set up.'); return; }
+      try {
+        const url = `https://sheets.googleapis.com/v4/spreadsheets/${conf.sheetId}/values/Delegates!A2:append?valueInputOption=RAW`;
+        const res = await fetch(url, { method:'POST', headers: { Authorization: 'Bearer ' + window.MUNauth.getConfig().idToken, 'Content-Type':'application/json' }, body: JSON.stringify({ values: [row] }) });
+        if (!res.ok) { const t = await res.text(); throw new Error(t); }
+        msg.textContent = 'Submission saved. Thank you!';
+      } catch (err) { console.error(err); alert('Could not save submission: ' + err.message); }
+    });
+
+    function cryptoRandom(len){ const bytes=new Uint8Array(len); crypto.getRandomValues(bytes); return Array.from(bytes).map(b=>('0'+b.toString(16)).slice(-2)).join(''); }
+  </script>
+</body>
+</html>

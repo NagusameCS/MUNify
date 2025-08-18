@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="assets/css/style.css">
   <!-- Google Identity -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="assets/js/auth.js"></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900">
   <!-- Rotating Earth Background -->
@@ -72,6 +73,10 @@
         </p>
 
         <div id="g_id_signin"></div>
+        <div class="mt-4">
+          <button id="btnConnect" class="px-3 py-2 rounded-2xl bg-blue-600 text-white">Sign in & Set up</button>
+          <button id="btnExportKey" class="px-3 py-2 rounded-2xl border">Download Key</button>
+        </div>
 
   <div class="spacer-50x120" aria-hidden="true"></div>
 
@@ -488,6 +493,35 @@
     alert("Local settings cleared.");
   });
 </script>
+  <script>
+    // Wire quick setup buttons
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('btnConnect');
+      const btnExport = document.getElementById('btnExportKey');
+      if (btn) btn.addEventListener('click', async () => {
+        try {
+          await window.MUNauth.requestAccess();
+          // If no sheet yet, create one
+          const saved = localStorage.getItem('munifySheetId');
+          if (!saved) {
+            const sheetId = await window.MUNauth.createSpreadsheet('MUNify - ' + (await window.MUNauth.getUserEmail()));
+            alert('Spreadsheet created: ' + sheetId + '\nYou can download the recovery key.');
+          } else {
+            alert('Already configured. Use Settings to change.');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Could not complete setup: ' + (err.message || err));
+        }
+      });
+
+      if (btnExport) btnExport.addEventListener('click', () => {
+        try {
+          window.MUNauth.exportKeyFile();
+        } catch (e) { console.error(e); alert('No key to export.'); }
+      });
+    });
+  </script>
 
 <script>
   // Staggered pop-up animations for elements with .pop-target
