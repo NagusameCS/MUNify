@@ -165,7 +165,7 @@
         .load(hdriUrl, function (texture) {
           texture.mapping = THREE.EquirectangularReflectionMapping;
           scene.environment = texture;
-          scene.background = null; // keep transparent, comment out to use HDRI as bg
+          //scene.background = null; // keep transparent, comment out to use HDRI as bg
         });
 
       let earthObj = null;
