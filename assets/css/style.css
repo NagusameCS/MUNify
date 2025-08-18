@@ -86,14 +86,6 @@ body::before{
 
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-
-	/* new backdrop glass effect */
-	background: rgba(255,255,255,0.4); /* semi-transparent white */
-	backdrop-filter: blur(6px) saturate(160%) contrast(90%);
-	-webkit-backdrop-filter: blur(6px) saturate(160%) contrast(90%);
-	border-radius: 0.5rem;
-	padding: 0.15em 0.4em; /* minimal padding to avoid giant boxes */
-	display: inline-block;
 }
 
 /* Stronger variant for large hero titles */
