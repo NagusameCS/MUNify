@@ -25,7 +25,7 @@
   </header>
 
   <!-- Main -->
-  <main class="max-w-5xl mx-auto px-4 pop-target" style="position:relative;z-index:1; text-align:left;">
+  <main class="max-w-5xl mx-auto px-4 pop-target" style="position:relative;z-index:1;">
     <section class="grid md:grid-cols-2 gap-8 items-center">
   <div class="space-y-4">
   <h1 class="text-3xl md:text-5xl font-bold leading-tight frosted-text frosted-text--hero">
@@ -33,17 +33,12 @@
         </h1>
         <p class="frosted-text">
           No servers. No data on us. You sign in with Google,
-        </p>
-        <p class="frosted-text">
           point to your Apps Script Web App and Sheet, 
-        </p>    
-        <p class="frosted-text">
           and we do the rest in your browser.
         </p>
         <div id="g_id_signin"></div>
         <p class="frosted-text text-xs">
           We only store configuration locally in your browser. 
-        </p><p class="frosted-text text-xs"></p>
           You can clear it anytime in Settings.
         </p>
       </div>
@@ -480,77 +475,62 @@
 </script>
 
 <script>
-  // On non-mobile devices, shift page content smoothly to avoid the earth's screen-space circle.
+  // On non-mobile devices, shift page content to avoid the earth's screen-space circle.
   (function(){
     const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 640;
     if (isMobile) return; // keep current system for mobile
 
     const main = document.querySelector('main');
-    if (!main) return;
-
-    let targetTX = 0; // target translateX (px)
-    let targetTY = 0; // target translateY (px)
-    let curTX = 0;
-    let curTY = 0;
-
-    const ease = 0.08; // lerp factor (smaller -> more fluid)
-
-    function updateTargets() {
+    const adjust = () => {
       const canvas = document.querySelector('#earth-bg canvas');
-      if (!canvas) { targetTX = 0; targetTY = 0; return; }
+      if (!canvas || !main) return;
 
+      // Compute circle: center is canvas center, radius = screenFraction * viewportWidth / 2
       const rect = canvas.getBoundingClientRect();
       const cx = rect.left + rect.width/2;
       const cy = rect.top + rect.height/2;
       const radius = Math.min(window.innerWidth, window.innerHeight) * screenFraction / 2;
 
+      // Main bounding box
       const mb = main.getBoundingClientRect();
 
-      // find overlap in X (prefer moving left/right only when necessary)
+      // Simple circle-rect overlap test: find closest point from circle center to rect
       const closestX = Math.max(mb.left, Math.min(cx, mb.right));
       const closestY = Math.max(mb.top, Math.min(cy, mb.bottom));
       const dx = closestX - cx;
       const dy = closestY - cy;
-      const dist = Math.sqrt(dx*dx + dy*dy);
+      const distSq = dx*dx + dy*dy;
 
-      if (dist < radius) {
-        // compute minimal vector to push the rect out of the circle plus small margin
-        const overlap = radius - dist + 20; // px margin
-        // determine direction from circle center to rect center
-        const rectCx = mb.left + mb.width/2;
-        const dirX = rectCx >= cx ? 1 : -1; // push horizontally away from circle center
-
-        // bias to moving horizontally (liquid feel) and allow small vertical nudges
-        targetTX = curTX + dirX * overlap * 0.6;
-        // small vertical adjustment to aid avoidance without large jumps
-        targetTY = (mb.top < cy) ? -Math.min(overlap * 0.15, 40) : Math.min(overlap * 0.15, 40);
+      if (distSq < radius*radius) {
+        // overlap — compute minimal vertical shift to move rect out of circle
+        // move main up or down depending on which requires smaller shift
+        const overlap = Math.sqrt(radius*radius - distSq);
+        // try moving upward by overlap + margin
+        const margin = 24; // px
+        const shiftUp = (cy - (mb.top)) - (radius + margin);
+        const shiftDown = (mb.bottom) - (cy + radius + margin);
+        let translateY = 0;
+        if (Math.abs(shiftUp) < Math.abs(shiftDown)) {
+          // move up (negative)
+          translateY = Math.min(0, shiftUp - margin);
+        } else {
+          // move down (positive)
+          translateY = Math.max(0, -shiftDown + margin);
+        }
+        main.style.transform = `translateY(${translateY}px)`;
+        main.style.transition = 'transform 420ms cubic-bezier(.2,.9,.2,1)';
       } else {
-        targetTX = 0;
-        targetTY = 0;
+        main.style.transform = '';
+        main.style.transition = 'transform 420ms cubic-bezier(.2,.9,.2,1)';
       }
-    }
+    };
 
-    function tick() {
-      // lerp current toward target for a liquid motion
-      curTX += (targetTX - curTX) * ease;
-      curTY += (targetTY - curTY) * ease;
-      // apply transform but keep left-justified text by translating only (not changing text-align)
-      main.style.transform = `translate(${curTX}px, ${curTY}px)`;
-      main.style.willChange = 'transform';
-      requestAnimationFrame(tick);
-    }
-
-    // observe layout changes and resize to recompute targets
-    const ro = new ResizeObserver(() => updateTargets());
-    ro.observe(document.body);
-    window.addEventListener('resize', updateTargets);
-    // update periodically while the renderer initializes
-    setTimeout(updateTargets, 300);
-    setTimeout(updateTargets, 900);
-    setTimeout(updateTargets, 1600);
-
-    // kick off
-    tick();
+    // Update on resize and a short timeout after load to allow canvas to initialize
+    window.addEventListener('resize', adjust);
+    setTimeout(adjust, 600);
+    // try a few times in case the renderer attaches later
+    setTimeout(adjust, 1200);
+    setTimeout(adjust, 2200);
   })();
 </script>
 
