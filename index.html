@@ -32,18 +32,14 @@
           Run MUNify using <span class="underline">your own</span> Google Sheets.
         </h1>
         <p class="text-neutral-700">
-          No servers. No data with us. 
-          You sign in with Google, 
-          point to your Apps Script Web App and Sheet, 
-          and we do the rest in your browser.
+          No servers. No data on us. You sign in with Google, point to your Apps Script Web App and Sheet, and we do the rest in your browser.
         </p>
         <div id="g_id_signin"></div>
         <p class="text-xs text-neutral-500">
-          We only store configuration locally in your browser. 
-          You can clear it anytime in Settings.
+          We only store configuration locally in your browser. You can clear it anytime in Settings.
         </p>
       </div>
-      <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200">
+  <div class="panel rounded-2xl p-6">
   <h2 class="font-semibold mb-2 frosted-text">Quick Setup</h2>
         <ol class="list-decimal ml-5 space-y-2 text-sm">
           <li>Click <strong><a href="https://developers.google.com/identity/gsi/web" target="_blank" class="underline">Sign in with Google</a></strong>.</li>
@@ -58,7 +54,7 @@
       </div>
     </section>
 
-    <section class="mt-12 bg-white rounded-2xl shadow p-6 border border-neutral-200">
+  <section class="mt-12 panel rounded-2xl p-6">
       <div class="flex items-center justify-between">
   <h3 class="font-semibold frosted-text">Settings</h3>
         <button id="btnClear" class="text-sm underline">Clear local settings</button>
@@ -79,7 +75,7 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200 pop-target" style="position:relative;z-index:1;">
+  <footer class="mt-12 py-6 text-center text-sm pop-target" style="position:relative;z-index:1;color:var(--muted)">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
       <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
@@ -127,8 +123,6 @@
   renderer.domElement.style.height = '100%';
   renderer.domElement.style.zIndex = '0';
   renderer.domElement.style.pointerEvents = 'none';
-  // Mark canvas so CSS can target it; start hidden for fade-in once content ready
-  renderer.domElement.classList.add('earth-canvas');
   // Optional styling hooks (uncomment to tweak visuals)
   // renderer.domElement.style.filter = 'blur(1.5px) brightness(0.85)';
   // renderer.domElement.style.opacity = '0.55';
@@ -193,8 +187,6 @@
   sphere.position.y = 0;
         scene.add(sphere);
         earthObj = sphere;
-  // fade-in when fallback is ready
-  fadeInEarth();
         // Add a thin atmosphere glow for the fallback globe
         try {
           const worldRadius = (sphere.geometry.parameters.radius || 2) * (sphere.scale.x || 1);
@@ -219,16 +211,6 @@
           console.warn('Could not create atmosphere for fallback', e);
         }
         console.warn('Using fallback procedural globe (scaled/offset).');
-      }
-
-      // Fade the canvas in when the 3D content (model or fallback) is ready
-      function fadeInEarth(){
-        try {
-          const canvas = container.querySelector('canvas.earth-canvas');
-          if (!canvas) return;
-          // small timeout so the first frame can render before fading
-          setTimeout(() => canvas.classList.add('earth-canvas--visible'), 80);
-        } catch(e){ console.warn('fadeInEarth failed', e); }
       }
 
       // Animate

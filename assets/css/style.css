@@ -12,9 +12,15 @@
 */
 
 /* Minimal fallback styles */
-:root{--bg:#f8fafc;--text:#111827;--muted:#6b7280}
+a:root{--bg:#071022;--text:#e8f3fb;--muted:#9fb0c9}
 html,body{height:100%}
-body{background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;margin:0}
+/* prefer applying to body and also override tailwind utility classes if present */
+body, body.bg-neutral-50, body.text-neutral-900 {
+	background: transparent;
+	color: var(--text);
+	font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	margin: 0;
+}
 a{color:inherit}
 button,input,textarea,select{font:inherit}
 
@@ -45,6 +51,16 @@ button,input,textarea,select{font:inherit}
 .min-h-screen{min-height:100vh}
 #earth-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 
+.muted{color:var(--muted)}
+
+/* Reusable panel style to replace bright white cards in a spacey theme */
+.panel{
+	background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+	border: 1px solid rgba(255,255,255,0.04);
+	box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+	color: var(--text);
+}
+
 /* Load pop-up animation */
 @keyframes popUp {
 	0% { opacity: 0; transform: translateY(12px) scale(0.98); }
@@ -61,12 +77,33 @@ button,input,textarea,select{font:inherit}
 
 /* Subtle radial gradient page background: white inner, very light blue outer at 10% */
 body::before{
+		/* deep space gradient with subtle banding for depth */
+		content: '';
+		position: fixed;
+		inset: 0;
+		z-index: -1;
+		pointer-events: none;
+		background-image:
+			radial-gradient(1200px 600px at 20% 30%, rgba(120,160,200,0.08), transparent 20%),
+			radial-gradient(1000px 500px at 80% 70%, rgba(90,120,160,0.06), transparent 18%),
+			linear-gradient(180deg, rgba(6,18,34,1) 0%, rgba(9,22,38,1) 30%, rgba(13,26,46,1) 60%, rgba(3,6,12,1) 100%);
+		background-blend-mode: screen, screen, normal;
+		filter: saturate(100%) contrast(1.05);
+}
+
+body::after{
+	/* subtle starfield layer built from repeated tiny radial gradients */
 	content: '';
 	position: fixed;
 	inset: 0;
 	z-index: -1;
 	pointer-events: none;
-	background: radial-gradient(circle at center, rgba(255,255,255,1) 0%, rgba(122,156,198,0.10) 100%);
+	background-image: 
+		radial-gradient(rgba(255,255,255,0.9) 1px, transparent 2px),
+		radial-gradient(rgba(255,255,255,0.7) 1px, transparent 2px);
+	background-size: 200px 200px, 360px 360px;
+	opacity: 0.08;
+	mix-blend-mode: screen;
 }
 
 /* Frosted glass style shadow for headings/text
@@ -75,32 +112,18 @@ body::before{
 	 Use by adding the `frosted-text` class to headings or other text elements.
 */
 .frosted-text{
-	color: rgba(17,24,39,0.98);
-	/* bright thin top highlight */
-	text-shadow: 0 1px 0 rgba(255,255,255,0.75),
-							 /* soft colored glow */
-							 0 8px 20px rgba(122,156,198,0.10),
-							 /* darker soft shadow for contrast */
-							 0 2px 6px rgba(2,6,23,0.12);
-	/* slight lift and smoothing on webkit */
+	color: var(--text);
+	/* bright thin top highlight to simulate reflected rim light */
+	text-shadow: 0 1px 0 rgba(255,255,255,0.12),
+							 /* soft cool glow */
+							 0 10px 28px rgba(110,145,180,0.12),
+							 /* subtle darker shadow for legibility */
+							 0 3px 8px rgba(0,0,0,0.35);
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 /* Stronger variant for large hero titles */
 .frosted-text--hero{ 
-	text-shadow: 0 1px 0 rgba(255,255,255,0.8), 0 14px 38px rgba(122,156,198,0.12), 0 4px 12px rgba(2,6,23,0.14);
-}
-
-/* Canvas fade-in for the 3D earth background */
-#earth-bg canvas.earth-canvas{
-	opacity: 0;
-	transition: opacity 900ms cubic-bezier(.2,.9,.2,1);
-	will-change: opacity;
-	/* slight visual polish before fully visible */
-	filter: saturate(0.98) contrast(0.99);
-}
-#earth-bg canvas.earth-canvas.earth-canvas--visible{
-	opacity: 1;
-	filter: none;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.14), 0 20px 56px rgba(90,120,150,0.16), 0 6px 18px rgba(0,0,0,0.4);
 }
