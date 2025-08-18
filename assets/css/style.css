@@ -12,14 +12,27 @@
 */
 
 /* Minimal fallback styles */
-a:root{--bg:#071022;--text:#e8f3fb;--muted:#9fb0c9}
+a-root{--bg:#f8fafc;--text:#111827;--muted:#6b7280}
+:root{
+	/* Spacey, desaturated palette while keeping a mostly monochrome feel */
+	--bg-top: #02040a;        /* deepest tone */
+	--bg-mid: #07122a;        /* mid galaxy */
+	--bg-bottom: #06172a;     /* subtle deep blue */
+	--text: rgba(236,240,255,0.98); /* light text for hero/primary */
+	--muted: rgba(170,180,195,0.7);
+	--card-text: #0f1724;     /* dark text for white cards */
+	--accent: #7aa9db;        /* subtle cool accent */
+}
 html,body{height:100%}
-/* prefer applying to body and also override tailwind utility classes if present */
-body, body.bg-neutral-50, body.text-neutral-900 {
-	background: transparent;
+body{
+	/* layered nebula + deep-space gradient */
+	background:
+		radial-gradient(800px 400px at 10% 20%, rgba(122,156,198,0.035), transparent 20%),
+		radial-gradient(600px 300px at 85% 75%, rgba(90,120,160,0.03), transparent 18%),
+		linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 45%, var(--bg-bottom) 100%);
 	color: var(--text);
-	font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-	margin: 0;
+	font-family: Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+	margin:0;
 }
 a{color:inherit}
 button,input,textarea,select{font:inherit}
@@ -51,16 +64,6 @@ button,input,textarea,select{font:inherit}
 .min-h-screen{min-height:100vh}
 #earth-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 
-.muted{color:var(--muted)}
-
-/* Reusable panel style to replace bright white cards in a spacey theme */
-.panel{
-	background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-	border: 1px solid rgba(255,255,255,0.04);
-	box-shadow: 0 8px 30px rgba(0,0,0,0.45);
-	color: var(--text);
-}
-
 /* Load pop-up animation */
 @keyframes popUp {
 	0% { opacity: 0; transform: translateY(12px) scale(0.98); }
@@ -77,33 +80,31 @@ button,input,textarea,select{font:inherit}
 
 /* Subtle radial gradient page background: white inner, very light blue outer at 10% */
 body::before{
-		/* deep space gradient with subtle banding for depth */
+		/* soft center halo (nebula-ish) */
 		content: '';
 		position: fixed;
 		inset: 0;
 		z-index: -1;
 		pointer-events: none;
-		background-image:
-			radial-gradient(1200px 600px at 20% 30%, rgba(120,160,200,0.08), transparent 20%),
-			radial-gradient(1000px 500px at 80% 70%, rgba(90,120,160,0.06), transparent 18%),
-			linear-gradient(180deg, rgba(6,18,34,1) 0%, rgba(9,22,38,1) 30%, rgba(13,26,46,1) 60%, rgba(3,6,12,1) 100%);
-		background-blend-mode: screen, screen, normal;
-		filter: saturate(100%) contrast(1.05);
+		background: radial-gradient(circle at 30% 30%, rgba(122,156,198,0.06) 0%, transparent 25%),
+								radial-gradient(circle at 75% 70%, rgba(90,120,160,0.05) 0%, transparent 30%);
 }
 
 body::after{
-	/* subtle starfield layer built from repeated tiny radial gradients */
+	/* faint stars layer using small radial gradients for a hand-placed starfield feel */
 	content: '';
 	position: fixed;
 	inset: 0;
 	z-index: -1;
 	pointer-events: none;
-	background-image: 
-		radial-gradient(rgba(255,255,255,0.9) 1px, transparent 2px),
-		radial-gradient(rgba(255,255,255,0.7) 1px, transparent 2px);
-	background-size: 200px 200px, 360px 360px;
-	opacity: 0.08;
-	mix-blend-mode: screen;
+	background-image:
+		radial-gradient(1px 1px at 4% 8%, rgba(255,255,255,0.95) 0%, transparent 60%),
+		radial-gradient(1px 1px at 14% 32%, rgba(255,255,255,0.9) 0%, transparent 60%),
+		radial-gradient(1px 1px at 28% 22%, rgba(255,255,255,0.85) 0%, transparent 60%),
+		radial-gradient(1px 1px at 62% 18%, rgba(255,255,255,0.85) 0%, transparent 60%),
+		radial-gradient(1px 1px at 78% 56%, rgba(255,255,255,0.8) 0%, transparent 60%),
+		radial-gradient(1px 1px at 92% 82%, rgba(255,255,255,0.75) 0%, transparent 60%);
+	opacity: 0.18;
 }
 
 /* Frosted glass style shadow for headings/text
@@ -113,17 +114,20 @@ body::after{
 */
 .frosted-text{
 	color: var(--text);
-	/* bright thin top highlight to simulate reflected rim light */
-	text-shadow: 0 1px 0 rgba(255,255,255,0.12),
+	/* bright thin top highlight */
+	text-shadow: 0 1px 0 rgba(255,255,255,0.08),
 							 /* soft cool glow */
-							 0 10px 28px rgba(110,145,180,0.12),
-							 /* subtle darker shadow for legibility */
-							 0 3px 8px rgba(0,0,0,0.35);
+							 0 10px 30px rgba(122,156,198,0.12),
+							 /* darker soft shadow for contrast close to card surfaces */
+							 0 3px 8px rgba(2,6,23,0.18);
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
 
 /* Stronger variant for large hero titles */
 .frosted-text--hero{ 
-	text-shadow: 0 1px 0 rgba(255,255,255,0.14), 0 20px 56px rgba(90,120,150,0.16), 0 6px 18px rgba(0,0,0,0.4);
+	text-shadow: 0 1px 0 rgba(255,255,255,0.06), 0 20px 50px rgba(122,156,198,0.14), 0 6px 18px rgba(2,6,23,0.2);
 }
+
+/* Ensure text inside white cards stays readable (dark) */
+.bg-white{background:#fff; color:var(--card-text)}
