@@ -23,24 +23,50 @@
   <a href="design/" class="hover:underline">Form Designer</a>
     </nav>
   </header>
-
+  <script>
+    const words = ["simplicity", "privacy", "security", "freedom", "efficiency", "trust", "flexibility"];
+    let index = 0;
+    const wordElements = [document.getElementById("word1"), document.getElementById("word2")];
+    
+    function fadeWord(el, newWord) {
+        el.style.transition = "opacity 0.5s";
+        el.style.opacity = 0;
+    
+        setTimeout(() => {
+            el.textContent = newWord;
+            el.style.opacity = 1;
+        }, 500); // matches the transition duration
+    }
+    
+    setInterval(() => {
+        index = (index + 1) % words.length;
+        wordElements.forEach(el => fadeWord(el, words[index]));
+    }, 2000);
+    </script>
+    
+    <style>
+    #word1, #word2 {
+        display: inline-block;
+        opacity: 1;
+    }
+    </style>
   <!-- Main -->
   <main class="max-w-5xl mx-auto px-4 pop-target" style="position:relative;z-index:1;">
     <section class="grid md:grid-cols-2 gap-8 items-center">
   <div class="space-y-4">
-  <h1 class="text-3xl md:text-5xl font-bold leading-tight frosted-text">
-          Run MUNify using <span class="underline">your own</span> Google Sheets.
+        <h1 class="text-3xl md:text-5xl font-bold leading-tight frosted-text">
+            MUNify is built for <span id="word1" class="underline">simplicity</span>.
         </h1>
-
+        
         <p>
-          No servers. No data on us.
+            Where diplomacy meets <span id="word2">simplicity</span>.
         </p>
 
         <div id="g_id_signin"></div>
 
         <div style="width: 50px; height: 100px;"></div>
 
-      </div>
+    </div>
       <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200">
   <h2 class="font-semibold mb-2 frosted-text">Quick Setup</h2>
         <ol class="list-decimal ml-5 space-y-2 text-sm">
