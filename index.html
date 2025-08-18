@@ -271,7 +271,8 @@
                   // Recompute radius after scaling and position camera to frame model
                   const radius = radiusModel * (earth.scale.x || 1);
                   const distance = Math.abs(radius / Math.sin(fov / 2)) * 1.05; // small padding
-                  camera.position.set(0, 0, distance);
+                  // Move the camera closer so the earth fills more of the view (half the distance)
+                  camera.position.set(0, 0, distance * 0.5);
                   camera.lookAt(0, 0, 0);
 
                   // Center model vertically (no downward offset)
