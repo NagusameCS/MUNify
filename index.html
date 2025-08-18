@@ -252,9 +252,8 @@
                 box.getCenter(center);
 
                 // Recenter model so its bounding box center is at the origin
-                earth.position.x = center.x;
-                earth.position.y = center.y;
-                earth.position.z = center.z;
+                // (use negative center to translate the model back to origin)
+                earth.position.set(-center.x, -center.y, -center.z);
 
                 // Compute a reasonable scale if the model is unusually small/large
                   // Compute scale so the model occupies the desired fraction of screen width
@@ -275,6 +274,7 @@
                   camera.lookAt(0, 0, 0);
 
                   // Center model vertically (no downward offset)
+                  // preserve horizontal/depth centering from above, but pin vertical center to 0
                   earth.position.y = 0;
 
                   // initialize baseDistance and desired targets so scroll math can use them
@@ -292,7 +292,13 @@
                     desiredCameraZ = baseDistance * (1 + centered * cameraZRangeFactor);
                   }, { passive: true });
 
-                  earth.rotation.x = 0.4; // tilt for realism
+                  // Force a predictable upright base rotation (tilt forward slightly)
+                  earth.rotation.set(0.4, 0, 0);
+
+                  // Provide a quick key toggle to flip the model if the source is upside-down
+                  // Press 'f' to flip 180° around X (useful for models authored in different coordinate systems)
+                  const flipToggle = () => { earth.rotation.x += Math.PI; console.log('Toggled model flip'); };
+                  window.addEventListener('keydown', (e) => { if (e.key === 'f' || e.key === 'F') flipToggle(); });
 
                   earthObj = earth;
                   console.log('3D model loaded and fitted from ./earth.glb (screen-fitted)');
