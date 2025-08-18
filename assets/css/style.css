@@ -95,22 +95,6 @@ body::before{
 	padding: 0.15em 0.4em; /* minimal padding to avoid giant boxes */
 	display: inline-block;
 }
-/* Dark overlay just for readability, not a full cover */
-.hero-overlay {
-  position: absolute;
-  inset: 0; /* covers the whole hero container */
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0.25) 0%,
-    rgba(0,0,0,0.15) 40%,
-    rgba(0,0,0,0.05) 100%
-  );
-  backdrop-filter: blur(6px);   /* 🔹 subtle blur */
-  -webkit-backdrop-filter: blur(6px); /* Safari support */
-  pointer-events: none; /* let clicks pass through */
-  z-index: 5; /* sits above the globe, below text */
-}
-
 
 /* Stronger variant for large hero titles */
 .frosted-text--hero { 
