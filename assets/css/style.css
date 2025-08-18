@@ -45,6 +45,12 @@ button,input,textarea,select{font:inherit}
 .min-h-screen{min-height:100vh}
 #earth-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 
+/* Foreground container class used to ensure content is above the background canvas */
+.site-foreground{position:relative;z-index:1}
+
+/* Small spacer helper used in the hero column */
+.spacer-50x120{width:50px;height:120px}
+
 /* Load pop-up animation */
 @keyframes popUp {
 	0% { opacity: 0; transform: translateY(12px) scale(0.98); }
