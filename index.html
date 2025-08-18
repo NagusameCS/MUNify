@@ -265,7 +265,7 @@
                   // We want the model projected width (2 * radiusModel * scale) to equal desiredWorldWidth
                   const desiredWorldWidth = 2 * camera.position.z * Math.tan(fov / 2) * (width / height) * screenFraction;
                   const scale = desiredWorldWidth / (2 * radiusModel);
-                  earth.scale.setScalar(scale || 2);
+                  earth.scale.setScalar(scale || 1);
 
                   // Recompute radius after scaling and position camera to frame model
                   const radius = radiusModel * (earth.scale.x || 1);
