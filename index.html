@@ -134,7 +134,8 @@
 
   // Camera
   const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-  camera.position.set(0, 0, 7);
+  // start the camera a bit farther back so the globe feels smaller by default
+  camera.position.set(0, 0, 9);
   // Scroll-interaction targets (will be initialized further after model fits)
   let baseDistance = camera.position.z;
   let desiredCameraY = 0;
@@ -232,6 +233,45 @@
       }
       animate();
 
+      // Expose a tiny runtime API so you can play with the camera from the browser console.
+      // Usage examples:
+      //  - EarthCamera.get()
+      //  - EarthCamera.setPosition(0, 0, 12)           // smoothly move camera to z=12 (keeps smoothing behavior)
+      //  - EarthCamera.setPosition(0, 0, 8, true)     // jump instantly to position
+      //  - EarthCamera.setDesired(y, z)               // set desiredCamera targets for smooth motion
+      //  - EarthCamera.setBaseDistance(z)             // set baseDistance used by scroll math
+      //  - EarthCamera.help()
+      window.EarthCamera = {
+        setPosition: (x = 0, y = 0, z = undefined, instant = false) => {
+          if (typeof x === 'object') { const o = x; x = o.x ?? 0; y = o.y ?? 0; z = o.z; }
+          if (z === undefined) z = camera.position.z;
+          if (instant) {
+            camera.position.set(x, y, z);
+            desiredCameraY = y;
+            desiredCameraZ = z;
+            baseDistance = z;
+          } else {
+            // update desired targets so the animation lerps there
+            desiredCameraY = y;
+            desiredCameraZ = z;
+          }
+          console.log('EarthCamera.setPosition ->', EarthCamera.get());
+        },
+        setDesired: (y, z) => {
+          if (typeof y === 'number') desiredCameraY = y;
+          if (typeof z === 'number') desiredCameraZ = z;
+          console.log('EarthCamera.setDesired ->', EarthCamera.get());
+        },
+        setBaseDistance: (z) => {
+          baseDistance = z;
+          desiredCameraZ = z;
+          camera.position.z = z;
+          console.log('EarthCamera.setBaseDistance ->', EarthCamera.get());
+        },
+        get: () => ({ x: camera.position.x, y: camera.position.y, z: camera.position.z, desiredY: desiredCameraY, desiredZ: desiredCameraZ, baseDistance }),
+        help: () => console.log('EarthCamera API: get(), setPosition(x,y,z,instant=false), setDesired(y,z), setBaseDistance(z)')
+      };
+
       // Load model
       function tryLoad() {
         loader.load(
@@ -271,8 +311,8 @@
                   // Recompute radius after scaling and position camera to frame model
                   const radius = radiusModel * (earth.scale.x || 1);
                   const distance = Math.abs(radius / Math.sin(fov / 2)) * 1.05; // small padding
-                  // Move the camera closer so the earth fills more of the view (half the distance)
-                  camera.position.set(0, 0, distance * 0.5);
+                  // Move the camera to frame the model. use a slightly larger fraction so the camera sits a bit farther back
+                  camera.position.set(0, 0, distance * 0.75);
                   camera.lookAt(0, 0, 0);
 
                   // Center model vertically (no downward offset)
