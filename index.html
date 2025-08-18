@@ -13,10 +13,10 @@
 </head>
 <body class="bg-neutral-50 text-neutral-900">
   <!-- Rotating Earth Background -->
-  <div id="earth-bg" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;overflow:hidden;"></div>
+  <div id="earth-bg"></div>
 
   <!-- Header -->
-  <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between pop-target" style="position:relative;z-index:1;">
+  <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between pop-target site-foreground">
   <a href="./" class="flex items-center gap-2 font-semibold">MUNify</a>
     <nav class="text-sm hidden sm:flex gap-6">
   <a href="info/" class="hover:underline">Info & Permissions</a>
@@ -51,7 +51,7 @@
     }
     </style>
   <!-- Main -->
-  <main class="max-w-5xl mx-auto px-4 pop-target" style="position:relative;z-index:1;">
+  <main class="max-w-5xl mx-auto px-4 pop-target site-foreground">
     <section class="grid md:grid-cols-2 gap-8 items-center">
   <div class="space-y-4">
         <h1 class="text-3xl md:text-5xl font-bold leading-tight frosted-text">
@@ -64,14 +64,14 @@
 
         <div id="g_id_signin"></div>
 
-        <div style="width: 50px; height: 120px;"></div>
+  <div class="spacer-50x120" aria-hidden="true"></div>
 
     </div>
       <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200">
   <h2 class="font-semibold mb-2 frosted-text">Quick Setup</h2>
         <ol class="list-decimal ml-5 space-y-2 text-sm">
-          <li>Click <strong><a href="https://developers.google.com/identity/gsi/web" target="_blank" class="underline">Sign in with Google</a></strong>.</li>
-          <li>Paste your <strong><a href="https://developers.google.com/apps-script/guides/web" target="_blank" class="underline">Apps Script Web App URL</a></strong> and <strong><a href="https://support.google.com/docs/answer/3540681" target="_blank" class="underline">Sheet ID</a></strong> in <em>Settings</em>.</li>
+          <li>Click <strong><a href="https://developers.google.com/identity/gsi/web" target="_blank" rel="noopener" class="underline">Sign in with Google</a></strong>.</li>
+          <li>Paste your <strong><a href="https://developers.google.com/apps-script/guides/web" target="_blank" rel="noopener" class="underline">Apps Script Web App URL</a></strong> and <strong><a href="https://support.google.com/docs/answer/3540681" target="_blank" rel="noopener" class="underline">Sheet ID</a></strong> in <em>Settings</em>.</li>
           <li>Go to <strong><a href="design/" class="underline">Form Designer</a></strong> and create your form.</li>
           <li>Share <code>form/#YOUR_HASH</code> with delegates.</li>
         </ol>
@@ -103,7 +103,7 @@
   </main>
 
   <!-- Footer -->
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200 pop-target" style="position:relative;z-index:1;">
+  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200 pop-target site-foreground">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
       <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
