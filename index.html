@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MUNify</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <!-- Tailwind (use compiled local CSS in production). CDN added temporarily to restore layout immediately. -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind: use the compiled local CSS in production. CDN previously used for quick preview removed. -->
   <link rel="stylesheet" href="assets/css/style.css">
   <!-- Google Identity -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -73,6 +72,14 @@
         </p>
 
         <div id="g_id_signin"></div>
+        <!-- Signed-in card (shown when user is already signed in) -->
+        <div id="signedInCard" class="hidden mt-4 p-3 rounded-lg border bg-neutral-50 text-sm">
+          <div id="signedInEmail" class="font-medium"></div>
+          <div class="mt-2 flex gap-2">
+            <button id="btnSignOutLocal" class="px-3 py-1 rounded border">Sign out</button>
+            <a href="design/" class="px-3 py-1 rounded border">Open Designer</a>
+          </div>
+        </div>
   <!-- sign-in handled by Google Sign-In button above; setup happens automatically after sign-in -->
 
   <div class="spacer-50x120" aria-hidden="true"></div>
@@ -498,6 +505,33 @@
       document.getElementById("g_id_signin"),
       { theme: "outline", size: "large" }
     );
+
+    // If already signed in, hide the GSI button and show a small signed-in card instead
+    const signedIn = localStorage.getItem('munifyLoggedIn') === 'true';
+    const gBtn = document.getElementById('g_id_signin');
+    const card = document.getElementById('signedInCard');
+    const emailEl = document.getElementById('signedInEmail');
+    if (signedIn) {
+      if (gBtn) gBtn.style.display = 'none';
+      // show basic signed-in info if available
+      const user = localStorage.getItem('munifyUser');
+      let email = '';
+      try { email = user ? JSON.parse(user).email || '' : ''; } catch(e) { email = ''; }
+      if (emailEl) emailEl.textContent = email ? `Signed in as ${email}` : 'Signed in';
+      if (card) card.classList.remove('hidden');
+    }
+
+    // local sign-out button
+    const btnSignOutLocal = document.getElementById('btnSignOutLocal');
+    if (btnSignOutLocal) btnSignOutLocal.addEventListener('click', () => {
+      localStorage.removeItem('munifyLoggedIn');
+      localStorage.removeItem('munifyUser');
+      // show the GSI button again
+      if (gBtn) gBtn.style.display = '';
+      if (card) card.classList.add('hidden');
+      // reload to reset UI state
+      window.location.reload();
+    });
   };
 
   // Settings
