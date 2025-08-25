@@ -175,7 +175,7 @@
       // Save button
       document.getElementById("btnSaveForm").addEventListener("click", () => {
         autoSave();
-        alert("Form saved locally. Sync to Google Sheet coming soon.");
+  window.MUNui && window.MUNui.toast ? window.MUNui.toast('Form saved locally', { type: 'success' }) : alert('Form saved locally');
       });
 
       // Reset template button
@@ -185,6 +185,7 @@
         editablePreview.innerHTML = baseTemplate;
         autoSave();
         status.textContent = 'Template reset to default.';
+        window.MUNui && window.MUNui.toast ? window.MUNui.toast('Template reset to default', { type: 'success' }) : null;
       });
 
       // Sign out button
@@ -214,7 +215,7 @@
             console.log('Intercepted form submission (local):', obj);
             localStorage.setItem('munifyLastSubmission', JSON.stringify(obj));
             status.textContent = 'Form submitted (saved locally).';
-            alert('Form submission intercepted and saved locally.');
+            window.MUNui && window.MUNui.toast ? window.MUNui.toast('Form submission saved locally', { type: 'success' }) : alert('Form submission intercepted and saved locally.');
           }
         } catch (err) {
           console.error(err);

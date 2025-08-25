@@ -132,12 +132,21 @@
       try {
         const cfg = window.MUNauth.getConfig();
         const appsScriptUrl = localStorage.getItem('munifyAppsScriptUrl') || cfg.appsScriptUrl || 'APPS_SCRIPT_URL_PLACEHOLDER';
-        if (!appsScriptUrl || appsScriptUrl === 'APPS_SCRIPT_URL_PLACEHOLDER') { alert('Server not configured. Please set munifyAppsScriptUrl in Settings.'); return; }
+        if (!appsScriptUrl || appsScriptUrl === 'APPS_SCRIPT_URL_PLACEHOLDER') {
+          const m = 'Server not configured. Please set munifyAppsScriptUrl in Settings.';
+          window.MUNui && window.MUNui.toast ? window.MUNui.toast(m, { type: 'error' }) : alert(m);
+          return;
+        }
         const key = cfg.key || (rawHash ? rawHash.split('-')[0] : null);
-        if (!key) { alert('No key configured.'); return; }
+        if (!key) {
+          const m = 'No key configured.';
+          window.MUNui && window.MUNui.toast ? window.MUNui.toast(m, { type: 'error' }) : alert(m);
+          return;
+        }
         await window.MUNauth.appendViaServer(appsScriptUrl, key, row);
         msg.textContent = 'Submission saved. Thank you!';
-      } catch (err) { console.error(err); alert('Could not save submission: ' + (err.message||err)); }
+        window.MUNui && window.MUNui.toast ? window.MUNui.toast('Submission sent', { type: 'success' }) : alert('Submission sent.');
+      } catch (err) { console.error(err); const m = 'Could not save submission: ' + (err.message||err); window.MUNui && window.MUNui.toast ? window.MUNui.toast(m, { type: 'error' }) : alert(m); }
     });
 
     function cryptoRandom(len){ const bytes=new Uint8Array(len); crypto.getRandomValues(bytes); return Array.from(bytes).map(b=>('0'+b.toString(16)).slice(-2)).join(''); }

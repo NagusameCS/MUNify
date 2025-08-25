@@ -13,6 +13,7 @@
   <!-- Google Identity -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="assets/js/auth.js"></script>
+  <script src="assets/js/ui.js"></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900">
   <!-- Rotating Earth Background -->
@@ -88,8 +89,10 @@
           <li>Go to <strong><a href="design/" class="underline">Form Designer</a></strong> and create your form.</li>
           <li>Share <code>form/#YOUR_HASH</code> with delegates.</li>
         </ol>
-        <div class="mt-4 flex gap-2">
+        <div class="mt-4 flex gap-2 items-center">
           <button id="btnConnect" class="px-3 py-2 rounded-2xl bg-blue-600 text-white">Quick Setup</button>
+          <span id="signIndicator" class="text-sm text-green-600 hidden">Signed in</span>
+          <button id="btnSignOutHome" class="text-sm underline hidden">Sign out</button>
           <a href="design/" class="px-3 py-2 rounded-2xl border">Open Designer</a>
           <a href="info/" class="px-3 py-2 rounded-2xl border">Permissions & Help</a>
         </div>
@@ -164,7 +167,10 @@
           <button id="modalProvisionBtn" class="px-3 py-2 border rounded">Provision user API (beta)</button>
         </div>
 
-        <div id="modalStatus" class="text-sm text-neutral-600 mt-2"></div>
+        <div id="modalBusy" class="hidden mt-2 flex items-center gap-3">
+          <div id="modalSpinner" class="w-5 h-5 border-2 border-t-transparent border-neutral-700 rounded-full animate-spin" aria-hidden="true"></div>
+          <div id="modalStatus" class="text-sm text-neutral-600">Ready</div>
+        </div>
       </div>
     </div>
   </div>
@@ -518,69 +524,33 @@
   const CLIENT_ID = "73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com";
 
   function handleCredentialResponse(response) {
-    const data = JSON.parse(atob(response.credential.split('.')[1] || '{}'));
-    localStorage.setItem("munifyUser", JSON.stringify(data));
-
-    // Store id token in munify_config so MUNauth can use it
+    // Persist minimal user info and id token, but do NOT auto-run setup or redirect.
+    try {
+      const data = JSON.parse(atob(response.credential.split('.')[1] || '{}'));
+      localStorage.setItem("munifyUser", JSON.stringify(data));
+    } catch (e) { /* ignore */ }
     try {
       const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
       cfg.idToken = response.credential;
       localStorage.setItem('munify_config', JSON.stringify(cfg));
     } catch (e) { console.warn('Could not persist id token to munify_config', e); }
 
-    // Attempt automatic setup: prefer central Apps Script server if configured;
-    // otherwise attempt experimental per-user provisioning (will prompt for consent).
-    (async function autoSetup(idToken, userData){
-      const appsScriptUrl = localStorage.getItem('munifyAppsScriptUrl');
-      try {
-        if (appsScriptUrl && window.MUNauth && window.MUNauth.registerWithServer) {
-          const title = 'MUNify - ' + (userData && (userData.email || userData.name)) || 'MUNify';
-          console.log('Auto-setup: registering with server at', appsScriptUrl);
-          await window.MUNauth.registerWithServer(appsScriptUrl, title);
-          console.log('Auto-setup: registerWithServer succeeded');
-        } else if (window.MUNauth && window.MUNauth.provisionUserApi) {
-          console.log('Auto-setup: no central Apps Script URL found, attempting per-user provisioning (may prompt for consent)');
-          const res = await window.MUNauth.provisionUserApi('MUNify - User API');
-          console.log('Auto-setup: provisionUserApi result', res);
-          if (res && res.spreadsheetId) {
-            const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
-            cfg.sheetId = res.spreadsheetId;
-            localStorage.setItem('munify_config', JSON.stringify(cfg));
-          }
-        } else {
-          console.log('Auto-setup: no setup actions available (missing MUNauth).');
-        }
-      } catch (err) {
-        // don't block user — log and continue to designer
-        console.error('Auto-setup failed:', err);
-      } finally {
-        // Go to designer regardless — user can continue and fix settings if needed
-        window.location.href = 'design/';
-      }
-    })(response.credential, data);
+    // Update UI to reflect signed-in state. Do not auto-run setup or navigate away.
+    try { window._munifyUpdateSignIn(true); } catch(e){}
+    try { document.getElementById('g_id_signin').style.display = 'none'; } catch(e){}
+    window.MUNui && window.MUNui.toast && window.MUNui.toast('Signed in — click Quick Setup to continue', { type: 'success' });
   }
-
-  window.onload = function () {
-    google.accounts.id.initialize({
-      client_id: CLIENT_ID,
-      callback: handleCredentialResponse
-    });
-    google.accounts.id.renderButton(
-      document.getElementById("g_id_signin"),
-      { theme: "outline", size: "large" }
-    );
-  };
 
   // Settings
   document.getElementById("btnSave").addEventListener("click", () => {
-    localStorage.setItem("munifyScriptUrl", document.getElementById("scriptUrl").value);
-    localStorage.setItem("munifySheetId", document.getElementById("sheetId").value);
-    alert("Settings saved locally.");
+  localStorage.setItem("munifyScriptUrl", document.getElementById("scriptUrl").value);
+  localStorage.setItem("munifySheetId", document.getElementById("sheetId").value);
+  window.MUNui.toast('Settings saved locally', { type: 'success' });
   });
 
   document.getElementById("btnClear").addEventListener("click", () => {
-    localStorage.clear();
-    alert("Local settings cleared.");
+  localStorage.clear();
+  window.MUNui.toast('Local settings cleared', { type: 'success' });
   });
 </script>
   <script>
@@ -622,10 +592,11 @@
         }
       });
 
-      if (btnExport) btnExport.addEventListener('click', () => {
+          if (btnExport) btnExport.addEventListener('click', () => {
         try {
           window.MUNauth.exportKeyFile();
-        } catch (e) { console.error(e); alert('No key to export.'); }
+          window.MUNui.toast('Key downloaded', { type: 'success' });
+        } catch (e) { console.error(e); window.MUNui.toast('No key to export', { type: 'error' }); }
       });
     });
   </script>
@@ -646,7 +617,7 @@
       if (btnSave) btnSave.addEventListener('click', () => {
         if (scriptInput && scriptInput.value.trim()) localStorage.setItem('munifyAppsScriptUrl', scriptInput.value.trim());
         if (sheetInput && sheetInput.value.trim()) { cfg.sheetId = sheetInput.value.trim(); localStorage.setItem('munify_config', JSON.stringify(cfg)); }
-        alert('Settings saved locally.');
+        window.MUNui.toast('Settings saved locally', { type: 'success' });
       });
 
       // invite creation (use status element + loading state)
@@ -721,7 +692,7 @@
         localStorage.removeItem('munifyLastSubmission');
         if (scriptInput) scriptInput.value = '';
         if (sheetInput) sheetInput.value = '';
-        alert('Local settings cleared.');
+        window.MUNui && window.MUNui.toast ? window.MUNui.toast('Local settings cleared', { type: 'success' }) : null;
       });
     });
   </script>
@@ -801,33 +772,112 @@
 </script>
 
 <script>
-  // Onboarding modal control
+  // Onboarding modal control — show only when user clicks Quick Setup
   document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('onboardModal');
-    const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
-    const hasKey = cfg && cfg.key;
+    const btnConnect = document.getElementById('btnConnect');
+    const signIndicator = document.getElementById('signIndicator');
     const siteDefault = document.querySelector('meta[name="munify-apps-script-url"]')?.content || '';
 
-    async function showModal() {
+  function showModal() {
       modal.classList.remove('hidden');
       modal.style.display = 'flex';
-      // Prefill script URL if site default exists
       if (siteDefault) document.getElementById('modalScriptUrl').value = siteDefault;
+      // Update sign indicator inside modal if already signed in
+      const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
+      if (cfg && cfg.idToken) document.getElementById('modalSignedTag').classList.remove('hidden');
     }
 
     function hideModal() { modal.classList.add('hidden'); modal.style.display = 'none'; }
 
-    // If user already configured key, don't force modal
-    if (hasKey) return;
+    // Helper to show/hide the modal busy spinner and disable modal actions
+    function setModalBusy(show, message) {
+      const mb = document.getElementById('modalBusy');
+      const ms = document.getElementById('modalStatus');
+      const buttons = [document.getElementById('modalVerifyUrlBtn'), document.getElementById('modalQuickSetupBtn'), document.getElementById('modalProvisionBtn'), document.getElementById('modalSignInBtn')];
+      if (show) {
+        if (mb) mb.classList.remove('hidden');
+        if (ms && message) ms.textContent = message;
+        buttons.forEach(b => { if (b) b.disabled = true; });
+      } else {
+        if (mb) mb.classList.add('hidden');
+        if (ms && message === undefined) ms.textContent = 'Ready';
+        buttons.forEach(b => { if (b) b.disabled = false; });
+      }
+    }
 
-    showModal();
+    // Wire main Quick Setup button to open the modal
+    if (btnConnect) btnConnect.addEventListener('click', () => { showModal(); window.MUNui && window.MUNui.toast && window.MUNui.toast('Opening setup', { type: 'info', duration: 1200 }); });
 
-    // Wire modal buttons
+    // Sign out button on home (clear id token and update UI)
+    const btnSignOutHome = document.getElementById('btnSignOutHome');
+    if (btnSignOutHome) btnSignOutHome.addEventListener('click', ()=>{
+      const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); delete cfg.idToken; delete cfg.key; localStorage.setItem('munify_config', JSON.stringify(cfg));
+      // update sign indicator
+      window._munifyUpdateSignIn(false);
+      window.MUNui && window.MUNui.toast && window.MUNui.toast('Signed out', { type: 'info' });
+    });
+
+    // Update global sign-in indicator from saved state and render sign-in button if needed
+    const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
+    const loggedIn = !!cfg.idToken;
+    const signOutBtn = document.getElementById('btnSignOutHome');
+    const signinContainer = document.getElementById('g_id_signin');
+    function renderGSI() {
+      try {
+        if (window.google && window.google.accounts && window.google.accounts.id && signinContainer) {
+          // initialize GSI with a callback that persists idToken and updates UI
+          window.google.accounts.id.initialize({
+            client_id: '73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com',
+            callback: (resp) => {
+              try {
+                const cfg2 = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg2.idToken = resp.credential; localStorage.setItem('munify_config', JSON.stringify(cfg2));
+                window._munifyUpdateSignIn(true);
+                document.getElementById('modalSignedTag') && document.getElementById('modalSignedTag').classList.remove('hidden');
+                window.MUNui && window.MUNui.toast && window.MUNui.toast('Signed in', { type: 'success' });
+                // hide the GSI button after sign-in
+                if (signinContainer) signinContainer.style.display = 'none';
+              } catch (e) { console.warn('GSI callback failed', e); }
+            }
+          });
+          // render a standard button if not already signed in
+          if (!loggedIn) {
+            signinContainer.style.display = '';
+            try { window.google.accounts.id.renderButton(signinContainer, { theme: 'outline', size: 'large', text: 'signin_with' }); } catch(e) {}
+          } else {
+            // hide the sign-in container when already signed in
+            if (signinContainer) signinContainer.style.display = 'none';
+          }
+        }
+      } catch (e) { console.warn('renderGSI error', e); }
+    }
+
+    // Expose a small helper to update sign indicator when sign-in state changes
+    window._munifyUpdateSignIn = function(signedIn){
+      if (signedIn) {
+        signIndicator.classList.remove('hidden');
+        if (signOutBtn) signOutBtn.classList.remove('hidden');
+        if (signinContainer) signinContainer.style.display = 'none';
+      } else {
+        signIndicator.classList.add('hidden');
+        if (signOutBtn) signOutBtn.classList.add('hidden');
+        if (signinContainer) signinContainer.style.display = '';
+      }
+    };
+
+    // initial render
+    window._munifyUpdateSignIn(loggedIn);
+    renderGSI();
+
+    // Wire modal buttons (sign in, verify, quick setup, provision)
     document.getElementById('modalSignInBtn').addEventListener('click', async () => {
       try {
         await window.MUNauth.requestAccess();
         document.getElementById('modalSignedTag').classList.remove('hidden');
         document.getElementById('modalSignedTag').textContent = 'Signed in ✓';
+        // persist a lightweight flag for UI
+        const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg.idToken = cfg.idToken || window.MUNauth.getConfig().idToken; localStorage.setItem('munify_config', JSON.stringify(cfg));
+        window._munifyUpdateSignIn(true);
       } catch (e) {
         document.getElementById('modalStatus').textContent = 'Sign-in failed: ' + (e.message||e);
       }
@@ -836,21 +886,26 @@
     document.getElementById('modalVerifyUrlBtn').addEventListener('click', async () => {
       const val = document.getElementById('modalScriptUrl').value.trim();
       if (!val) return document.getElementById('modalStatus').textContent = 'Enter the Apps Script Web App URL to continue.';
-      // Save to localStorage immediately for autoRegister to pick up
-      localStorage.setItem('munifyAppsScriptUrl', val);
-      document.getElementById('modalStatus').textContent = 'Verifying URL...';
-      const ok = await (window.MUNauth && window.MUNauth.checkAppsScriptHealth ? window.MUNauth.checkAppsScriptHealth(val) : (async ()=>{ try { const u=new URL(val); const r=await fetch(u.toString()+'?action=ping'); return r.ok; } catch(e){return false;} })());
-      if (ok) {
-        document.getElementById('modalStatus').textContent = 'Apps Script URL verified.';
-      } else {
-        document.getElementById('modalStatus').textContent = 'Could not verify URL. Ensure the script is deployed and accessible.';
-      }
+      try {
+        setModalBusy(true, 'Verifying Apps Script URL...');
+        localStorage.setItem('munifyAppsScriptUrl', val);
+        const ok = await (window.MUNauth && window.MUNauth.checkAppsScriptHealth ? window.MUNauth.checkAppsScriptHealth(val) : (async ()=>{ try { const u=new URL(val); const r=await fetch(u.toString()+'?action=ping'); return r.ok; } catch(e){return false;} })());
+        if (ok) {
+          document.getElementById('modalStatus').textContent = 'Apps Script URL verified.';
+          window.MUNui && window.MUNui.toast && window.MUNui.toast('Apps Script verified', { type: 'success' });
+        } else {
+          document.getElementById('modalStatus').textContent = 'Could not verify URL. Ensure the script is deployed and accessible.';
+          window.MUNui && window.MUNui.toast && window.MUNui.toast('Could not verify Apps Script URL', { type: 'error' });
+        }
+      } catch (e) {
+        console.error(e);
+        document.getElementById('modalStatus').textContent = 'Verification failed: ' + (e.message || String(e));
+      } finally { setModalBusy(false); }
     });
 
     document.getElementById('modalQuickSetupBtn').addEventListener('click', async () => {
-      document.getElementById('modalStatus').textContent = 'Running quick setup — please wait...';
       try {
-        // ensure we have an id token
+        setModalBusy(true, 'Running quick setup — please wait...');
         await window.MUNauth.requestAccess();
         const url = localStorage.getItem('munifyAppsScriptUrl') || document.getElementById('modalScriptUrl').value.trim() || '';
         if (!url) return document.getElementById('modalStatus').textContent = 'No Apps Script URL configured.';
@@ -858,6 +913,7 @@
         const res = await window.MUNauth.registerWithServer(url, title);
         if (res && res.key) {
           document.getElementById('modalStatus').textContent = 'Setup complete — redirecting to designer...';
+          window.MUNui && window.MUNui.toast && window.MUNui.toast('Setup complete', { type: 'success' });
           setTimeout(()=>{ hideModal(); window.location.href = 'design/'; }, 900);
         } else {
           document.getElementById('modalStatus').textContent = 'Setup finished but server returned incomplete data.';
@@ -865,18 +921,19 @@
       } catch (err) {
         console.error(err);
         document.getElementById('modalStatus').textContent = 'Quick setup failed: ' + (err.message || String(err));
-      }
+        window.MUNui && window.MUNui.toast && window.MUNui.toast('Quick setup failed', { type: 'error' });
+      } finally { setModalBusy(false); }
     });
 
     document.getElementById('modalProvisionBtn').addEventListener('click', async () => {
-      document.getElementById('modalStatus').textContent = 'Provisioning user API (consent screens may appear)...';
       try {
+        setModalBusy(true, 'Provisioning user API (consent screens may appear)...');
         await window.MUNauth.requestAccess();
         const res = await window.MUNauth.provisionUserApi('MUNify - User API');
         if (res && res.spreadsheetId) {
-          // store sheetId locally
           const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg.sheetId = res.spreadsheetId; localStorage.setItem('munify_config', JSON.stringify(cfg));
           document.getElementById('modalStatus').textContent = 'Provisioning complete — redirecting to designer...';
+          window.MUNui && window.MUNui.toast && window.MUNui.toast('Provisioning complete', { type: 'success' });
           setTimeout(()=>{ hideModal(); window.location.href = 'design/'; }, 900);
         } else {
           document.getElementById('modalStatus').textContent = 'Provisioning finished but returned no IDs. Check console.';
@@ -884,7 +941,8 @@
       } catch (err) {
         console.error(err);
         document.getElementById('modalStatus').textContent = 'Provisioning failed: ' + (err.message || String(err));
-      }
+        window.MUNui && window.MUNui.toast && window.MUNui.toast('Provisioning failed', { type: 'error' });
+      } finally { setModalBusy(false); }
     });
   });
 </script>
