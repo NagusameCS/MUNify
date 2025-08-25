@@ -114,15 +114,16 @@
       row.push(cryptoRandom(8)); // Delegate ID
       for (let i=1;i<=5;i++) row.push(vals.get('sel'+i)||'');
 
-      // append to Delegates sheet via Sheets API
-      const conf = window.MUNauth.getConfig();
-      if (!conf || !conf.sheetId) { alert('No sheet configured. Please sign in and set up.'); return; }
+      // append via Apps Script server endpoint
       try {
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${conf.sheetId}/values/Delegates!A2:append?valueInputOption=RAW`;
-        const res = await fetch(url, { method:'POST', headers: { Authorization: 'Bearer ' + window.MUNauth.getConfig().idToken, 'Content-Type':'application/json' }, body: JSON.stringify({ values: [row] }) });
-        if (!res.ok) { const t = await res.text(); throw new Error(t); }
+        const cfg = window.MUNauth.getConfig();
+        const appsScriptUrl = localStorage.getItem('munifyAppsScriptUrl') || cfg.appsScriptUrl || 'APPS_SCRIPT_URL_PLACEHOLDER';
+        if (!appsScriptUrl || appsScriptUrl === 'APPS_SCRIPT_URL_PLACEHOLDER') { alert('Server not configured. Please set munifyAppsScriptUrl in Settings.'); return; }
+        const key = cfg.key || (rawHash ? rawHash.split('-')[0] : null);
+        if (!key) { alert('No key configured.'); return; }
+        await window.MUNauth.appendViaServer(appsScriptUrl, key, row);
         msg.textContent = 'Submission saved. Thank you!';
-      } catch (err) { console.error(err); alert('Could not save submission: ' + err.message); }
+      } catch (err) { console.error(err); alert('Could not save submission: ' + (err.message||err)); }
     });
 
     function cryptoRandom(len){ const bytes=new Uint8Array(len); crypto.getRandomValues(bytes); return Array.from(bytes).map(b=>('0'+b.toString(16)).slice(-2)).join(''); }

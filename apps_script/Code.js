@@ -71,25 +71,82 @@ function jsonResponse(obj, code) {
 }
 
 // verify id_token via Google tokeninfo endpoint to get email
+// stricter ID token verification
+const CLIENT_ID = '73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com';
 function verifyIdToken(idToken) {
   if (!idToken) throw new Error('missing_id_token');
   const url = 'https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken);
   const resp = UrlFetchApp.fetch(url);
   if (resp.getResponseCode() !== 200) throw new Error('invalid_id_token');
   const data = JSON.parse(resp.getContentText());
+  // required checks
+  if (!data.email) throw new Error('no_email');
+  if (!data.email_verified || data.email_verified.toString() !== 'true') throw new Error('email_not_verified');
+  if (data.aud !== CLIENT_ID) throw new Error('invalid_aud');
+  if (['accounts.google.com','https://accounts.google.com'].indexOf(data.iss) === -1) throw new Error('invalid_iss');
+  if (parseInt(data.exp,10)*1000 < Date.now()) throw new Error('token_expired');
   return data.email;
 }
 
 function handleRegister(payload) {
-  const { id_token, sheetId, key } = payload;
-  if (!id_token || !sheetId || !key) return jsonResponse({ error: 'missing_fields' }, 400);
+  // Accept payload: { id_token, title? }
+  const { id_token, title } = payload;
+  if (!id_token) return jsonResponse({ error: 'missing_fields' }, 400);
   const email = verifyIdToken(id_token);
-  const mapping = getMapping(key);
-  if (mapping) return jsonResponse({ error: 'key_exists' }, 409);
+
+  // create spreadsheet server-side to avoid client-side tokens
+  const sheetTitle = title || ('MUNify - ' + (email || 'form'));
+  const ss = SpreadsheetApp.create(sheetTitle);
+
+  // create Forms and Delegates and headers
+  initSheetStructure(ss);
+
+  // generate short key
+  const key = Utilities.getUuid().slice(0,8).replace(/-/g,'');
   const secret = Utilities.getUuid();
-  const obj = { sheetId: sheetId, owner: email, whitelist: [email], secret: secret, created: Date.now() };
+  const obj = { sheetId: ss.getId(), owner: email, whitelist: [email], secret: secret, created: Date.now() };
   setMapping(key, obj);
-  return jsonResponse({ ok: true, key: key, sheetId: sheetId, secret: secret });
+  // log registration
+  safeLog('register', key, email, 'ok', 'created');
+  return jsonResponse({ ok: true, key: key, sheetId: ss.getId(), secret: secret });
+}
+
+function initSheetStructure(ss) {
+  // ss may be a Spreadsheet object or id
+  var spreadsheet = ss;
+  if (typeof ss === 'string') spreadsheet = SpreadsheetApp.openById(ss);
+  try {
+    // remove default sheet if empty
+    var defaultSheet = spreadsheet.getSheets()[0];
+    if (defaultSheet.getMaxRows() <= 100 && defaultSheet.getName() === 'Sheet1') {
+      spreadsheet.deleteSheet(defaultSheet);
+    }
+  } catch(e) { /* ignore */ }
+  var forms = spreadsheet.getSheetByName('Forms') || spreadsheet.insertSheet('Forms');
+  var delegates = spreadsheet.getSheetByName('Delegates') || spreadsheet.insertSheet('Delegates');
+  var formsHeaders = ['School Rules of Procedure (Link)','Committee abbreviation','Committee Full Name','Committee General Description','Committee Background Guide (Link)','Whitelist','Secret'];
+  var delegatesHeaders = ['Delegate Name','Delegate Email','Delegate Year','Delegate ID','Delegate Selection 1','Delegate Selection 2','Delegate Selection 3','Delegate Selection 4','Delegate Selection 5'];
+  forms.getRange(1,1,1,formsHeaders.length).setValues([formsHeaders]);
+  delegates.getRange(1,1,1,delegatesHeaders.length).setValues([delegatesHeaders]);
+}
+
+// basic logging helper: append rows to a hidden Log sheet
+function safeLog(action, key, email, status, msg) {
+  try {
+    var meta = getProperties();
+    var logId = meta.getProperty('munify_log_sheet_id');
+    var ss;
+    if (logId) {
+      ss = SpreadsheetApp.openById(logId);
+    } else {
+      // create a new log spreadsheet for the script owner
+      var nss = SpreadsheetApp.create('MUNify-Logs');
+      meta.setProperty('munify_log_sheet_id', nss.getId());
+      ss = nss;
+    }
+    var sheet = ss.getSheetByName('Log') || ss.insertSheet('Log');
+    sheet.appendRow([new Date().toISOString(), action, key, email, status, msg]);
+  } catch(e) { /* don't throw from logger */ }
 }
 
 function handleAppend(payload) {
@@ -100,13 +157,28 @@ function handleAppend(payload) {
   if (!mapping) return jsonResponse({ error: 'not_found' }, 404);
   // check whitelist
   if (mapping.whitelist && mapping.whitelist.indexOf(email) === -1) return jsonResponse({ error: 'not_whitelisted' }, 403);
+
+  // simple rate limit: allow up to 5 appends per 60s per key+email
+  try {
+    const pr = getProperties();
+    const counterKey = 'rate_' + key + '_' + email;
+    const data = pr.getProperty(counterKey);
+    let obj = data ? JSON.parse(data) : { count:0, windowStart: Date.now() };
+    if (Date.now() - obj.windowStart > 60*1000) { obj.count = 0; obj.windowStart = Date.now(); }
+    if (obj.count >= 5) { safeLog('append', key, email, 'rate_limited', 'too_many_requests'); return jsonResponse({ error: 'rate_limited' }, 429); }
+    obj.count += 1;
+    pr.setProperty(counterKey, JSON.stringify(obj));
+  } catch(e) { /* non-fatal */ }
+
   // append row to Delegates sheet
   try {
     const ss = SpreadsheetApp.openById(mapping.sheetId);
     const sheet = ss.getSheetByName('Delegates') || ss.insertSheet('Delegates');
     sheet.appendRow(values);
+    safeLog('append', key, email, 'ok', 'appended');
     return jsonResponse({ ok: true });
   } catch (err) {
+    safeLog('append', key, email, 'error', err.message);
     return jsonResponse({ error: 'sheet_error', detail: err.message }, 500);
   }
 }
