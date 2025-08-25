@@ -53,8 +53,22 @@
     }
 
     document.getElementById('btnSignIn').addEventListener('click', async () => {
-      try { await window.MUNauth.requestAccess(); alert('Signed in. You can now submit.'); } catch(e){ alert('Could not sign in'); }
+      try { await window.MUNauth.requestAccess(); msg.textContent = 'Signed in. You can now submit.'; } catch(e){ msg.textContent = 'Could not sign in: ' + (e.message||e); }
     });
+
+    // Attempt automatic registration/provisioning if an id token is present
+    (async function(){
+      if (window.MUNauth && typeof window.MUNauth.autoRegisterIfNeeded === 'function') {
+        try {
+          const res = await window.MUNauth.autoRegisterIfNeeded();
+          if (res && (res.status === 'registered' || res.status === 'provisioned')) {
+            msg.textContent = 'Auto-setup complete. You can submit.';
+            // reload config-driven UI (like loadOptions)
+            try { await loadOptions(); } catch(e) { console.warn('loadOptions after autoRegister failed', e); }
+          }
+        } catch (e) { console.warn('autoRegisterIfNeeded error', e); }
+      }
+    })();
 
     // Build 5 selection dropdowns (non-repeating enforced client-side)
     const selectionsEl = document.getElementById('selections');

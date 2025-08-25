@@ -11,12 +11,26 @@ Deployment
 4. Deploy -> New deployment -> Select type: Web app. Set access to "Anyone" or "Anyone with Google account" as required.
 5. Save the deployment URL. Use that URL from the static site to call endpoints.
 
+Site-level automatic setup (optional)
+-----------------------------------
+If you want GitHub Pages users to be auto-configured without any manual per-user settings, you can provide a site-level default Apps Script URL. Add this meta tag to your site's `index.html` (it is included but empty by default):
+
+```html
+<meta name="munify-apps-script-url" content="https://script.google.com/macros/s/AK.../exec" />
+```
+
+When present, the static site will use that URL as the default target for automatic registration. The client also falls back to `localStorage.getItem('munifyAppsScriptUrl')` if present.
+
 Endpoints
 - GET    /?action=get&key=KEY
 - POST   /?action=register  { key, sheetId, id_token }
 - POST   /?action=append    { key, id_token, values: [...] }
 - POST   /?action=invite    { key, id_token } -> returns inviteToken
 - POST   /?action=redeem    { token, id_token }
+
+Health check (recommended)
+--------------------------
+The client will perform a lightweight health-check before attempting automatic registration. Apps Script should accept a GET with `?action=ping` (no authentication) and return HTTP 200. The reference `Code.js` already responds to unknown actions; ensure your deployed script returns 200 for `action=ping` so automatic setup doesn't skip the server.
 
 Notes
 - This is a simple reference implementation. For production, consider adding stronger auth, rate-limits, and logging.
@@ -25,6 +39,12 @@ CORS / Allowed origins
 You can limit which origins may call the web app by setting a script property named `munify_allowed_origins` with a comma-separated list of allowed origins (for example: `https://yourusername.github.io`).
 
 To set the property in Apps Script editor: `PropertiesService.getScriptProperties().setProperty('munify_allowed_origins', 'https://yourusername.github.io')` or set it programmatically in your deployment script.
+
+Recommended deployment checklist for fully-automatic setup
+- Deploy the Apps Script web app and copy the deployment URL.
+- Add the deployment URL to your site's `index.html` meta (`munify-apps-script-url`) or set `munifyAppsScriptUrl` in localStorage (for testing).
+- In the Apps Script project, set the Script Property `munify_allowed_origins` to your GitHub Pages origin.
+- Ensure the web app returns HTTP 200 on `?action=ping` (this enables client health checks to pass).
 
 Per-user provisioning (beta)
 ---------------------------------

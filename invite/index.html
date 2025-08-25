@@ -30,19 +30,26 @@
       const tokenInput = document.getElementById('token');
       if (raw) tokenInput.value = raw;
       document.getElementById('btnSignIn').addEventListener('click', async ()=>{
-        try { await window.MUNauth.requestAccess(); alert('Signed in'); } catch(e){ alert('Sign in failed'); }
+        try { await window.MUNauth.requestAccess(); document.getElementById('status').textContent = 'Signed in'; } catch(e){ document.getElementById('status').textContent = 'Sign in failed: ' + (e.message||e); }
       });
       document.getElementById('btnRedeem').addEventListener('click', async ()=>{
         const token = tokenInput.value.trim();
-        if (!token) return alert('Enter invite token');
+        if (!token) return document.getElementById('status').textContent = 'Enter invite token';
         try {
           await window.MUNauth.requestAccess();
           const appsScriptUrl = localStorage.getItem('munifyAppsScriptUrl');
-          if (!appsScriptUrl) return alert('Server not configured');
+          if (!appsScriptUrl) return document.getElementById('status').textContent = 'Server not configured';
           const res = await window.MUNauth.redeemInvite(appsScriptUrl, token);
           document.getElementById('status').textContent = 'Redeemed! You should now be allowed to submit.';
         } catch (err) { console.error(err); document.getElementById('status').textContent = 'Could not redeem invite: ' + (err.message || err); }
       });
+
+      // Attempt automatic registration/provisioning if possible
+      (async function(){
+        if (window.MUNauth && typeof window.MUNauth.autoRegisterIfNeeded === 'function') {
+          try { await window.MUNauth.autoRegisterIfNeeded(); } catch(e){ console.warn('autoRegisterIfNeeded failed', e); }
+        }
+      })();
     });
   </script>
 </body>

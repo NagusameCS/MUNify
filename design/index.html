@@ -85,15 +85,20 @@
       console.log("JWT ID token:", response.credential);
       // Save login state
   localStorage.setItem("munifyLoggedIn", "true");
-
-  // store token in our auth helper as well (MUNauth reads google.accounts.id after initialize)
+  // store id token in munify_config so the auth helper can use it
+  try { const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg.idToken = response.credential; localStorage.setItem('munify_config', JSON.stringify(cfg)); } catch(e){console.warn('Could not save id token', e);}
 
       // Hide login, show main designer
       document.getElementById("loginContainer").style.display = "none";
       document.querySelector("main").style.display = "block";
 
-      // Initialize the designer
-      initDesigner();
+      // Attempt automatic registration if available, then initialize designer
+      (async function(){
+        if (window.MUNauth && typeof window.MUNauth.autoRegisterIfNeeded === 'function') {
+          try { await window.MUNauth.autoRegisterIfNeeded(); } catch(e){ console.warn('autoRegisterIfNeeded error', e); }
+        }
+        initDesigner();
+      })();
     }
 
     // --- CHECK LOGIN ON PAGE LOAD ---
@@ -101,7 +106,7 @@
     if (loggedIn) {
       document.getElementById("loginContainer").style.display = "none";
       document.querySelector("main").style.display = "block";
-      initDesigner();
+      (async function(){ if (window.MUNauth && typeof window.MUNauth.autoRegisterIfNeeded === 'function') { try { await window.MUNauth.autoRegisterIfNeeded(); } catch(e){ console.warn('autoRegisterIfNeeded error', e); } } initDesigner(); })();
     }
 
     // --- INITIALIZE DESIGNER ---

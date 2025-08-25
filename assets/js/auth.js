@@ -17,6 +17,15 @@
   function save(obj){ localStorage.setItem('munify_config', JSON.stringify(obj)); }
   function load(){ try { return JSON.parse(localStorage.getItem('munify_config')||'{}'); } catch(e){ return {}; } }
 
+  // Read a site-level default Apps Script URL from a meta tag (optional)
+  function siteAppsScriptUrl() {
+    try {
+      const m = document.querySelector('meta[name="munify-apps-script-url"]');
+      if (m && m.content && m.content.trim()) return m.content.trim();
+    } catch(e){}
+    return null;
+  }
+
   // Token client (initialized lazily)
   let tokenClient = null;
   function ensureTokenClient(){
@@ -53,11 +62,105 @@
     return new Promise((resolve, reject)=>{
       if (!window.google || !window.google.accounts || !window.google.accounts.id) return reject(new Error('Google Identity not loaded'));
       window.google.accounts.id.initialize({ client_id: CLIENT_ID, callback: (r)=>{
-        const cfg = load(); cfg.idToken = r.credential; save(cfg);
+        try { const cfg = load(); cfg.idToken = r.credential; save(cfg); } catch(e){ console.warn('Could not save idToken', e); }
         resolve(r.credential);
       }});
       try { window.google.accounts.id.prompt(); } catch(e){ /* ignore */ }
     });
+  }
+
+  // Helper: if user has signed in and no local key exists, attempt automatic registration
+  async function autoRegisterIfNeeded() {
+    const cfg = load();
+    if (cfg && cfg.key) return { status: 'already_configured' };
+    let appsScriptUrl = localStorage.getItem('munifyAppsScriptUrl') || siteAppsScriptUrl();
+    const idToken = cfg && cfg.idToken;
+    if (!idToken) return { status: 'no_id_token' };
+    // ensure id token is valid / refresh if needed
+    try {
+      const refreshed = await ensureValidIdToken();
+      if (refreshed) {
+        const nc = load(); appsScriptUrl = appsScriptUrl || localStorage.getItem('munifyAppsScriptUrl') || siteAppsScriptUrl();
+      }
+    } catch(e) { /* continue; we'll attempt with existing token */ }
+    // Try automatic register with a small retry/backoff in case of transient failures
+    if (appsScriptUrl && registerWithServer) {
+      const user = decodeJwt(idToken) || {};
+      const title = 'MUNify - ' + (user.email || user.name || 'User');
+      let attempt = 0;
+      const maxAttempts = 3;
+      let lastErr = null;
+      while (attempt < maxAttempts) {
+        try {
+          // perform a quick health-check before trying the register endpoint
+          const ok = await checkAppsScriptHealth(appsScriptUrl).catch(e => false);
+          if (!ok && attempt === 0) {
+            // if the site-level URL exists but health fails, fall back to local storage URL if any
+            const localUrl = localStorage.getItem('munifyAppsScriptUrl');
+            if (localUrl && localUrl !== appsScriptUrl) appsScriptUrl = localUrl;
+          }
+          const res = await registerWithServer(appsScriptUrl, title);
+          return { status: 'registered', result: res };
+        } catch (e) {
+          lastErr = e;
+          attempt++;
+          const backoff = 250 * attempt;
+          await new Promise(r => setTimeout(r, backoff));
+        }
+      }
+      return { status: 'error', error: lastErr };
+    }
+
+    // fallback: try per-user provisioning if available
+    if (typeof provisionUserApi === 'function') {
+      try {
+        const user = decodeJwt(idToken) || {};
+        const res = await provisionUserApi('MUNify - User API');
+        if (res && res.spreadsheetId) {
+          const cfg2 = load(); cfg2.sheetId = res.spreadsheetId; save(cfg2);
+          return { status: 'provisioned', result: res };
+        }
+        return { status: 'provisioned_no_id', result: res };
+      } catch (e) { return { status: 'error', error: e }; }
+    }
+
+    return { status: 'no_action' };
+  }
+
+  // Quick health-check for an Apps Script web app: call ?action=pong or a simple GET and expect JSON/200
+  async function checkAppsScriptHealth(appsScriptUrl) {
+    try {
+      const u = new URL(appsScriptUrl);
+      u.searchParams.set('action', 'ping');
+      const res = await fetch(u.toString(), { method: 'GET', mode: 'cors' });
+      if (!res.ok) return false;
+      // if it returns JSON with {ok:true} that's ideal; accept any 2xx
+      return true;
+    } catch (e) { return false; }
+  }
+
+  // Ensure the stored ID token is present and not near expiry. If it's missing or expiring
+  // within `thresholdSec` seconds, attempt to call requestAccess() to get a fresh token.
+  async function ensureValidIdToken(thresholdSec = 300) {
+    try {
+      const cfg = load();
+      let token = cfg && cfg.idToken;
+      if (!token) {
+        const newTok = await requestAccess();
+        return !!newTok;
+      }
+      const decoded = decodeJwt(token);
+      if (!decoded || !decoded.exp) return !!(await requestAccess());
+      const now = Math.floor(Date.now() / 1000);
+      if ((decoded.exp - now) < thresholdSec) {
+        const newTok = await requestAccess();
+        return !!newTok;
+      }
+      return true;
+    } catch (e) {
+      console.warn('ensureValidIdToken failed', e);
+      return false;
+    }
   }
 
   function getIdToken(){ const c=load(); return c.idToken || null; }
@@ -177,5 +280,5 @@
     const j = await res.json(); if (!res.ok || j.error) throw new Error(j.error || 'append_failed'); return j;
   }
 
-  window.MUNauth = { requestAccess, registerWithServer, appendViaServer, exportKeyFile, getUserEmail, getConfig, createInvite, redeemInvite, provisionUserApi };
+  window.MUNauth = { requestAccess, registerWithServer, appendViaServer, exportKeyFile, getUserEmail, getConfig, createInvite, redeemInvite, provisionUserApi, autoRegisterIfNeeded, ensureValidIdToken, checkAppsScriptHealth };
 })();
