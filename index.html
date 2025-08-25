@@ -87,9 +87,11 @@
           <li>Share <code>form/#YOUR_HASH</code> with delegates.</li>
         </ol>
         <div class="mt-4 flex gap-2">
+          <button id="btnConnect" class="px-3 py-2 rounded-2xl bg-blue-600 text-white">Quick Setup</button>
           <a href="design/" class="px-3 py-2 rounded-2xl border">Open Designer</a>
           <a href="info/" class="px-3 py-2 rounded-2xl border">Permissions & Help</a>
         </div>
+        <div id="setupStatus" class="mt-2 text-sm text-neutral-600"></div>
       </div>
     </section>
 
@@ -511,19 +513,37 @@
     document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('btnConnect');
       const btnExport = document.getElementById('btnExportKey');
+      const setupStatus = document.getElementById('setupStatus');
       if (btn) btn.addEventListener('click', async () => {
+        if (setupStatus) setupStatus.textContent = '';
         try {
+          btn.disabled = true;
+          const orig = btn.textContent;
+          btn.textContent = 'Setting up…';
           await window.MUNauth.requestAccess();
           const appsScriptUrl = localStorage.getItem('munifyAppsScriptUrl');
-          if (!appsScriptUrl) return alert('Apps Script server URL not configured. Please set munifyAppsScriptUrl in browser localStorage.');
+          if (!appsScriptUrl) {
+            if (setupStatus) setupStatus.textContent = 'Apps Script server URL not configured. Please set it in Settings.';
+            return;
+          }
           const cfg = window.MUNauth.getConfig();
-          if (cfg && cfg.key) return alert('Already configured. Use Settings to change.');
+          if (cfg && cfg.key) {
+            if (setupStatus) setupStatus.textContent = 'Already configured. Use Settings to change.';
+            return;
+          }
+          if (setupStatus) setupStatus.textContent = 'Creating spreadsheet and configuring your account...';
           const title = 'MUNify - ' + (await window.MUNauth.getUserEmail());
           const res = await window.MUNauth.registerWithServer(appsScriptUrl, title);
-          alert('Spreadsheet created: ' + res.sheetId + '\nKey: ' + res.key + '\nYou can download the recovery key.');
+          if (res && res.sheetId && res.key) {
+            if (setupStatus) setupStatus.textContent = 'Setup complete — Sheet created and key stored locally.';
+          } else {
+            if (setupStatus) setupStatus.textContent = 'Setup completed but server returned incomplete data.';
+          }
         } catch (err) {
           console.error(err);
-          alert('Could not complete setup: ' + (err.message || err));
+          if (setupStatus) setupStatus.textContent = 'Setup failed: ' + (err.message || String(err));
+        } finally {
+          if (btn) { btn.disabled = false; btn.textContent = 'Quick Setup'; }
         }
       });
 
@@ -554,33 +574,68 @@
         alert('Settings saved locally.');
       });
 
-      // invite creation
+      // invite creation (use status element + loading state)
       const btnCreateInvite = document.getElementById('btnCreateInvite');
       const inviteTokenInput = document.getElementById('inviteToken');
+      const inviteStatus = document.getElementById('inviteStatus');
       if (btnCreateInvite) btnCreateInvite.addEventListener('click', async () => {
+        if (inviteStatus) inviteStatus.textContent = '';
         try {
+          btnCreateInvite.disabled = true;
+          const orig = btnCreateInvite.textContent;
+          btnCreateInvite.textContent = 'Creating…';
           await window.MUNauth.requestAccess();
           const appsScriptUrl = localStorage.getItem('munifyAppsScriptUrl');
-          if (!appsScriptUrl) return alert('Apps Script server URL not configured.');
+          if (!appsScriptUrl) {
+            if (inviteStatus) inviteStatus.textContent = 'Apps Script server URL not configured.';
+            return;
+          }
           const cfg = window.MUNauth.getConfig();
-          const key = cfg.key;
-          if (!key) return alert('No key configured. Run Quick Setup first.');
+          const key = cfg && cfg.key;
+          if (!key) {
+            if (inviteStatus) inviteStatus.textContent = 'No key configured. Run Quick Setup first.';
+            return;
+          }
+          if (inviteStatus) inviteStatus.textContent = 'Creating invite — please wait...';
           const res = await window.MUNauth.createInvite(appsScriptUrl, key);
-          if (inviteTokenInput) inviteTokenInput.value = res.inviteToken || res.token || '';
-          alert('Invite created. Token shown in the input field. It expires in 24h.');
-        } catch (err) { console.error(err); alert('Could not create invite: ' + (err.message||err)); }
+          const token = (res && (res.inviteToken || res.token)) || '';
+          if (inviteTokenInput) inviteTokenInput.value = token;
+          if (inviteStatus) inviteStatus.textContent = token ? 'Invite created — copy the token.' : 'Invite created but no token returned.';
+        } catch (err) {
+          console.error(err);
+          if (inviteStatus) inviteStatus.textContent = 'Could not create invite: ' + (err.message || String(err));
+        } finally {
+          btnCreateInvite.disabled = false;
+          btnCreateInvite.textContent = 'Create 24h Invite';
+        }
       });
 
-      // Provision user API button
+      // Provision user API button (show loading and status)
       const btnProvision = document.getElementById('btnProvision');
       const provResult = document.getElementById('provResult');
+      const provisionStatus = document.getElementById('provisionStatus');
       if (btnProvision) btnProvision.addEventListener('click', async () => {
+        if (provisionStatus) provisionStatus.textContent = '';
         try {
+          btnProvision.disabled = true;
+          const orig = btnProvision.textContent;
+          btnProvision.textContent = 'Provisioning…';
           await window.MUNauth.requestAccess();
+          if (provisionStatus) provisionStatus.textContent = 'Requesting permissions and creating resources. Follow any Google consent screens.';
           const res = await window.MUNauth.provisionUserApi('MUNify - User API');
           if (provResult) provResult.value = JSON.stringify(res);
-          alert('Provisioning initiated. Check returned IDs in the field.');
-        } catch (err) { console.error(err); alert('Provision failed: ' + (err.message||err)); }
+          if (res && (res.spreadsheetId || res.projectId)) {
+            if (provisionStatus) provisionStatus.textContent = 'Provisioning complete. IDs shown in the field.';
+          } else {
+            if (provisionStatus) provisionStatus.textContent = 'Provisioning finished but returned no IDs. Check console for details.';
+          }
+        } catch (err) {
+          console.error(err);
+          if (provisionStatus) provisionStatus.textContent = 'Provision failed: ' + (err.message || String(err));
+        } finally {
+          btnProvision.disabled = false;
+          btnProvision.textContent = 'Provision user API';
+        }
       });
 
       if (btnClear) btnClear.addEventListener('click', () => {
