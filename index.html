@@ -125,7 +125,7 @@
         </div>
         <div id="inviteStatus" class="mt-2 text-sm text-neutral-600"></div>
       </div>
-      <div class="mt-4">
+      <div class="mt-4 hidden">
         <h4 class="font-medium">Provision user API (beta)</h4>
         <div class="flex gap-2 mt-2 items-center">
           <button id="btnProvision" class="px-3 py-2 rounded-2xl border">Provision user API</button>
@@ -169,8 +169,7 @@
           <h3 class="font-medium">Run Quick Setup</h3>
           <p class="text-sm text-neutral-600">Quick Setup will create a Spreadsheet and wire up a short key for your form. Click Next to begin. If you prefer a per-user API, expand Advanced in this modal.</p>
           <div class="mt-3 flex gap-2 items-center">
-            <button id="modalQuickSetupBtn" class="px-3 py-2 bg-neutral-900 text-white rounded">Run Quick Setup</button>
-            <button id="modalAdvancedToggle" class="px-3 py-2 border rounded">Advanced</button>
+              <button id="modalQuickSetupBtn" class="px-3 py-2 bg-neutral-900 text-white rounded">Run Quick Setup</button>
           </div>
         </div>
 
@@ -922,6 +921,7 @@
         if (ok) {
           document.getElementById('modalStatus').textContent = 'Apps Script URL verified.';
           window.MUNui.toast('Apps Script verified', { type: 'success' });
+          try{ showStep(2); }catch(e){}
         } else {
           document.getElementById('modalStatus').textContent = 'Could not verify URL. Ensure the script is deployed and accessible.';
           window.MUNui.toast('Could not verify Apps Script URL', { type: 'error' });
@@ -941,9 +941,11 @@
         const title = 'MUNify - ' + (window.MUNauth.getUserEmail() || 'User');
         const res = await window.MUNauth.registerWithServer(url, title);
         if (res && res.key) {
-          document.getElementById('modalStatus').textContent = 'Setup complete — redirecting to designer...';
+          // persist key and sheetId to munify_config
+          try{ const c = JSON.parse(localStorage.getItem('munify_config')||'{}'); c.key = res.key; if (res.sheetId) c.sheetId = res.sheetId; localStorage.setItem('munify_config', JSON.stringify(c)); } catch(e){}
+          document.getElementById('modalStatus').textContent = 'Setup complete — continuing...';
           window.MUNui.toast('Setup complete', { type: 'success' });
-          setTimeout(()=>{ hideModal(); window.location.href = 'design/'; }, 900);
+          try{ showStep(3); } catch(e){}
         } else {
           document.getElementById('modalStatus').textContent = 'Setup finished but server returned incomplete data.';
         }
@@ -960,10 +962,10 @@
         await window.MUNauth.requestAccess();
         const res = await window.MUNauth.provisionUserApi('MUNify - User API');
         if (res && res.spreadsheetId) {
-          const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg.sheetId = res.spreadsheetId; localStorage.setItem('munify_config', JSON.stringify(cfg));
-          document.getElementById('modalStatus').textContent = 'Provisioning complete — redirecting to designer...';
+          const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg.sheetId = res.spreadsheetId; if (res.key) cfg.key = res.key; localStorage.setItem('munify_config', JSON.stringify(cfg));
+          document.getElementById('modalStatus').textContent = 'Provisioning complete.';
           window.MUNui.toast('Provisioning complete', { type: 'success' });
-          setTimeout(()=>{ hideModal(); window.location.href = 'design/'; }, 900);
+          try{ showStep(3); } catch(e){}
         } else {
           document.getElementById('modalStatus').textContent = 'Provisioning finished but returned no IDs. Check console.';
         }
