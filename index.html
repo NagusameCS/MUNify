@@ -106,16 +106,25 @@
           <input id="sheetId" type="text" placeholder="1AbCdefGhIjK..." class="mt-1 w-full border rounded-lg p-2" />
         </label>
       </div>
-      <div class="mt-4 flex gap-2">
-        <button id="btnSave" class="px-3 py-2 rounded-2xl bg-neutral-900 text-white">Save</button>
+    <div class="mt-4 flex gap-2">
+      <button id="btnSave" class="px-3 py-2 rounded-2xl bg-neutral-900 text-white">Save</button>
   <a href="design/" class="px-3 py-2 rounded-2xl border">Go to Designer</a>
-      </div>
+    </div>
       <div class="mt-4">
         <h4 class="font-medium">Invites</h4>
         <div class="flex gap-2 mt-2 items-center">
           <button id="btnCreateInvite" class="px-3 py-2 rounded-2xl border">Create 24h Invite</button>
           <input id="inviteToken" class="mt-1 w-full border rounded-lg p-2" placeholder="Invite token will appear here" readonly />
         </div>
+        <div id="inviteStatus" class="mt-2 text-sm text-neutral-600"></div>
+      </div>
+      <div class="mt-4">
+        <h4 class="font-medium">Provision user API (beta)</h4>
+        <div class="flex gap-2 mt-2 items-center">
+          <button id="btnProvision" class="px-3 py-2 rounded-2xl border">Provision user API</button>
+          <input id="provResult" class="mt-1 w-full border rounded-lg p-2" placeholder="Provision result (spreadsheetId, projectId, deploymentId)" readonly />
+        </div>
+        <div id="provisionStatus" class="mt-2 text-sm text-neutral-600"></div>
       </div>
     </section>
   </main>
@@ -560,6 +569,18 @@
           if (inviteTokenInput) inviteTokenInput.value = res.inviteToken || res.token || '';
           alert('Invite created. Token shown in the input field. It expires in 24h.');
         } catch (err) { console.error(err); alert('Could not create invite: ' + (err.message||err)); }
+      });
+
+      // Provision user API button
+      const btnProvision = document.getElementById('btnProvision');
+      const provResult = document.getElementById('provResult');
+      if (btnProvision) btnProvision.addEventListener('click', async () => {
+        try {
+          await window.MUNauth.requestAccess();
+          const res = await window.MUNauth.provisionUserApi('MUNify - User API');
+          if (provResult) provResult.value = JSON.stringify(res);
+          alert('Provisioning initiated. Check returned IDs in the field.');
+        } catch (err) { console.error(err); alert('Provision failed: ' + (err.message||err)); }
       });
 
       if (btnClear) btnClear.addEventListener('click', () => {

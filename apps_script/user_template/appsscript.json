@@ -1,0 +1,10 @@
+{
+  "timeZone": "Etc/UTC",
+  "executionApi": {
+    "access": "ANYONE"
+  },
+  "webapp": {
+    "access": "ANYONE_ANONYMOUS",
+    "executeAs": "USER_DEPLOYING"
+  }
+}
