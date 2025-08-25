@@ -20,3 +20,8 @@ Endpoints
 
 Notes
 - This is a simple reference implementation. For production, consider adding stronger auth, rate-limits, and logging.
+
+CORS / Allowed origins
+You can limit which origins may call the web app by setting a script property named `munify_allowed_origins` with a comma-separated list of allowed origins (for example: `https://yourusername.github.io`).
+
+To set the property in Apps Script editor: `PropertiesService.getScriptProperties().setProperty('munify_allowed_origins', 'https://yourusername.github.io')` or set it programmatically in your deployment script.

@@ -55,6 +55,22 @@
     return j;
   }
 
+  // create an invite token (server issues 24h token by default)
+  async function createInvite(appsScriptUrl, key, ttlSeconds){
+    const idToken = getIdToken(); if (!idToken) throw new Error('Not signed in');
+    const body = { id_token: idToken, key: key };
+    if (typeof ttlSeconds === 'number') body.ttl = ttlSeconds;
+    const res = await fetch(appsScriptUrl + '?action=invite', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await res.json(); if (!res.ok || j.error) throw new Error(j.error || 'invite_failed'); return j;
+  }
+
+  // redeem an invite token to add the signed-in user to the whitelist
+  async function redeemInvite(appsScriptUrl, token){
+    const idToken = getIdToken(); if (!idToken) throw new Error('Not signed in');
+    const res = await fetch(appsScriptUrl + '?action=redeem', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id_token: idToken, token: token }) });
+    const j = await res.json(); if (!res.ok || j.error) throw new Error(j.error || 'redeem_failed'); return j;
+  }
+
   function cryptoRandom(len){ const bytes=new Uint8Array(len); crypto.getRandomValues(bytes); return Array.from(bytes).map(b=>('0'+b.toString(16)).slice(-2)).join(''); }
 
   // client no longer initializes sheets directly; server does it during register
@@ -72,5 +88,5 @@
     const j = await res.json(); if (!res.ok || j.error) throw new Error(j.error || 'append_failed'); return j;
   }
 
-  window.MUNauth = { requestAccess, registerWithServer, appendViaServer, exportKeyFile, getUserEmail, getConfig };
+  window.MUNauth = { requestAccess, registerWithServer, appendViaServer, exportKeyFile, getUserEmail, getConfig, createInvite, redeemInvite };
 })();

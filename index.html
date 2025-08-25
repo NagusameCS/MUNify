@@ -110,6 +110,13 @@
         <button id="btnSave" class="px-3 py-2 rounded-2xl bg-neutral-900 text-white">Save</button>
   <a href="design/" class="px-3 py-2 rounded-2xl border">Go to Designer</a>
       </div>
+      <div class="mt-4">
+        <h4 class="font-medium">Invites</h4>
+        <div class="flex gap-2 mt-2 items-center">
+          <button id="btnCreateInvite" class="px-3 py-2 rounded-2xl border">Create 24h Invite</button>
+          <input id="inviteToken" class="mt-1 w-full border rounded-lg p-2" placeholder="Invite token will appear here" readonly />
+        </div>
+      </div>
     </section>
   </main>
 
@@ -515,6 +522,55 @@
         try {
           window.MUNauth.exportKeyFile();
         } catch (e) { console.error(e); alert('No key to export.'); }
+      });
+    });
+  </script>
+  <script>
+    // Settings: save apps script URL and optional sheetId; keep client-side storage minimal
+    document.addEventListener('DOMContentLoaded', () => {
+      const scriptInput = document.getElementById('scriptUrl');
+      const sheetInput = document.getElementById('sheetId');
+      const btnSave = document.getElementById('btnSave');
+      const btnClear = document.getElementById('btnClear');
+
+      // initialize
+      const appsUrl = localStorage.getItem('munifyAppsScriptUrl') || '';
+      if (scriptInput) scriptInput.value = appsUrl;
+      const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
+      if (sheetInput && cfg.sheetId) sheetInput.value = cfg.sheetId;
+
+      if (btnSave) btnSave.addEventListener('click', () => {
+        if (scriptInput && scriptInput.value.trim()) localStorage.setItem('munifyAppsScriptUrl', scriptInput.value.trim());
+        if (sheetInput && sheetInput.value.trim()) { cfg.sheetId = sheetInput.value.trim(); localStorage.setItem('munify_config', JSON.stringify(cfg)); }
+        alert('Settings saved locally.');
+      });
+
+      // invite creation
+      const btnCreateInvite = document.getElementById('btnCreateInvite');
+      const inviteTokenInput = document.getElementById('inviteToken');
+      if (btnCreateInvite) btnCreateInvite.addEventListener('click', async () => {
+        try {
+          await window.MUNauth.requestAccess();
+          const appsScriptUrl = localStorage.getItem('munifyAppsScriptUrl');
+          if (!appsScriptUrl) return alert('Apps Script server URL not configured.');
+          const cfg = window.MUNauth.getConfig();
+          const key = cfg.key;
+          if (!key) return alert('No key configured. Run Quick Setup first.');
+          const res = await window.MUNauth.createInvite(appsScriptUrl, key);
+          if (inviteTokenInput) inviteTokenInput.value = res.inviteToken || res.token || '';
+          alert('Invite created. Token shown in the input field. It expires in 24h.');
+        } catch (err) { console.error(err); alert('Could not create invite: ' + (err.message||err)); }
+      });
+
+      if (btnClear) btnClear.addEventListener('click', () => {
+        if (!confirm('Clear local MUNify settings?')) return;
+        localStorage.removeItem('munifyAppsScriptUrl');
+        localStorage.removeItem('munify_config');
+        localStorage.removeItem('munifyFormCode');
+        localStorage.removeItem('munifyLastSubmission');
+        if (scriptInput) scriptInput.value = '';
+        if (sheetInput) sheetInput.value = '';
+        alert('Local settings cleared.');
       });
     });
   </script>

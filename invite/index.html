@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MUNify Invite</title>
+<link rel="stylesheet" href="/assets/css/style.css">
+<script src="/assets/js/auth.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900">
+  <main class="max-w-2xl mx-auto p-6">
+    <h1 class="text-xl font-bold mb-4">Redeem Invite</h1>
+    <p class="mb-4 text-sm">Open the invite link you received. Sign in and click Redeem to be added to the form's whitelist.</p>
+    <div class="mb-4">
+      <label class="block text-sm">Invite Token
+        <input id="token" class="mt-1 block w-full border rounded p-2" />
+      </label>
+    </div>
+    <div class="flex gap-2">
+      <button id="btnRedeem" class="px-3 py-2 rounded bg-green-600 text-white">Redeem</button>
+      <button id="btnSignIn" class="px-3 py-2 border rounded">Sign in</button>
+    </div>
+    <div id="status" class="mt-4 text-sm"></div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const raw = location.hash ? location.hash.slice(1) : '';
+      const tokenInput = document.getElementById('token');
+      if (raw) tokenInput.value = raw;
+      document.getElementById('btnSignIn').addEventListener('click', async ()=>{
+        try { await window.MUNauth.requestAccess(); alert('Signed in'); } catch(e){ alert('Sign in failed'); }
+      });
+      document.getElementById('btnRedeem').addEventListener('click', async ()=>{
+        const token = tokenInput.value.trim();
+        if (!token) return alert('Enter invite token');
+        try {
+          await window.MUNauth.requestAccess();
+          const appsScriptUrl = localStorage.getItem('munifyAppsScriptUrl');
+          if (!appsScriptUrl) return alert('Server not configured');
+          const res = await window.MUNauth.redeemInvite(appsScriptUrl, token);
+          document.getElementById('status').textContent = 'Redeemed! You should now be allowed to submit.';
+        } catch (err) { console.error(err); document.getElementById('status').textContent = 'Could not redeem invite: ' + (err.message || err); }
+      });
+    });
+  </script>
+</body>
+</html>

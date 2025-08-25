@@ -8,42 +8,51 @@
 
 function doGet(e) {
   const action = e.parameter.action;
+  const origin = e && e.request && e.request.headers ? e.request.headers.Origin : null;
   try {
     if (action === 'get' && e.parameter.key) {
       const mapping = getMapping(e.parameter.key);
-      if (!mapping) return jsonResponse({ error: 'not_found' }, 404);
+      if (!mapping) return jsonResponse({ error: 'not_found' }, 404, origin);
       // don't leak secret
       const out = Object.assign({}, mapping);
       delete out.secret;
-      return jsonResponse({ ok: true, mapping: out });
+      return jsonResponse({ ok: true, mapping: out }, null, origin);
     }
-    return jsonResponse({ ok: true, msg: 'MUNify Apps Script' });
+    return jsonResponse({ ok: true, msg: 'MUNify Apps Script' }, null, origin);
   } catch (err) {
-    return jsonResponse({ error: err.message }, 500);
+    return jsonResponse({ error: err.message }, 500, origin);
   }
 }
 
 function doPost(e) {
+  const origin = e && e.request && e.request.headers ? e.request.headers.Origin : null;
   const action = e.parameter && e.parameter.action ? e.parameter.action : (e.postData && e.postData.type ? JSON.parse(e.postData.contents).action : null);
   try {
     const payload = e.postData && e.postData.contents ? JSON.parse(e.postData.contents) : {};
-    if (action === 'register') return handleRegister(payload);
-    if (action === 'append') return handleAppend(payload);
-    if (action === 'invite') return handleInvite(payload);
-    if (action === 'redeem') return handleRedeem(payload);
-    return jsonResponse({ error: 'unknown_action' }, 400);
+    if (action === 'register') return handleRegister(payload, origin);
+    if (action === 'append') return handleAppend(payload, origin);
+    if (action === 'invite') return handleInvite(payload, origin);
+    if (action === 'redeem') return handleRedeem(payload, origin);
+    return jsonResponse({ error: 'unknown_action' }, 400, origin);
   } catch (err) {
-    return jsonResponse({ error: err.message }, 500);
+    return jsonResponse({ error: err.message }, 500, origin);
   }
 }
 
 // Helpers
 function getProperties() { return PropertiesService.getScriptProperties(); }
 function getMappingsObj() {
-  const p = getProperties().getProperty('munify_mappings');
+  // If script property 'munify_use_user_properties' is 'true', store mappings per-user
+  const useUser = PropertiesService.getScriptProperties().getProperty('munify_use_user_properties') === 'true';
+  const props = useUser ? PropertiesService.getUserProperties() : PropertiesService.getScriptProperties();
+  const p = props.getProperty('munify_mappings');
   return p ? JSON.parse(p) : {};
 }
-function saveMappingsObj(obj) { getProperties().setProperty('munify_mappings', JSON.stringify(obj)); }
+function saveMappingsObj(obj) {
+  const useUser = PropertiesService.getScriptProperties().getProperty('munify_use_user_properties') === 'true';
+  const props = useUser ? PropertiesService.getUserProperties() : PropertiesService.getScriptProperties();
+  props.setProperty('munify_mappings', JSON.stringify(obj));
+}
 
 function getMapping(key) {
   const m = getMappingsObj();
@@ -59,15 +68,27 @@ function removeInvite(token) { const pr = getProperties(); pr.deleteProperty('mu
 function saveInvite(token, obj) { getProperties().setProperty('munify_invite_' + token, JSON.stringify(obj)); }
 function getInvite(token) { const v = getProperties().getProperty('munify_invite_' + token); return v ? JSON.parse(v) : null; }
 
-function jsonResponse(obj, code) {
-  const out = ContentService.createTextOutput(JSON.stringify(obj));
-  out.setMimeType(ContentService.MimeType.JSON);
-  if (code) {
-    // Apps Script can't set HTTP status codes directly for simple web apps; include code in payload
-    obj._status = code;
-    out.setContent(JSON.stringify(obj));
+function jsonResponse(obj, code, origin) {
+  // Build response and add CORS headers via HtmlService (ContentService has limited header support)
+  const payload = JSON.stringify(obj);
+  const allowed = PropertiesService.getScriptProperties().getProperty('munify_allowed_origins') || '';
+
+  const html = HtmlService.createHtmlOutput()
+    .setContent(payload)
+    .setMimeType(ContentService.MimeType.JSON);
+
+  // if allowed is set and origin matches, set a meta tag (best-effort; Apps Script header control is limited)
+  if (allowed && origin) {
+    const list = allowed.split(',').map(s => s.trim());
+    if (list.indexOf(origin) !== -1) {
+      html.addMetaTag('Access-Control-Allow-Origin', origin);
+    }
   }
-  return out;
+
+  // append code info for clients
+  if (code) obj._status = code;
+  html.setContent(JSON.stringify(obj));
+  return html;
 }
 
 // verify id_token via Google tokeninfo endpoint to get email
@@ -88,10 +109,10 @@ function verifyIdToken(idToken) {
   return data.email;
 }
 
-function handleRegister(payload) {
+function handleRegister(payload, origin) {
   // Accept payload: { id_token, title? }
   const { id_token, title } = payload;
-  if (!id_token) return jsonResponse({ error: 'missing_fields' }, 400);
+  if (!id_token) return jsonResponse({ error: 'missing_fields' }, 400, origin);
   const email = verifyIdToken(id_token);
 
   // create spreadsheet server-side to avoid client-side tokens
@@ -107,8 +128,8 @@ function handleRegister(payload) {
   const obj = { sheetId: ss.getId(), owner: email, whitelist: [email], secret: secret, created: Date.now() };
   setMapping(key, obj);
   // log registration
-  safeLog('register', key, email, 'ok', 'created');
-  return jsonResponse({ ok: true, key: key, sheetId: ss.getId(), secret: secret });
+  safeLog('register', key, email, 'ok', 'created', origin);
+  return jsonResponse({ ok: true, key: key, sheetId: ss.getId(), secret: secret }, null, origin);
 }
 
 function initSheetStructure(ss) {
@@ -131,7 +152,7 @@ function initSheetStructure(ss) {
 }
 
 // basic logging helper: append rows to a hidden Log sheet
-function safeLog(action, key, email, status, msg) {
+function safeLog(action, key, email, status, msg, origin) {
   try {
     var meta = getProperties();
     var logId = meta.getProperty('munify_log_sheet_id');
@@ -145,18 +166,18 @@ function safeLog(action, key, email, status, msg) {
       ss = nss;
     }
     var sheet = ss.getSheetByName('Log') || ss.insertSheet('Log');
-    sheet.appendRow([new Date().toISOString(), action, key, email, status, msg]);
+    sheet.appendRow([new Date().toISOString(), action, key, email, status, msg, origin || '']);
   } catch(e) { /* don't throw from logger */ }
 }
 
-function handleAppend(payload) {
+function handleAppend(payload, origin) {
   const { id_token, key, values } = payload;
-  if (!id_token || !key || !values) return jsonResponse({ error: 'missing_fields' }, 400);
+  if (!id_token || !key || !values) return jsonResponse({ error: 'missing_fields' }, 400, origin);
   const email = verifyIdToken(id_token);
   const mapping = getMapping(key);
-  if (!mapping) return jsonResponse({ error: 'not_found' }, 404);
+  if (!mapping) return jsonResponse({ error: 'not_found' }, 404, origin);
   // check whitelist
-  if (mapping.whitelist && mapping.whitelist.indexOf(email) === -1) return jsonResponse({ error: 'not_whitelisted' }, 403);
+  if (mapping.whitelist && mapping.whitelist.indexOf(email) === -1) return jsonResponse({ error: 'not_whitelisted' }, 403, origin);
 
   // simple rate limit: allow up to 5 appends per 60s per key+email
   try {
@@ -165,7 +186,7 @@ function handleAppend(payload) {
     const data = pr.getProperty(counterKey);
     let obj = data ? JSON.parse(data) : { count:0, windowStart: Date.now() };
     if (Date.now() - obj.windowStart > 60*1000) { obj.count = 0; obj.windowStart = Date.now(); }
-    if (obj.count >= 5) { safeLog('append', key, email, 'rate_limited', 'too_many_requests'); return jsonResponse({ error: 'rate_limited' }, 429); }
+    if (obj.count >= 5) { safeLog('append', key, email, 'rate_limited', 'too_many_requests', origin); return jsonResponse({ error: 'rate_limited' }, 429, origin); }
     obj.count += 1;
     pr.setProperty(counterKey, JSON.stringify(obj));
   } catch(e) { /* non-fatal */ }
@@ -175,41 +196,43 @@ function handleAppend(payload) {
     const ss = SpreadsheetApp.openById(mapping.sheetId);
     const sheet = ss.getSheetByName('Delegates') || ss.insertSheet('Delegates');
     sheet.appendRow(values);
-    safeLog('append', key, email, 'ok', 'appended');
-    return jsonResponse({ ok: true });
+    safeLog('append', key, email, 'ok', 'appended', origin);
+    return jsonResponse({ ok: true }, null, origin);
   } catch (err) {
-    safeLog('append', key, email, 'error', err.message);
-    return jsonResponse({ error: 'sheet_error', detail: err.message }, 500);
+    safeLog('append', key, email, 'error', err.message, origin);
+    return jsonResponse({ error: 'sheet_error', detail: err.message }, 500, origin);
   }
 }
 
-function handleInvite(payload) {
+function handleInvite(payload, origin) {
   const { id_token, key } = payload;
-  if (!id_token || !key) return jsonResponse({ error: 'missing_fields' }, 400);
+  if (!id_token || !key) return jsonResponse({ error: 'missing_fields' }, 400, origin);
   const email = verifyIdToken(id_token);
   const mapping = getMapping(key);
-  if (!mapping) return jsonResponse({ error: 'not_found' }, 404);
+  if (!mapping) return jsonResponse({ error: 'not_found' }, 404, origin);
   // only owner may create invites (simple policy)
-  if (mapping.owner !== email) return jsonResponse({ error: 'not_allowed' }, 403);
+  if (mapping.owner !== email) return jsonResponse({ error: 'not_allowed' }, 403, origin);
   const token = Utilities.getUuid().replace(/-/g,'');
   const expire = Date.now() + 24*60*60*1000; // 24h
   saveInvite(token, { key: key, sheetId: mapping.sheetId, expires: expire, issuer: email });
-  return jsonResponse({ ok: true, inviteToken: token, expires: expire });
+  safeLog('invite', key, email, 'created', token, origin);
+  return jsonResponse({ ok: true, inviteToken: token, expires: expire }, null, origin);
 }
 
-function handleRedeem(payload) {
+function handleRedeem(payload, origin) {
   const { id_token, token } = payload;
-  if (!id_token || !token) return jsonResponse({ error: 'missing_fields' }, 400);
+  if (!id_token || !token) return jsonResponse({ error: 'missing_fields' }, 400, origin);
   const email = verifyIdToken(id_token);
   const invite = getInvite(token);
-  if (!invite) return jsonResponse({ error: 'invite_not_found' }, 404);
-  if (Date.now() > invite.expires) { removeInvite(token); return jsonResponse({ error: 'invite_expired' }, 410); }
+  if (!invite) return jsonResponse({ error: 'invite_not_found' }, 404, origin);
+  if (Date.now() > invite.expires) { removeInvite(token); return jsonResponse({ error: 'invite_expired' }, 410, origin); }
   // add email to mapping's whitelist
   const mapping = getMapping(invite.key);
-  if (!mapping) return jsonResponse({ error: 'mapping_not_found' }, 404);
+  if (!mapping) return jsonResponse({ error: 'mapping_not_found' }, 404, origin);
   mapping.whitelist = mapping.whitelist || [];
   if (mapping.whitelist.indexOf(email) === -1) mapping.whitelist.push(email);
   setMapping(invite.key, mapping);
   removeInvite(token);
-  return jsonResponse({ ok: true, added: email });
+  safeLog('redeem', invite.key, email, 'ok', token, origin);
+  return jsonResponse({ ok: true, added: email }, null, origin);
 }
