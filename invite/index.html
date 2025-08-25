@@ -30,18 +30,18 @@
       const tokenInput = document.getElementById('token');
       if (raw) tokenInput.value = raw;
       document.getElementById('btnSignIn').addEventListener('click', async ()=>{
-        try { await window.MUNauth.requestAccess(); window.MUNui && window.MUNui.toast ? window.MUNui.toast('Signed in', { type: 'success' }) : document.getElementById('status').textContent = 'Signed in'; } catch(e){ window.MUNui && window.MUNui.toast ? window.MUNui.toast('Sign in failed: ' + (e.message||e), { type: 'error' }) : document.getElementById('status').textContent = 'Sign in failed: ' + (e.message||e); }
+        try { await window.MUNauth.requestAccess(); window.MUNui.toast('Signed in', { type: 'success' }); } catch(e){ document.getElementById('status').textContent = 'Sign in failed: ' + (e.message||e); window.MUNui.toast('Sign in failed: ' + (e.message||e), { type: 'error' }); }
       });
       document.getElementById('btnRedeem').addEventListener('click', async ()=>{
         const token = tokenInput.value.trim();
-        if (!token) return window.MUNui && window.MUNui.toast ? window.MUNui.toast('Enter invite token', { type: 'warn' }) : document.getElementById('status').textContent = 'Enter invite token';
+        if (!token) { window.MUNui.toast('Enter invite token', { type: 'warn' }); return; }
         try {
           await window.MUNauth.requestAccess();
           const appsScriptUrl = localStorage.getItem('munifyAppsScriptUrl');
-          if (!appsScriptUrl) return window.MUNui && window.MUNui.toast ? window.MUNui.toast('Server not configured', { type: 'error' }) : document.getElementById('status').textContent = 'Server not configured';
+          if (!appsScriptUrl) { window.MUNui.toast('Server not configured', { type: 'error' }); return; }
           const res = await window.MUNauth.redeemInvite(appsScriptUrl, token);
-          window.MUNui && window.MUNui.toast ? window.MUNui.toast('Redeemed! You can now submit', { type: 'success' }) : document.getElementById('status').textContent = 'Redeemed! You should now be allowed to submit.';
-        } catch (err) { console.error(err); window.MUNui && window.MUNui.toast ? window.MUNui.toast('Could not redeem invite: ' + (err.message || err), { type: 'error' }) : document.getElementById('status').textContent = 'Could not redeem invite: ' + (err.message || err); }
+          window.MUNui.toast('Redeemed! You can now submit', { type: 'success' });
+  } catch (err) { console.error(err); document.getElementById('status').textContent = 'Could not redeem invite: ' + (err.message || err); window.MUNui.toast('Could not redeem invite: ' + (err.message || err), { type: 'error' }); }
       });
 
       // Attempt automatic registration/provisioning if possible

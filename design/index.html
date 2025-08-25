@@ -175,17 +175,18 @@
       // Save button
       document.getElementById("btnSaveForm").addEventListener("click", () => {
         autoSave();
-  window.MUNui && window.MUNui.toast ? window.MUNui.toast('Form saved locally', { type: 'success' }) : alert('Form saved locally');
+        window.MUNui.toast('Form saved locally', { type: 'success' });
       });
 
       // Reset template button
-      document.getElementById("btnResetTemplate").addEventListener("click", () => {
-        if (!confirm('Reset the form to the default template? This will overwrite your current code.')) return;
+      document.getElementById("btnResetTemplate").addEventListener("click", async () => {
+        const ok = await window.MUNui.confirm('Reset the form to the default template? This will overwrite your current code.');
+        if (!ok) return;
         formCode.value = baseTemplate;
         editablePreview.innerHTML = baseTemplate;
         autoSave();
         status.textContent = 'Template reset to default.';
-        window.MUNui && window.MUNui.toast ? window.MUNui.toast('Template reset to default', { type: 'success' }) : null;
+        window.MUNui.toast('Template reset to default', { type: 'success' });
       });
 
       // Sign out button
@@ -215,7 +216,7 @@
             console.log('Intercepted form submission (local):', obj);
             localStorage.setItem('munifyLastSubmission', JSON.stringify(obj));
             status.textContent = 'Form submitted (saved locally).';
-            window.MUNui && window.MUNui.toast ? window.MUNui.toast('Form submission saved locally', { type: 'success' }) : alert('Form submission intercepted and saved locally.');
+            window.MUNui.toast('Form submission saved locally', { type: 'success' });
           }
         } catch (err) {
           console.error(err);

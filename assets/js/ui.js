@@ -70,5 +70,65 @@
     return id;
   }
 
-  window.MUNui = { toast };
+  // confirmation dialog helper: returns a Promise<boolean>
+  function confirm(message, opts={}){
+    return new Promise(resolve => {
+      // overlay
+      const ov = document.createElement('div');
+      ov.style.position = 'fixed';
+      ov.style.left = 0; ov.style.top = 0; ov.style.right = 0; ov.style.bottom = 0;
+      ov.style.background = 'rgba(2,6,23,0.45)';
+      ov.style.zIndex = 100000;
+      ov.style.display = 'flex';
+      ov.style.alignItems = 'center';
+      ov.style.justifyContent = 'center';
+
+      const box = document.createElement('div');
+      box.style.background = '#fff';
+      box.style.padding = '18px';
+      box.style.borderRadius = '10px';
+      box.style.minWidth = '300px';
+      box.style.boxShadow = '0 8px 30px rgba(2,6,23,0.2)';
+
+      const txt = document.createElement('div');
+      txt.style.marginBottom = '12px';
+      txt.style.color = '#0f172a';
+      txt.style.fontSize = '15px';
+      txt.textContent = message;
+      box.appendChild(txt);
+
+      const actions = document.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.justifyContent = 'flex-end';
+      actions.style.gap = '8px';
+
+      const no = document.createElement('button');
+      no.textContent = opts.noText || 'Cancel';
+      no.style.padding = '8px 10px';
+      no.style.border = 'none';
+      no.style.background = 'transparent';
+      no.style.cursor = 'pointer';
+
+      const yes = document.createElement('button');
+      yes.textContent = opts.yesText || 'OK';
+      yes.style.padding = '8px 10px';
+      yes.style.border = 'none';
+      yes.style.background = '#0f172a';
+      yes.style.color = '#fff';
+      yes.style.borderRadius = '6px';
+      yes.style.cursor = 'pointer';
+
+      actions.appendChild(no);
+      actions.appendChild(yes);
+      box.appendChild(actions);
+      ov.appendChild(box);
+      document.body.appendChild(ov);
+
+      function cleanup(){ if (ov && ov.parentNode) ov.parentNode.removeChild(ov); }
+      no.addEventListener('click', ()=>{ cleanup(); resolve(false); });
+      yes.addEventListener('click', ()=>{ cleanup(); resolve(true); });
+    });
+  }
+
+  window.MUNui = { toast, confirm };
 })();

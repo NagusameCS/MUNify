@@ -143,28 +143,54 @@
       <p class="text-sm text-neutral-600 mb-4">We'll walk you through setup so forms and sheets are created correctly. This process is required before continuing.</p>
 
       <div id="onboardSteps" class="space-y-4">
-        <div id="stepSignIn" class="">
-          <h3 class="font-medium">1) Sign in with Google</h3>
-          <p class="text-sm text-neutral-600">Sign in so MUNify can create and link a sheet for you (we only request the minimum permissions).</p>
+        <!-- Step 1: Sign in -->
+        <div data-step="0" id="stepSignIn" class="">
+          <h3 class="font-medium">Sign in with Google</h3>
+          <p class="text-sm text-neutral-600">Sign in so MUNify can create and link a sheet for you. This action only requests a short-lived ID token by default.</p>
           <div class="mt-3 flex gap-2 items-center">
             <button id="modalSignInBtn" class="px-3 py-2 bg-blue-600 text-white rounded">Sign in</button>
             <div id="modalSignedTag" class="text-sm text-green-600 hidden">Signed in ✓</div>
           </div>
         </div>
 
-        <div id="stepScriptUrl">
-          <h3 class="font-medium">2) Apps Script Web App URL</h3>
-          <p class="text-sm text-neutral-600">Enter your deployed Apps Script Web App URL, or use the site default if provided.</p>
+        <!-- Step 2: Apps Script URL -->
+        <div data-step="1" id="stepScriptUrl" class="hidden">
+          <h3 class="font-medium">Provide Apps Script Web App URL</h3>
+          <p class="text-sm text-neutral-600">Paste your deployed Apps Script Web App URL, or accept the site default if present.</p>
           <div class="mt-3 flex gap-2">
             <input id="modalScriptUrl" class="flex-1 border rounded-lg p-2" placeholder="https://script.google.com/macros/s/AK.../exec" />
             <button id="modalVerifyUrlBtn" class="px-3 py-2 border rounded">Verify</button>
           </div>
-          <div id="modalUrlHelp" class="text-sm text-neutral-600 mt-2">You can also paste the URL in Settings later, but verifying now makes setup automatic.</div>
+          <div id="modalUrlHelp" class="text-sm text-neutral-600 mt-2">Verifying now makes setup automatic; you can also set this later in Settings.</div>
         </div>
 
-        <div id="stepActions" class="flex gap-2 items-center">
-          <button id="modalQuickSetupBtn" class="px-3 py-2 bg-neutral-900 text-white rounded">Quick Setup (recommended)</button>
-          <button id="modalProvisionBtn" class="px-3 py-2 border rounded">Provision user API (beta)</button>
+        <!-- Step 3: Quick Setup action -->
+        <div data-step="2" id="stepQuickSetup" class="hidden">
+          <h3 class="font-medium">Run Quick Setup</h3>
+          <p class="text-sm text-neutral-600">Quick Setup will create a Spreadsheet and wire up a short key for your form. Click Next to begin. If you prefer a per-user API, expand Advanced in this modal.</p>
+          <div class="mt-3 flex gap-2 items-center">
+            <button id="modalQuickSetupBtn" class="px-3 py-2 bg-neutral-900 text-white rounded">Run Quick Setup</button>
+            <button id="modalAdvancedToggle" class="px-3 py-2 border rounded">Advanced</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Done / copy key -->
+        <div data-step="3" id="stepDone" class="hidden">
+          <h3 class="font-medium">Setup Complete</h3>
+          <p class="text-sm text-neutral-600">You're all set. Use the button below to open the Designer or copy your recovery key.</p>
+          <div class="mt-3 flex gap-2 items-center">
+            <button id="modalOpenDesignerBtn" class="px-3 py-2 bg-blue-600 text-white rounded">Open Designer</button>
+            <button id="modalCopyKeyBtn" class="px-3 py-2 border rounded">Copy Key</button>
+            <button id="modalCloseBtn" class="px-3 py-2 border rounded">Close</button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mt-3">
+          <div id="modalProgress" class="text-sm text-neutral-600">Step 1 of 4</div>
+          <div class="flex gap-2">
+            <button id="modalBackBtn" class="px-3 py-2 border rounded hidden">Back</button>
+            <button id="modalNextBtn" class="px-3 py-2 bg-neutral-900 text-white rounded">Next</button>
+          </div>
         </div>
 
         <div id="modalBusy" class="hidden mt-2 flex items-center gap-3">
@@ -538,7 +564,7 @@
     // Update UI to reflect signed-in state. Do not auto-run setup or navigate away.
     try { window._munifyUpdateSignIn(true); } catch(e){}
     try { document.getElementById('g_id_signin').style.display = 'none'; } catch(e){}
-    window.MUNui && window.MUNui.toast && window.MUNui.toast('Signed in — click Quick Setup to continue', { type: 'success' });
+  window.MUNui.toast('Signed in — click Quick Setup to continue', { type: 'success' });
   }
 
   // Settings
@@ -684,15 +710,16 @@
         }
       });
 
-      if (btnClear) btnClear.addEventListener('click', () => {
-        if (!confirm('Clear local MUNify settings?')) return;
+      if (btnClear) btnClear.addEventListener('click', async () => {
+        const ok = await window.MUNui.confirm('Clear local MUNify settings?');
+        if (!ok) return;
         localStorage.removeItem('munifyAppsScriptUrl');
         localStorage.removeItem('munify_config');
         localStorage.removeItem('munifyFormCode');
         localStorage.removeItem('munifyLastSubmission');
         if (scriptInput) scriptInput.value = '';
         if (sheetInput) sheetInput.value = '';
-        window.MUNui && window.MUNui.toast ? window.MUNui.toast('Local settings cleared', { type: 'success' }) : null;
+        window.MUNui.toast('Local settings cleared', { type: 'success' });
       });
     });
   </script>
@@ -807,7 +834,7 @@
     }
 
     // Wire main Quick Setup button to open the modal
-    if (btnConnect) btnConnect.addEventListener('click', () => { showModal(); window.MUNui && window.MUNui.toast && window.MUNui.toast('Opening setup', { type: 'info', duration: 1200 }); });
+  if (btnConnect) btnConnect.addEventListener('click', () => { showModal(); window.MUNui.toast('Opening setup', { type: 'info', duration: 1200 }); });
 
     // Sign out button on home (clear id token and update UI)
     const btnSignOutHome = document.getElementById('btnSignOutHome');
@@ -815,7 +842,7 @@
       const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); delete cfg.idToken; delete cfg.key; localStorage.setItem('munify_config', JSON.stringify(cfg));
       // update sign indicator
       window._munifyUpdateSignIn(false);
-      window.MUNui && window.MUNui.toast && window.MUNui.toast('Signed out', { type: 'info' });
+  window.MUNui.toast('Signed out', { type: 'info' });
     });
 
     // Update global sign-in indicator from saved state and render sign-in button if needed
@@ -834,7 +861,7 @@
                 const cfg2 = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg2.idToken = resp.credential; localStorage.setItem('munify_config', JSON.stringify(cfg2));
                 window._munifyUpdateSignIn(true);
                 document.getElementById('modalSignedTag') && document.getElementById('modalSignedTag').classList.remove('hidden');
-                window.MUNui && window.MUNui.toast && window.MUNui.toast('Signed in', { type: 'success' });
+                window.MUNui.toast('Signed in', { type: 'success' });
                 // hide the GSI button after sign-in
                 if (signinContainer) signinContainer.style.display = 'none';
               } catch (e) { console.warn('GSI callback failed', e); }
@@ -878,6 +905,8 @@
         // persist a lightweight flag for UI
         const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg.idToken = cfg.idToken || window.MUNauth.getConfig().idToken; localStorage.setItem('munify_config', JSON.stringify(cfg));
         window._munifyUpdateSignIn(true);
+        // advance tutorial
+        try { showStep(1); } catch(e){}
       } catch (e) {
         document.getElementById('modalStatus').textContent = 'Sign-in failed: ' + (e.message||e);
       }
@@ -892,10 +921,10 @@
         const ok = await (window.MUNauth && window.MUNauth.checkAppsScriptHealth ? window.MUNauth.checkAppsScriptHealth(val) : (async ()=>{ try { const u=new URL(val); const r=await fetch(u.toString()+'?action=ping'); return r.ok; } catch(e){return false;} })());
         if (ok) {
           document.getElementById('modalStatus').textContent = 'Apps Script URL verified.';
-          window.MUNui && window.MUNui.toast && window.MUNui.toast('Apps Script verified', { type: 'success' });
+          window.MUNui.toast('Apps Script verified', { type: 'success' });
         } else {
           document.getElementById('modalStatus').textContent = 'Could not verify URL. Ensure the script is deployed and accessible.';
-          window.MUNui && window.MUNui.toast && window.MUNui.toast('Could not verify Apps Script URL', { type: 'error' });
+          window.MUNui.toast('Could not verify Apps Script URL', { type: 'error' });
         }
       } catch (e) {
         console.error(e);
@@ -913,7 +942,7 @@
         const res = await window.MUNauth.registerWithServer(url, title);
         if (res && res.key) {
           document.getElementById('modalStatus').textContent = 'Setup complete — redirecting to designer...';
-          window.MUNui && window.MUNui.toast && window.MUNui.toast('Setup complete', { type: 'success' });
+          window.MUNui.toast('Setup complete', { type: 'success' });
           setTimeout(()=>{ hideModal(); window.location.href = 'design/'; }, 900);
         } else {
           document.getElementById('modalStatus').textContent = 'Setup finished but server returned incomplete data.';
@@ -921,7 +950,7 @@
       } catch (err) {
         console.error(err);
         document.getElementById('modalStatus').textContent = 'Quick setup failed: ' + (err.message || String(err));
-        window.MUNui && window.MUNui.toast && window.MUNui.toast('Quick setup failed', { type: 'error' });
+  window.MUNui.toast('Quick setup failed', { type: 'error' });
       } finally { setModalBusy(false); }
     });
 
@@ -933,7 +962,7 @@
         if (res && res.spreadsheetId) {
           const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg.sheetId = res.spreadsheetId; localStorage.setItem('munify_config', JSON.stringify(cfg));
           document.getElementById('modalStatus').textContent = 'Provisioning complete — redirecting to designer...';
-          window.MUNui && window.MUNui.toast && window.MUNui.toast('Provisioning complete', { type: 'success' });
+          window.MUNui.toast('Provisioning complete', { type: 'success' });
           setTimeout(()=>{ hideModal(); window.location.href = 'design/'; }, 900);
         } else {
           document.getElementById('modalStatus').textContent = 'Provisioning finished but returned no IDs. Check console.';
@@ -941,9 +970,37 @@
       } catch (err) {
         console.error(err);
         document.getElementById('modalStatus').textContent = 'Provisioning failed: ' + (err.message || String(err));
-        window.MUNui && window.MUNui.toast && window.MUNui.toast('Provisioning failed', { type: 'error' });
+  window.MUNui.toast('Provisioning failed', { type: 'error' });
       } finally { setModalBusy(false); }
     });
+    // Stepper init and navigation handlers
+    (function(){
+      const steps = Array.from(document.querySelectorAll('#onboardSteps [data-step]'));
+      const totalSteps = steps.length;
+      let currentStep = 0;
+      const progress = document.getElementById('modalProgress');
+      const backBtn = document.getElementById('modalBackBtn');
+      const nextBtn = document.getElementById('modalNextBtn');
+
+      function showStep(n){
+        steps.forEach(s => s.classList.add('hidden'));
+        const el = steps[n]; if (!el) return;
+        el.classList.remove('hidden');
+        progress.textContent = `Step ${Math.min(n+1, totalSteps)} of ${totalSteps}`;
+        backBtn.classList.toggle('hidden', n === 0);
+        nextBtn.textContent = (n === totalSteps-1) ? 'Finish' : 'Next';
+        currentStep = n;
+      }
+
+      backBtn.addEventListener('click', ()=> showStep(Math.max(0, currentStep-1)));
+      nextBtn.addEventListener('click', ()=>{ if (currentStep < totalSteps-1) showStep(currentStep+1); else hideModal(); });
+
+      document.getElementById('modalOpenDesignerBtn').addEventListener('click', ()=>{ hideModal(); window.location.href = 'design/'; });
+      document.getElementById('modalCloseBtn').addEventListener('click', ()=>{ hideModal(); });
+      document.getElementById('modalCopyKeyBtn').addEventListener('click', ()=>{ try{ const cfg=JSON.parse(localStorage.getItem('munify_config')||'{}'); if (!cfg.key) throw new Error('No key'); navigator.clipboard.writeText(cfg.key); window.MUNui.toast('Key copied', { type: 'success' }); } catch(e){ window.MUNui.toast('No key to copy', { type: 'error' }); } });
+
+      showStep(0);
+    })();
   });
 </script>
 
