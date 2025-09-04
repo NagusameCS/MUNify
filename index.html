@@ -14,6 +14,8 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/ui.js"></script>
+  <script src="assets/js/theme.js"></script>
+  <script>/* early theme apply */(function(){try{var m=localStorage.getItem('munify-dark-mode');if(m==='true'){document.documentElement.classList.add('dark');}}catch(e){}})();</script>
   <style>
     /* Ensure earth background never overlays foreground content */
     #earth-bg, #earth-bg canvas {
@@ -29,7 +31,7 @@
     .pop-target { position: relative; z-index: 10; }
   </style>
 </head>
-<body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col">
+<body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col dark:bg-neutral-900 dark:text-neutral-100">
   <!-- Rotating Earth Background -->
   <div id="earth-bg"></div>
 
@@ -44,7 +46,11 @@
       <a href="info/" class="hover:underline">Info</a>
     </nav>
     <div class="flex gap-2 items-center text-sm">
-      
+      <button data-theme-toggle aria-pressed="false" class="p-2 rounded hover:underline" title="Switch to dark mode">
+        <span data-icon="sun" aria-hidden="true">☀️</span>
+        <span data-icon="moon" aria-hidden="true" style="display:none">🌙</span>
+        <span class="sr-only">Toggle theme</span>
+      </button>
       <div id="g_id_signin" class=""></div>
       <button id="btnSignOutHome" class="underline hidden">Sign out</button>
     </div>
@@ -137,7 +143,7 @@
             </div>
         </div>
       </div>
-      <div class="glow-card rounded-2xl p-6 border relative overflow-hidden">
+  <div class="glow-card rounded-2xl p-6 border relative overflow-hidden dark:bg-neutral-800/70 dark:border-neutral-700">
         <h2 class="font-semibold mb-3 flex items-center gap-2 text-neutral-800">
           <span class="inline-block w-5 h-5 rounded-full bg-blue-600"></span> Unified Flow
         </h2>
@@ -153,30 +159,30 @@
     </section>
 
     <!-- FEATURES GRID -->
-    <section class="py-12 md:py-16 space-y-10">
+  <section class="py-12 md:py-16 space-y-10">
       <h2 class="text-2xl md:text-3xl font-semibold text-center mb-2">Why MUNify?</h2>
       <div class="grid md:grid-cols-3 gap-6">
-        <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition">
+  <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700/60">
           <h3 class="font-medium mb-1">Own Your Data</h3>
           <p class="text-sm text-neutral-600 leading-relaxed">All submissions land directly in <strong>your</strong> Google Sheet. Export, pivot, archive without proprietary lock‑in.</p>
         </div>
-        <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition">
+  <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700/60">
           <h3 class="font-medium mb-1">Rapid Provisioning</h3>
           <p class="text-sm text-neutral-600 leading-relaxed">Wizard guides you through sheet selection and endpoint registration or beta auto‑provision.</p>
         </div>
-        <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition">
+  <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700/60">
           <h3 class="font-medium mb-1">Secure by Design</h3>
           <p class="text-sm text-neutral-600 leading-relaxed">Short‑lived ID tokens, whitelist enforcement, invite tokens, and minimal local storage only.</p>
         </div>
-        <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition">
+  <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700/60">
           <h3 class="font-medium mb-1">Inline Form Designer</h3>
           <p class="text-sm text-neutral-600 leading-relaxed">Live HTML editing with instant preview; keep or customize a clean starter template.</p>
         </div>
-        <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition">
+  <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700/60">
           <h3 class="font-medium mb-1">Invite Collaboration</h3>
           <p class="text-sm text-neutral-600 leading-relaxed">24h tokens let trusted users self‑whitelist—no manual email juggling.</p>
         </div>
-        <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition">
+  <div class="reveal p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700/60">
           <h3 class="font-medium mb-1">Auditable Simplicity</h3>
           <p class="text-sm text-neutral-600 leading-relaxed">Small, readable codebase. Fork, extend, self‑host on GitHub Pages.</p>
         </div>
@@ -184,25 +190,25 @@
     </section>
 
     <!-- WORKFLOW STRIP -->
-    <section class="py-12 md:py-16 section-gradient rounded-2xl px-4 md:px-8">
+  <section class="py-12 md:py-16 section-gradient rounded-2xl px-4 md:px-8 dark:bg-[linear-gradient(180deg,rgba(0,0,0,0)_0%,rgba(0,0,0,0.6)_40%,rgba(23,23,23,1)_100%)]">
       <h2 class="text-2xl md:text-3xl font-semibold mb-6 text-center">From zero to live in minutes</h2>
       <div class="grid md:grid-cols-4 gap-6 text-sm">
-        <div class="reveal p-4 border rounded-lg bg-white/70 backdrop-blur">
+  <div class="reveal p-4 border rounded-lg bg-white/70 backdrop-blur dark:bg-neutral-800/70 dark:border-neutral-700">
           <div class="text-xs font-semibold tracking-tight mb-1 text-blue-600">STEP 1</div>
           <h3 class="font-medium mb-1">Sign In</h3>
           <p class="text-neutral-600 leading-relaxed">Google Identity button gives you a short‑lived ID token.</p>
         </div>
-        <div class="reveal p-4 border rounded-lg bg-white/70 backdrop-blur">
+  <div class="reveal p-4 border rounded-lg bg-white/70 backdrop-blur dark:bg-neutral-800/70 dark:border-neutral-700">
           <div class="text-xs font-semibold tracking-tight mb-1 text-blue-600">STEP 2</div>
           <h3 class="font-medium mb-1">Select Sheet</h3>
           <p class="text-neutral-600 leading-relaxed">Pick existing or create a fresh spreadsheet for delegates.</p>
         </div>
-        <div class="reveal p-4 border rounded-lg bg-white/70 backdrop-blur">
+  <div class="reveal p-4 border rounded-lg bg-white/70 backdrop-blur dark:bg-neutral-800/70 dark:border-neutral-700">
           <div class="text-xs font-semibold tracking-tight mb-1 text-blue-600">STEP 3</div>
           <h3 class="font-medium mb-1">Register Endpoint</h3>
           <p class="text-neutral-600 leading-relaxed">Point to your Apps Script Web App or auto‑provision (beta).</p>
         </div>
-        <div class="reveal p-4 border rounded-lg bg-white/70 backdrop-blur">
+  <div class="reveal p-4 border rounded-lg bg-white/70 backdrop-blur dark:bg-neutral-800/70 dark:border-neutral-700">
           <div class="text-xs font-semibold tracking-tight mb-1 text-blue-600">STEP 4</div>
           <h3 class="font-medium mb-1">Share Form</h3>
           <p class="text-neutral-600 leading-relaxed">Distribute the public URL. Monitor Sheet in real time.</p>
@@ -215,7 +221,7 @@
       <div class="max-w-4xl mx-auto">
         <h2 class="text-2xl md:text-3xl font-semibold mb-4">Lightweight client calls</h2>
         <p class="text-sm text-neutral-600 mb-4">Core operations are simple fetches to your Apps Script endpoint. Example append (handled internally):</p>
-        <div class="code-block reveal" role="region" aria-label="Example code snippet"><pre><code>// Minimal append flow (simplified)
+  <div class="code-block reveal dark:bg-neutral-950" role="region" aria-label="Example code snippet"><pre><code>// Minimal append flow (simplified)
 const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
 const url = localStorage.getItem('munifyAppsScriptUrl');
 const row = ['Name','Email','Year','ID'];
@@ -228,13 +234,13 @@ await fetch(url+'?mode=append&key='+cfg.key, {
     </section>
 
     <!-- FAQ -->
-    <section class="py-12 md:py-16">
+  <section class="py-12 md:py-16">
       <h2 class="text-2xl md:text-3xl font-semibold mb-6 text-center">FAQ</h2>
       <div class="max-w-4xl mx-auto space-y-4">
-        <details class="reveal p-4 border rounded-lg bg-white shadow-sm"><summary class="cursor-pointer font-medium">Do I need a backend server?</summary><p class="mt-2 text-sm text-neutral-600">No — Google Apps Script acts as your minimal server. Host the static site (this repository) anywhere (GitHub Pages works).</p></details>
-        <details class="reveal p-4 border rounded-lg bg-white shadow-sm"><summary class="cursor-pointer font-medium">Is any personal data stored here?</summary><p class="mt-2 text-sm text-neutral-600">Only in your Google Sheet. Local storage keeps temporary config (sheet id, key, token) in your own browser.</p></details>
-        <details class="reveal p-4 border rounded-lg bg-white shadow-sm"><summary class="cursor-pointer font-medium">How do invite tokens work?</summary><p class="mt-2 text-sm text-neutral-600">Owner creates a 24h token → collaborator redeems while signed in → server adds them to whitelist.</p></details>
-        <details class="reveal p-4 border rounded-lg bg-white shadow-sm"><summary class="cursor-pointer font-medium">Can I customize the form markup?</summary><p class="mt-2 text-sm text-neutral-600">Yes. The Designer lets you edit raw HTML, add fields, and reset to a starter template at any time.</p></details>
+  <details class="reveal p-4 border rounded-lg bg-white shadow-sm dark:bg-neutral-800 dark:border-neutral-700"><summary class="cursor-pointer font-medium">Do I need a backend server?</summary><p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">No — Google Apps Script acts as your minimal server. Host the static site (this repository) anywhere (GitHub Pages works).</p></details>
+  <details class="reveal p-4 border rounded-lg bg-white shadow-sm dark:bg-neutral-800 dark:border-neutral-700"><summary class="cursor-pointer font-medium">Is any personal data stored here?</summary><p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">Only in your Google Sheet. Local storage keeps temporary config (sheet id, key, token) in your own browser.</p></details>
+  <details class="reveal p-4 border rounded-lg bg-white shadow-sm dark:bg-neutral-800 dark:border-neutral-700"><summary class="cursor-pointer font-medium">How do invite tokens work?</summary><p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">Owner creates a 24h token → collaborator redeems while signed in → server adds them to whitelist.</p></details>
+  <details class="reveal p-4 border rounded-lg bg-white shadow-sm dark:bg-neutral-800 dark:border-neutral-700"><summary class="cursor-pointer font-medium">Can I customize the form markup?</summary><p class="mt-2 text-sm text-neutral-600 dark:text-neutral-400">Yes. The Designer lets you edit raw HTML, add fields, and reset to a starter template at any time.</p></details>
       </div>
     </section>
 
@@ -248,7 +254,7 @@ await fetch(url+'?mode=append&key='+cfg.key, {
   <!-- Onboarding modal removed for unified flow -->
 
   <!-- Footer -->
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200 pop-target site-foreground">
+  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200 pop-target site-foreground dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
       <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">

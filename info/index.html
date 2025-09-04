@@ -8,8 +8,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../assets/css/style.css" />
   <script src="../assets/js/ui.js"></script>
+  <script src="../assets/js/theme.js"></script>
+  <script>/* early theme apply */(function(){try{var m=localStorage.getItem('munify-dark-mode');if(m==='true'){document.documentElement.classList.add('dark');}}catch(e){}})();</script>
 </head>
-<body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col">
+<body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col dark:bg-neutral-900 dark:text-neutral-100">
   <header class="border-b bg-white/70 backdrop-blur sticky top-0 z-10" role="banner">
     <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
       <a href="../" class="font-semibold tracking-tight">MUNify</a>
@@ -19,11 +21,15 @@
         <a href="../settings/" class="hover:underline">Settings</a>
         <a href="./" class="hover:underline font-medium">Info</a>
       </nav>
-      
+      <button data-theme-toggle aria-pressed="false" class="p-2 rounded hover:underline" title="Switch to dark mode">
+        <span data-icon="sun" aria-hidden="true">☀️</span>
+        <span data-icon="moon" aria-hidden="true" style="display:none">🌙</span>
+        <span class="sr-only">Toggle theme</span>
+      </button>
     </div>
   </header>
   <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-10 space-y-10" role="main">
-    <section class="bg-white border rounded-xl shadow-sm p-6">
+  <section class="bg-white border rounded-xl shadow-sm p-6 dark:bg-neutral-800 dark:border-neutral-700">
       <h1 class="text-2xl font-semibold mb-2">How MUNify Works</h1>
       <p class="text-sm text-neutral-600 mb-4">MUNify connects a Google Sheet with a lightweight Apps Script Web App so you can design custom conference registration forms and collect delegate submissions securely.</p>
       <div class="grid md:grid-cols-3 gap-6 text-sm">
@@ -42,7 +48,7 @@
       </div>
     </section>
 
-    <section class="bg-white border rounded-xl shadow-sm p-6" aria-labelledby="securityHeading">
+  <section class="bg-white border rounded-xl shadow-sm p-6 dark:bg-neutral-800 dark:border-neutral-700" aria-labelledby="securityHeading">
       <h2 id="securityHeading" class="text-xl font-semibold mb-2">Security & Permissions</h2>
       <ul class="list-disc ml-5 space-y-2 text-sm">
         <li><strong>ID Token:</strong> Used server-side to verify your email. Not shared with other users.</li>
@@ -53,7 +59,7 @@
       </ul>
     </section>
 
-    <section class="bg-white border rounded-xl shadow-sm p-6">
+  <section class="bg-white border rounded-xl shadow-sm p-6 dark:bg-neutral-800 dark:border-neutral-700">
       <h2 class="text-xl font-semibold mb-2">Manual Setup Recap</h2>
       <ol class="list-decimal ml-5 space-y-1 text-sm">
         <li>Create a Google Apps Script project & deploy as Web App (execute as you, accessible to anyone).</li>
@@ -63,7 +69,7 @@
       </ol>
     </section>
 
-    <section class="bg-white border rounded-xl shadow-sm p-6">
+  <section class="bg-white border rounded-xl shadow-sm p-6 dark:bg-neutral-800 dark:border-neutral-700">
       <h2 class="text-xl font-semibold mb-2">Troubleshooting</h2>
       <div class="space-y-4 text-sm">
         <div>
@@ -82,7 +88,7 @@
     </section>
   </main>
 
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t">
+  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
       <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="hover:underline" target="_blank" rel="noopener">GitHub</a>
