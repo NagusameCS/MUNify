@@ -242,9 +242,24 @@
     });
     if (!deployRes.ok) { const t = await deployRes.text(); throw new Error('Script deploy failed: ' + t); }
     const deployJson = await deployRes.json();
+    // Attempt to extract web app URL from entry points (if present)
+    let webAppUrl = null;
+    try {
+      if (deployJson.entryPoints && Array.isArray(deployJson.entryPoints)) {
+        const web = deployJson.entryPoints.find(e => (e.entryPointType||e.type) === 'WEB_APP');
+        if (web && (web.url || web.webApp && web.webApp.url)) webAppUrl = web.url || (web.webApp && web.webApp.url);
+      }
+    } catch (e) { /* ignore parse failures */ }
 
-    // Web app URL is not always returned; provide projectId + deploymentId to the caller
-    return { spreadsheetId, projectId, deploymentId: deployJson.deploymentId, deployInfo: deployJson };
+    // Persist discovered URL for unified flow
+    if (webAppUrl) {
+      try { localStorage.setItem('munifyAppsScriptUrl', webAppUrl); } catch(e) {}
+    }
+
+    const result = { spreadsheetId, projectId, deploymentId: deployJson.deploymentId, webAppUrl: webAppUrl || null, deployInfo: deployJson };
+    // Save sheetId into config if not already present
+    try { const cfg = load(); if (spreadsheetId && !cfg.sheetId) { cfg.sheetId = spreadsheetId; save(cfg); } } catch(e) {}
+    return result;
   }
 
   // create an invite token (server issues 24h token by default)

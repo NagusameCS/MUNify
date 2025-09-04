@@ -13,14 +13,15 @@ Features
 - Sheet picker & optional automatic provisioning (beta)
 - Minimal, responsive UI built with Tailwind
 
-Quick Start (Hosted / GitHub Pages)
-----------------------------------
-1. Open the site root (`index.html`). Click Quick Setup or go to Settings.
-2. Sign in with your Google account (consent screen appears the first time).
-3. (Option A) Provide an existing Apps Script Web App URL you deployed manually.
-4. (Option B) Use Automatic Setup / Provision (beta) to create a Sheet + Script via APIs.
-5. A short key and sheet ID are stored locally in `localStorage` under `munify_config`.
-6. Open Designer, customize your form, then share `form/#<KEY>` or invite others.
+Unified Setup Flow (Hosted / GitHub Pages)
+-----------------------------------------
+1. Open the site root (`index.html`). Click Get Started (takes you to Settings).
+2. Sign in with your Google account (ID token only; no refresh token stored).
+3. In Settings run Automatic Setup (creates/chooses Sheet then registers or provisions endpoint) OR:
+   - Provide an existing Apps Script Web App URL you deployed manually and click Register with Server.
+   - Use Provision User Script (beta) to have a personal Script + Sheet created for you (then manually deploy if URL not auto-returned).
+4. Your key and sheet ID are stored locally in `localStorage` (`munify_config`).
+5. Open Designer, customize your form, then share `form/#<KEY>` or invite others to whitelist them.
 
 Building CSS (Tailwind)
 -----------------------
@@ -90,8 +91,8 @@ Troubleshooting
 
 Directory Overview
 ------------------
-- `index.html` – Landing + Quick Setup & onboarding modal.
-- `settings/` – Advanced configuration: sheet picker, provisioning, endpoint management.
+- `index.html` – Landing (navigation + background globe) pointing to unified Settings flow.
+- `settings/` – Single canonical configuration area: sheet picker, provisioning, endpoint management.
 - `design/` – Form designer (preview + code editing & save/reset).
 - `form/` – Public delegate form (consumes key & sheet ID).
 - `invite/` – Invite token redemption.

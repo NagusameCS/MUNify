@@ -14,18 +14,39 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/ui.js"></script>
+  <style>
+    /* Ensure earth background never overlays foreground content */
+    #earth-bg, #earth-bg canvas {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: -1 !important; /* push strictly behind */
+      pointer-events: none !important;
+    }
+    /* Foreground utility */
+    .site-foreground { position: relative; z-index: 10; }
+    .pop-target { position: relative; z-index: 10; }
+  </style>
 </head>
 <body class="bg-neutral-50 text-neutral-900">
   <!-- Rotating Earth Background -->
   <div id="earth-bg"></div>
 
   <!-- Header -->
-  <header class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between pop-target site-foreground">
-  <a href="./" class="flex items-center gap-2 font-semibold">MUNify</a>
+  <header class="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between site-foreground">
+    <a href="./" class="flex items-center gap-2 font-semibold">MUNify</a>
     <nav class="text-sm hidden sm:flex gap-6">
-  <a href="info/" class="hover:underline">Info & Permissions</a>
-  <a href="design/" class="hover:underline">Form Designer</a>
+      <a href="./" class="hover:underline font-medium">Home</a>
+      <a href="design/" class="hover:underline">Designer</a>
+      <a href="form/" class="hover:underline">Form</a>
+      <a href="settings/" class="hover:underline">Settings</a>
+      <a href="info/" class="hover:underline">Info</a>
     </nav>
+    <div class="flex gap-2 items-center text-sm">
+      <div id="g_id_signin" class=""></div>
+      <button id="btnSignOutHome" class="underline hidden">Sign out</button>
+    </div>
   </header>
   <script>
   // Rotating words: wait until DOM is ready and guard missing elements
@@ -58,6 +79,14 @@
   </script>
     
     <style>
+    #earth-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .site-foreground { position: relative; z-index: 2; }
+    .pop-target { position: relative; z-index: 2; }
     #word1, #word2 {
         display: inline-block;
         opacity: 1;
@@ -65,140 +94,32 @@
     </style>
   <!-- Main -->
   <main class="max-w-5xl mx-auto px-4 pop-target site-foreground">
-    <section class="grid md:grid-cols-2 gap-8 items-center">
-  <div class="space-y-4">
+    <section class="grid md:grid-cols-2 gap-8 items-center site-foreground">
+      <div class="space-y-4">
         <h1 class="text-3xl md:text-5xl font-bold leading-tight frosted-text">
-            MUNify is built for <span id="word1" class="underline">simplicity</span>.
+          MUNify is built for <span id="word1" class="underline">simplicity</span>.
         </h1>
-        
-        <p>
-            Where diplomacy meets <span id="word2">simplicity</span>.
-        </p>
-
-        <div id="g_id_signin"></div>
-
-
-  <div class="spacer-50x120" aria-hidden="true"></div>
-
-    </div>
-      <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200">
-  <h2 class="font-semibold mb-2 frosted-text">Quick Setup</h2>
+        <p>Where diplomacy meets <span id="word2">simplicity</span>.</p>
+        <div class="mt-6 flex gap-2 flex-wrap">
+          <a href="settings/" class="px-4 py-2 rounded-lg bg-blue-600 text-white">Get Started</a>
+          <a href="design/" class="px-4 py-2 rounded-lg border">Designer</a>
+          <a href="info/" class="px-4 py-2 rounded-lg border">Help</a>
+        </div>
+      </div>
+      <div class="bg-white/80 backdrop-blur rounded-2xl shadow p-6 border border-neutral-200">
+        <h2 class="font-semibold mb-2 frosted-text">Unified Flow</h2>
         <ol class="list-decimal ml-5 space-y-2 text-sm">
-          <li>Click <strong>Quick Setup</strong> to launch guided onboarding.</li>
-          <li>(Optional) Paste an existing <strong>Apps Script Web App URL</strong> or let Automatic Setup provision one.</li>
-          <li>Designer: build your form and test locally.</li>
-          <li>Share <code>form/#YOUR_KEY</code> or invite users with a token.</li>
+          <li>Sign in (top-right if not signed in).</li>
+          <li>Open <strong>Settings</strong> to run Automatic Setup.</li>
+          <li>Design your form and distribute <code>form/#KEY</code>.</li>
+          <li>Manage invites & config anytime in Settings.</li>
         </ol>
-        <div class="mt-4 flex gap-2 items-center">
-          <button id="btnConnect" class="px-3 py-2 rounded-2xl bg-blue-600 text-white">Quick Setup</button>
-          <span id="signIndicator" class="text-sm text-green-600 hidden">Signed in</span>
-          <button id="btnSignOutHome" class="text-sm underline hidden">Sign out</button>
-          <a href="design/" class="px-3 py-2 rounded-2xl border">Open Designer</a>
-          <a href="info/" class="px-3 py-2 rounded-2xl border">Permissions & Help</a>
-        </div>
-        <div id="setupStatus" class="mt-2 text-sm text-neutral-600"></div>
+        <p class="mt-3 text-xs text-neutral-500">The legacy Quick Setup modal has been removed; everything lives in Settings now.</p>
       </div>
     </section>
-
-    <section class="mt-12 bg-white rounded-2xl shadow p-6 border border-neutral-200">
-      <div class="flex items-center justify-between">
-  <h3 class="font-semibold frosted-text">Settings</h3>
-        <button id="btnClear" class="text-sm underline">Clear local settings</button>
-      </div>
-      <div class="grid md:grid-cols-2 gap-4 mt-4">
-        <label class="text-sm">Apps Script Web App URL
-          <input id="scriptUrl" type="url" placeholder="https://script.google.com/macros/s/AK.../exec" class="mt-1 w-full border rounded-lg p-2" />
-        </label>
-        <label class="text-sm">Google Sheet ID
-          <input id="sheetId" type="text" placeholder="1AbCdefGhIjK..." class="mt-1 w-full border rounded-lg p-2" />
-        </label>
-      </div>
-    <div class="mt-4 flex gap-2">
-      <button id="btnSave" class="px-3 py-2 rounded-2xl bg-neutral-900 text-white">Save</button>
-  <a href="design/" class="px-3 py-2 rounded-2xl border">Go to Designer</a>
-    </div>
-      <div class="mt-4">
-        <h4 class="font-medium">Invites</h4>
-        <div class="flex gap-2 mt-2 items-center">
-          <button id="btnCreateInvite" class="px-3 py-2 rounded-2xl border">Create 24h Invite</button>
-          <input id="inviteToken" class="mt-1 w-full border rounded-lg p-2" placeholder="Invite token will appear here" readonly />
-        </div>
-        <div id="inviteStatus" class="mt-2 text-sm text-neutral-600"></div>
-      </div>
-      <div class="mt-4 hidden">
-        <h4 class="font-medium">Provision user API (beta)</h4>
-        <div class="flex gap-2 mt-2 items-center">
-          <button id="btnProvision" class="px-3 py-2 rounded-2xl border">Provision user API</button>
-          <input id="provResult" class="mt-1 w-full border rounded-lg p-2" placeholder="Provision result (spreadsheetId, projectId, deploymentId)" readonly />
-        </div>
-        <div id="provisionStatus" class="mt-2 text-sm text-neutral-600"></div>
-      </div>
-    </section>
+    <!-- Settings section removed from landing to enforce single canonical flow -->
   </main>
-
-  <!-- Onboarding modal (forced, appears when no key is configured) -->
-  <div id="onboardModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
-      <h2 class="text-xl font-semibold mb-2">Welcome — Setup MUNify</h2>
-      <p class="text-sm text-neutral-600 mb-4">We'll walk you through setup so forms and sheets are created correctly. This process is required before continuing.</p>
-
-      <div id="onboardSteps" class="space-y-4">
-        <!-- Step 1: Sign in -->
-        <div data-step="0" id="stepSignIn" class="">
-          <h3 class="font-medium">Sign in with Google</h3>
-          <p class="text-sm text-neutral-600">Sign in so MUNify can create and link a sheet for you. This action only requests a short-lived ID token by default.</p>
-          <div class="mt-3 flex gap-2 items-center">
-            <button id="modalSignInBtn" class="px-3 py-2 bg-blue-600 text-white rounded">Sign in</button>
-            <div id="modalSignedTag" class="text-sm text-green-600 hidden">Signed in ✓</div>
-          </div>
-        </div>
-
-        <!-- Step 2: Apps Script URL -->
-        <div data-step="1" id="stepScriptUrl" class="hidden">
-          <h3 class="font-medium">Provide Apps Script Web App URL</h3>
-          <p class="text-sm text-neutral-600">Paste your deployed Apps Script Web App URL, or accept the site default if present.</p>
-          <div class="mt-3 flex gap-2">
-            <input id="modalScriptUrl" class="flex-1 border rounded-lg p-2" placeholder="https://script.google.com/macros/s/AK.../exec" />
-            <button id="modalVerifyUrlBtn" class="px-3 py-2 border rounded">Verify</button>
-          </div>
-          <div id="modalUrlHelp" class="text-sm text-neutral-600 mt-2">Verifying now makes setup automatic; you can also set this later in Settings.</div>
-        </div>
-
-        <!-- Step 3: Quick Setup action -->
-        <div data-step="2" id="stepQuickSetup" class="hidden">
-          <h3 class="font-medium">Run Quick Setup</h3>
-          <p class="text-sm text-neutral-600">Quick Setup will create a Spreadsheet and wire up a short key for your form. Click Next to begin. If you prefer a per-user API, expand Advanced in this modal.</p>
-          <div class="mt-3 flex gap-2 items-center">
-              <button id="modalQuickSetupBtn" class="px-3 py-2 bg-neutral-900 text-white rounded">Run Quick Setup</button>
-          </div>
-        </div>
-
-        <!-- Step 4: Done / copy key -->
-        <div data-step="3" id="stepDone" class="hidden">
-          <h3 class="font-medium">Setup Complete</h3>
-          <p class="text-sm text-neutral-600">You're all set. Use the button below to open the Designer or copy your recovery key.</p>
-          <div class="mt-3 flex gap-2 items-center">
-            <button id="modalOpenDesignerBtn" class="px-3 py-2 bg-blue-600 text-white rounded">Open Designer</button>
-            <button id="modalCopyKeyBtn" class="px-3 py-2 border rounded">Copy Key</button>
-            <button id="modalCloseBtn" class="px-3 py-2 border rounded">Close</button>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between mt-3">
-          <div id="modalProgress" class="text-sm text-neutral-600">Step 1 of 4</div>
-          <div class="flex gap-2">
-            <button id="modalBackBtn" class="px-3 py-2 border rounded hidden">Back</button>
-            <button id="modalNextBtn" class="px-3 py-2 bg-neutral-900 text-white rounded">Next</button>
-          </div>
-        </div>
-
-        <div id="modalBusy" class="hidden mt-2 flex items-center gap-3">
-          <div id="modalSpinner" class="w-5 h-5 border-2 border-t-transparent border-neutral-700 rounded-full animate-spin" aria-hidden="true"></div>
-          <div id="modalStatus" class="text-sm text-neutral-600">Ready</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Onboarding modal removed for unified flow -->
 
   <!-- Footer -->
   <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200 pop-target site-foreground">
@@ -247,7 +168,7 @@
   renderer.domElement.style.left = '0';
   renderer.domElement.style.width = '100%';
   renderer.domElement.style.height = '100%';
-  renderer.domElement.style.zIndex = '0';
+  renderer.domElement.style.zIndex = '-2';
   renderer.domElement.style.pointerEvents = 'none';
   // Optional styling hooks (uncomment to tweak visuals)
   // renderer.domElement.style.filter = 'blur(1.5px) brightness(0.85)';
@@ -545,85 +466,34 @@
     }
   });
 
-  // Google Sign-In
-  const CLIENT_ID = "73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com";
-
-  function handleCredentialResponse(response) {
-    // Persist minimal user info and id token, but do NOT auto-run setup or redirect.
-    try {
-      const data = JSON.parse(atob(response.credential.split('.')[1] || '{}'));
-      localStorage.setItem("munifyUser", JSON.stringify(data));
-    } catch (e) { /* ignore */ }
-    try {
-      const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
-      cfg.idToken = response.credential;
-      localStorage.setItem('munify_config', JSON.stringify(cfg));
-    } catch (e) { console.warn('Could not persist id token to munify_config', e); }
-
-    // Update UI to reflect signed-in state. Do not auto-run setup or navigate away.
-    try { window._munifyUpdateSignIn(true); } catch(e){}
-    try { document.getElementById('g_id_signin').style.display = 'none'; } catch(e){}
-  window.MUNui.toast('Signed in — click Quick Setup to continue', { type: 'success' });
-  }
-
-  // Settings
-  document.getElementById("btnSave").addEventListener("click", () => {
-  localStorage.setItem("munifyScriptUrl", document.getElementById("scriptUrl").value);
-  localStorage.setItem("munifySheetId", document.getElementById("sheetId").value);
-  window.MUNui.toast('Settings saved locally', { type: 'success' });
-  });
-
-  document.getElementById("btnClear").addEventListener("click", () => {
-  localStorage.clear();
-  window.MUNui.toast('Local settings cleared', { type: 'success' });
-  });
-</script>
-  <script>
-    // Wire quick setup buttons
-    document.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('btnConnect');
-      const btnExport = document.getElementById('btnExportKey');
-      const setupStatus = document.getElementById('setupStatus');
-      if (btn) btn.addEventListener('click', async () => {
-        if (setupStatus) setupStatus.textContent = '';
-        try {
-          btn.disabled = true;
-          const orig = btn.textContent;
-          btn.textContent = 'Setting up…';
-          await window.MUNauth.requestAccess();
-          const appsScriptUrl = localStorage.getItem('munifyAppsScriptUrl');
-          if (!appsScriptUrl) {
-            if (setupStatus) setupStatus.textContent = 'Apps Script server URL not configured. Please set it in Settings.';
-            return;
-          }
-          const cfg = window.MUNauth.getConfig();
-          if (cfg && cfg.key) {
-            if (setupStatus) setupStatus.textContent = 'Already configured. Use Settings to change.';
-            return;
-          }
-          if (setupStatus) setupStatus.textContent = 'Creating spreadsheet and configuring your account...';
-          const title = 'MUNify - ' + (await window.MUNauth.getUserEmail());
-          const res = await window.MUNauth.registerWithServer(appsScriptUrl, title);
-          if (res && res.sheetId && res.key) {
-            if (setupStatus) setupStatus.textContent = 'Setup complete — Sheet created and key stored locally.';
-          } else {
-            if (setupStatus) setupStatus.textContent = 'Setup completed but server returned incomplete data.';
-          }
-        } catch (err) {
-          console.error(err);
-          if (setupStatus) setupStatus.textContent = 'Setup failed: ' + (err.message || String(err));
-        } finally {
-          if (btn) { btn.disabled = false; btn.textContent = 'Quick Setup'; }
-        }
-      });
-
-          if (btnExport) btnExport.addEventListener('click', () => {
-        try {
-          window.MUNauth.exportKeyFile();
-          window.MUNui.toast('Key downloaded', { type: 'success' });
-        } catch (e) { console.error(e); window.MUNui.toast('No key to export', { type: 'error' }); }
-      });
+  // Google Sign-In simplified: render button, store token, toggle sign out
+  const CLIENT_ID = '73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com';
+  function initGsi(){
+    const container = document.getElementById('g_id_signin');
+    if (!window.google || !window.google.accounts || !window.google.accounts.id || !container) return;
+    const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
+    window.google.accounts.id.initialize({
+      client_id: CLIENT_ID,
+      callback: (resp)=>{
+        try { const c=JSON.parse(localStorage.getItem('munify_config')||'{}'); c.idToken = resp.credential; localStorage.setItem('munify_config', JSON.stringify(c)); } catch(e){}
+        container.classList.add('hidden');
+        document.getElementById('btnSignOutHome').classList.remove('hidden');
+        window.MUNui.toast('Signed in', { type:'success'});
+      }
     });
+    if (!cfg.idToken) {
+      container.classList.remove('hidden');
+      try { window.google.accounts.id.renderButton(container, { theme:'outline', size:'large' }); } catch(e){}
+    } else {
+      container.classList.add('hidden');
+      document.getElementById('btnSignOutHome').classList.remove('hidden');
+    }
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    if ('requestIdleCallback' in window) requestIdleCallback(()=>initGsi(), {timeout:1500}); else setTimeout(initGsi, 800);
+    const so = document.getElementById('btnSignOutHome');
+    if (so) so.addEventListener('click', ()=>{ const c=JSON.parse(localStorage.getItem('munify_config')||'{}'); delete c.idToken; delete c.key; localStorage.setItem('munify_config', JSON.stringify(c)); document.getElementById('g_id_signin').classList.remove('hidden'); so.classList.add('hidden'); window.MUNui.toast('Signed out', { type:'info'}); initGsi(); });
+  });
   </script>
   <script>
     // Settings: save apps script URL and optional sheetId; keep client-side storage minimal
@@ -797,213 +667,22 @@
   })();
 </script>
 
+<!-- Removed legacy onboarding JS -->
 <script>
-  // Onboarding modal control — show only when user clicks Quick Setup
-  document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('onboardModal');
-    const btnConnect = document.getElementById('btnConnect');
-    const signIndicator = document.getElementById('signIndicator');
-    const siteDefault = document.querySelector('meta[name="munify-apps-script-url"]')?.content || '';
-
-  function showModal() {
-      modal.classList.remove('hidden');
-      modal.style.display = 'flex';
-      if (siteDefault) document.getElementById('modalScriptUrl').value = siteDefault;
-      // Update sign indicator inside modal if already signed in
-      const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
-      if (cfg && cfg.idToken) document.getElementById('modalSignedTag').classList.remove('hidden');
-    }
-
-    function hideModal() { modal.classList.add('hidden'); modal.style.display = 'none'; }
-
-    // Helper to show/hide the modal busy spinner and disable modal actions
-    function setModalBusy(show, message) {
-      const mb = document.getElementById('modalBusy');
-      const ms = document.getElementById('modalStatus');
-      const buttons = [document.getElementById('modalVerifyUrlBtn'), document.getElementById('modalQuickSetupBtn'), document.getElementById('modalProvisionBtn'), document.getElementById('modalSignInBtn')];
-      if (show) {
-        if (mb) mb.classList.remove('hidden');
-        if (ms && message) ms.textContent = message;
-        buttons.forEach(b => { if (b) b.disabled = true; });
-      } else {
-        if (mb) mb.classList.add('hidden');
-        if (ms && message === undefined) ms.textContent = 'Ready';
-        buttons.forEach(b => { if (b) b.disabled = false; });
-      }
-    }
-
-    // Wire main Quick Setup button to open the modal
-  if (btnConnect) btnConnect.addEventListener('click', () => { showModal(); window.MUNui.toast('Opening setup', { type: 'info', duration: 1200 }); });
-
-    // Sign out button on home (clear id token and update UI)
-    const btnSignOutHome = document.getElementById('btnSignOutHome');
-    if (btnSignOutHome) btnSignOutHome.addEventListener('click', ()=>{
-      const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); delete cfg.idToken; delete cfg.key; localStorage.setItem('munify_config', JSON.stringify(cfg));
-      // update sign indicator
-      window._munifyUpdateSignIn(false);
-  window.MUNui.toast('Signed out', { type: 'info' });
-    });
-
-    // Update global sign-in indicator from saved state and render sign-in button if needed
-    const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
-    const loggedIn = !!cfg.idToken;
-    const signOutBtn = document.getElementById('btnSignOutHome');
-    const signinContainer = document.getElementById('g_id_signin');
-    function renderGSI() {
-      try {
-        if (window.google && window.google.accounts && window.google.accounts.id && signinContainer) {
-          // initialize GSI with a callback that persists idToken and updates UI
-          window.google.accounts.id.initialize({
-            client_id: '73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com',
-            callback: (resp) => {
-              try {
-                const cfg2 = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg2.idToken = resp.credential; localStorage.setItem('munify_config', JSON.stringify(cfg2));
-                window._munifyUpdateSignIn(true);
-                document.getElementById('modalSignedTag') && document.getElementById('modalSignedTag').classList.remove('hidden');
-                window.MUNui.toast('Signed in', { type: 'success' });
-                // hide the GSI button after sign-in
-                if (signinContainer) signinContainer.style.display = 'none';
-              } catch (e) { console.warn('GSI callback failed', e); }
-            }
-          });
-          // render a standard button if not already signed in
-          if (!loggedIn) {
-            signinContainer.style.display = '';
-            try { window.google.accounts.id.renderButton(signinContainer, { theme: 'outline', size: 'large', text: 'signin_with' }); } catch(e) {}
-          } else {
-            // hide the sign-in container when already signed in
-            if (signinContainer) signinContainer.style.display = 'none';
-          }
-        }
-      } catch (e) { console.warn('renderGSI error', e); }
-    }
-
-    // Expose a small helper to update sign indicator when sign-in state changes
-    window._munifyUpdateSignIn = function(signedIn){
-      if (signedIn) {
-        signIndicator.classList.remove('hidden');
-        if (signOutBtn) signOutBtn.classList.remove('hidden');
-        if (signinContainer) signinContainer.style.display = 'none';
-      } else {
-        signIndicator.classList.add('hidden');
-        if (signOutBtn) signOutBtn.classList.add('hidden');
-        if (signinContainer) signinContainer.style.display = '';
-      }
-    };
-
-    // initial render
-    window._munifyUpdateSignIn(loggedIn);
-    renderGSI();
-
-    // Wire modal buttons (sign in, verify, quick setup, provision)
-    document.getElementById('modalSignInBtn').addEventListener('click', async () => {
-      try {
-        await window.MUNauth.requestAccess();
-        document.getElementById('modalSignedTag').classList.remove('hidden');
-        document.getElementById('modalSignedTag').textContent = 'Signed in ✓';
-        // persist a lightweight flag for UI
-        const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg.idToken = cfg.idToken || window.MUNauth.getConfig().idToken; localStorage.setItem('munify_config', JSON.stringify(cfg));
-        window._munifyUpdateSignIn(true);
-        // advance tutorial
-        try { showStep(1); } catch(e){}
-      } catch (e) {
-        document.getElementById('modalStatus').textContent = 'Sign-in failed: ' + (e.message||e);
-      }
-    });
-
-    document.getElementById('modalVerifyUrlBtn').addEventListener('click', async () => {
-      const val = document.getElementById('modalScriptUrl').value.trim();
-      if (!val) return document.getElementById('modalStatus').textContent = 'Enter the Apps Script Web App URL to continue.';
-      try {
-        setModalBusy(true, 'Verifying Apps Script URL...');
-        localStorage.setItem('munifyAppsScriptUrl', val);
-        const ok = await (window.MUNauth && window.MUNauth.checkAppsScriptHealth ? window.MUNauth.checkAppsScriptHealth(val) : (async ()=>{ try { const u=new URL(val); const r=await fetch(u.toString()+'?action=ping'); return r.ok; } catch(e){return false;} })());
-        if (ok) {
-          document.getElementById('modalStatus').textContent = 'Apps Script URL verified.';
-          window.MUNui.toast('Apps Script verified', { type: 'success' });
-          try{ showStep(2); }catch(e){}
-        } else {
-          document.getElementById('modalStatus').textContent = 'Could not verify URL. Ensure the script is deployed and accessible.';
-          window.MUNui.toast('Could not verify Apps Script URL', { type: 'error' });
-        }
-      } catch (e) {
-        console.error(e);
-        document.getElementById('modalStatus').textContent = 'Verification failed: ' + (e.message || String(e));
-      } finally { setModalBusy(false); }
-    });
-
-    document.getElementById('modalQuickSetupBtn').addEventListener('click', async () => {
-      try {
-        setModalBusy(true, 'Running quick setup — please wait...');
-        await window.MUNauth.requestAccess();
-        const url = localStorage.getItem('munifyAppsScriptUrl') || document.getElementById('modalScriptUrl').value.trim() || '';
-        if (!url) return document.getElementById('modalStatus').textContent = 'No Apps Script URL configured.';
-        const title = 'MUNify - ' + (window.MUNauth.getUserEmail() || 'User');
-        const res = await window.MUNauth.registerWithServer(url, title);
-        if (res && res.key) {
-          // persist key and sheetId to munify_config
-          try{ const c = JSON.parse(localStorage.getItem('munify_config')||'{}'); c.key = res.key; if (res.sheetId) c.sheetId = res.sheetId; localStorage.setItem('munify_config', JSON.stringify(c)); } catch(e){}
-          document.getElementById('modalStatus').textContent = 'Setup complete — continuing...';
-          window.MUNui.toast('Setup complete', { type: 'success' });
-          try{ showStep(3); } catch(e){}
-        } else {
-          document.getElementById('modalStatus').textContent = 'Setup finished but server returned incomplete data.';
-        }
-      } catch (err) {
-        console.error(err);
-        document.getElementById('modalStatus').textContent = 'Quick setup failed: ' + (err.message || String(err));
-  window.MUNui.toast('Quick setup failed', { type: 'error' });
-      } finally { setModalBusy(false); }
-    });
-
-    document.getElementById('modalProvisionBtn').addEventListener('click', async () => {
-      try {
-        setModalBusy(true, 'Provisioning user API (consent screens may appear)...');
-        await window.MUNauth.requestAccess();
-        const res = await window.MUNauth.provisionUserApi('MUNify - User API');
-        if (res && res.spreadsheetId) {
-          const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}'); cfg.sheetId = res.spreadsheetId; if (res.key) cfg.key = res.key; localStorage.setItem('munify_config', JSON.stringify(cfg));
-          document.getElementById('modalStatus').textContent = 'Provisioning complete.';
-          window.MUNui.toast('Provisioning complete', { type: 'success' });
-          try{ showStep(3); } catch(e){}
-        } else {
-          document.getElementById('modalStatus').textContent = 'Provisioning finished but returned no IDs. Check console.';
-        }
-      } catch (err) {
-        console.error(err);
-        document.getElementById('modalStatus').textContent = 'Provisioning failed: ' + (err.message || String(err));
-  window.MUNui.toast('Provisioning failed', { type: 'error' });
-      } finally { setModalBusy(false); }
-    });
-    // Stepper init and navigation handlers
-    (function(){
-      const steps = Array.from(document.querySelectorAll('#onboardSteps [data-step]'));
-      const totalSteps = steps.length;
-      let currentStep = 0;
-      const progress = document.getElementById('modalProgress');
-      const backBtn = document.getElementById('modalBackBtn');
-      const nextBtn = document.getElementById('modalNextBtn');
-
-      function showStep(n){
-        steps.forEach(s => s.classList.add('hidden'));
-        const el = steps[n]; if (!el) return;
-        el.classList.remove('hidden');
-        progress.textContent = `Step ${Math.min(n+1, totalSteps)} of ${totalSteps}`;
-        backBtn.classList.toggle('hidden', n === 0);
-        nextBtn.textContent = (n === totalSteps-1) ? 'Finish' : 'Next';
-        currentStep = n;
-      }
-
-      backBtn.addEventListener('click', ()=> showStep(Math.max(0, currentStep-1)));
-      nextBtn.addEventListener('click', ()=>{ if (currentStep < totalSteps-1) showStep(currentStep+1); else hideModal(); });
-
-      document.getElementById('modalOpenDesignerBtn').addEventListener('click', ()=>{ hideModal(); window.location.href = 'design/'; });
-      document.getElementById('modalCloseBtn').addEventListener('click', ()=>{ hideModal(); });
-      document.getElementById('modalCopyKeyBtn').addEventListener('click', ()=>{ try{ const cfg=JSON.parse(localStorage.getItem('munify_config')||'{}'); if (!cfg.key) throw new Error('No key'); navigator.clipboard.writeText(cfg.key); window.MUNui.toast('Key copied', { type: 'success' }); } catch(e){ window.MUNui.toast('No key to copy', { type: 'error' }); } });
-
-      showStep(0);
-    })();
-  });
+// Header sign state wiring (moved sign out here)
+document.addEventListener('DOMContentLoaded', ()=>{
+  const cfg = JSON.parse(localStorage.getItem('munify_config')||'{}');
+  const signed = !!cfg.idToken;
+  const signedEl = document.getElementById('navSignedIn');
+  const signOutBtn = document.getElementById('navSignOut');
+  function applyState(isSigned){
+    if (isSigned) { signedEl.classList.remove('hidden'); signOutBtn.classList.remove('hidden'); }
+    else { signedEl.classList.add('hidden'); signOutBtn.classList.add('hidden'); }
+  }
+  applyState(signed);
+  if (signOutBtn) signOutBtn.addEventListener('click', ()=>{ const c=JSON.parse(localStorage.getItem('munify_config')||'{}'); delete c.idToken; delete c.key; localStorage.setItem('munify_config', JSON.stringify(c)); applyState(false); window.MUNui.toast('Signed out', { type:'info'}); const g=document.getElementById('g_id_signin'); if (g) g.style.display=''; });
+  window._munifyUpdateSignIn = (state)=>applyState(state);
+});
 </script>
 
 </body>

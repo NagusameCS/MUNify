@@ -9,16 +9,20 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900">
-<header class="border-b bg-white/70 backdrop-blur mb-6">
+<header class="border-b bg-white/70 backdrop-blur mb-6 site-foreground">
   <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
     <a href="../" class="font-semibold tracking-tight">MUNify</a>
     <nav class="hidden md:flex gap-6 text-sm">
-      <a href="../" class="hover:underline">Home</a>
+      <a href="../" class="hover:underline font-medium">Home</a>
       <a href="../design/" class="hover:underline">Designer</a>
       <a href="../form/" class="hover:underline">Form</a>
       <a href="../settings/" class="hover:underline">Settings</a>
       <a href="../info/" class="hover:underline">Info</a>
     </nav>
+    <div class="flex gap-2 items-center text-sm">
+      <span id="signIndicator" class="text-green-600 hidden">Signed in</span>
+      <button id="btnSignOutHome" class="underline hidden">Sign out</button>
+    </div>
   </div>
 </header>
 <main class="max-w-2xl mx-auto p-6">

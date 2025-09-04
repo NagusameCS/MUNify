@@ -12,33 +12,39 @@
   <script src="../assets/js/ui.js"></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col">
-<header class="border-b bg-white/70 backdrop-blur sticky top-0 z-10">
+<header class="border-b bg-white/70 backdrop-blur sticky top-0 z-10 site-foreground">
   <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
     <a href="../" class="font-semibold tracking-tight">MUNify</a>
     <nav class="hidden md:flex gap-6 text-sm">
-      <a href="../" class="hover:underline">Home</a>
+      <a href="../" class="hover:underline font-medium">Home</a>
       <a href="../design/" class="hover:underline">Designer</a>
       <a href="../form/" class="hover:underline">Form</a>
       <a href="./" class="hover:underline font-medium">Settings</a>
       <a href="../info/" class="hover:underline">Info</a>
     </nav>
+    <div class="flex gap-2 items-center text-sm">
+      <span id="signIndicator" class="text-green-600 hidden">Signed in</span>
+      <button id="btnSignOutHome" class="underline hidden">Sign out</button>
+    </div>
   </div>
 </header>
 <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8 space-y-10" aria-describedby="settingsHelp">
     <section class="bg-white border rounded-xl shadow-sm p-6">
-      <h2 class="text-lg font-semibold mb-1">Quick Start</h2>
-      <p class="text-sm text-neutral-600 mb-4">Follow these steps to connect a Google Sheet and deploy an Apps Script endpoint. You can re-run these steps any time.</p>
-      <ol class="list-decimal ml-5 space-y-1 text-sm">
-        <li>Sign in with Google</li>
-        <li>Select or create a Sheet</li>
-        <li>Deploy / Register Apps Script endpoint</li>
-        <li>Use the generated Key and Sheet ID in the Designer & Form</li>
-      </ol>
-      <div class="mt-4 flex flex-wrap gap-2">
-        <button id="btnAutoSetup" class="px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm">Run Automatic Setup</button>
-        <button id="btnShowAdvanced" class="px-4 py-2 border rounded-lg text-sm">Advanced Controls</button>
+      <h2 class="text-lg font-semibold mb-1">Unified Setup</h2>
+      <p class="text-sm text-neutral-600 mb-4">Run automatic setup or perform each step manually below. This is the only place you need to configure MUNify.</p>
+      <div class="grid md:grid-cols-4 gap-4 text-center text-xs">
+        <div class="p-3 rounded-lg border bg-neutral-50 flex flex-col gap-1"><span class="font-semibold text-sm">1. Sign In</span><span class="text-neutral-500">Google account</span></div>
+        <div class="p-3 rounded-lg border bg-neutral-50 flex flex-col gap-1"><span class="font-semibold text-sm">2. Sheet</span><span class="text-neutral-500">Select or create</span></div>
+        <div class="p-3 rounded-lg border bg-neutral-50 flex flex-col gap-1"><span class="font-semibold text-sm">3. Endpoint</span><span class="text-neutral-500">Register / Provision</span></div>
+        <div class="p-3 rounded-lg border bg-neutral-50 flex flex-col gap-1"><span class="font-semibold text-sm">4. Use</span><span class="text-neutral-500">Designer & Form</span></div>
       </div>
-      <div id="autoSetupLog" class="mt-4 text-xs font-mono bg-neutral-50 border rounded p-3 h-40 overflow-y-auto"></div>
+      <div class="mt-6 flex flex-wrap gap-2">
+        <button id="btnAutoSetup" class="px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm">Run Automatic Setup</button>
+        <button id="btnShowAdvanced" class="px-4 py-2 border rounded-lg text-sm">Toggle Advanced</button>
+        <a href="../design/" class="px-4 py-2 border rounded-lg text-sm">Open Designer</a>
+        <a href="../form/" class="px-4 py-2 border rounded-lg text-sm">Open Form</a>
+      </div>
+      <div id="autoSetupLog" class="mt-4 text-xs font-mono bg-neutral-50 border rounded p-3 h-48 overflow-y-auto"></div>
     </section>
 
     <section id="advancedPanel" class="bg-white border rounded-xl shadow-sm p-6 hidden">
