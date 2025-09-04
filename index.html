@@ -10,6 +10,7 @@
   <!-- Tailwind (use compiled local CSS in production). CDN added temporarily to restore layout immediately. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/theme.css">
   <!-- Google Identity -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="assets/js/auth.js"></script>
@@ -29,7 +30,7 @@
     .pop-target { position: relative; z-index: 10; }
   </style>
 </head>
-<body class="bg-neutral-50 text-neutral-900">
+<body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col">
   <!-- Rotating Earth Background -->
   <div id="earth-bg"></div>
 
@@ -44,10 +45,19 @@
       <a href="info/" class="hover:underline">Info</a>
     </nav>
     <div class="flex gap-2 items-center text-sm">
+      <button data-theme-toggle class="px-2 py-1 border rounded text-xs">Dark Mode</button>
       <div id="g_id_signin" class=""></div>
       <button id="btnSignOutHome" class="underline hidden">Sign out</button>
     </div>
   </header>
+  <script src="assets/js/theme.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => window.MUNtheme && window.MUNtheme.toggle());
+      });
+    });
+  </script>
   <script>
   // Rotating words: wait until DOM is ready and guard missing elements
   document.addEventListener('DOMContentLoaded', () => {
@@ -93,7 +103,7 @@
     }
     </style>
   <!-- Main -->
-  <main class="max-w-5xl mx-auto px-4 pop-target site-foreground">
+  <main class="max-w-5xl mx-auto px-4 pop-target site-foreground flex-1 w-full">
     <section class="grid md:grid-cols-2 gap-8 items-center site-foreground">
       <div class="space-y-4">
         <h1 class="text-3xl md:text-5xl font-bold leading-tight frosted-text">

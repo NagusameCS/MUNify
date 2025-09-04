@@ -18,6 +18,8 @@
     return c;
   }
 
+  function isDark(){ return document.documentElement.getAttribute('data-theme') === 'dark'; }
+
   function toast(message, opts={}){
     const container = createContainer();
     const id = 't_' + Math.random().toString(36).slice(2,9);
@@ -29,8 +31,17 @@
     el.style.padding = '10px 12px';
     el.style.borderRadius = '8px';
     el.style.boxShadow = '0 6px 18px rgba(0,0,0,0.12)';
-    el.style.background = opts.type === 'error' ? '#fee2e2' : (opts.type === 'warn' ? '#fff7ed' : '#f8fafc');
-    el.style.color = '#0f172a';
+    if (isDark()) {
+      const base = '#1c2128';
+      const err = '#3d1619';
+      const warn = '#3a2d16';
+      el.style.background = opts.type === 'error' ? err : (opts.type === 'warn' ? warn : base);
+      el.style.border = '1px solid #30363d';
+      el.style.color = '#e6edf3';
+    } else {
+      el.style.background = opts.type === 'error' ? '#fee2e2' : (opts.type === 'warn' ? '#fff7ed' : '#f8fafc');
+      el.style.color = '#0f172a';
+    }
     el.style.fontSize = '13px';
     el.style.display = 'flex';
     el.style.alignItems = 'center';
@@ -87,15 +98,16 @@
       ov.style.justifyContent = 'center';
 
       const box = document.createElement('div');
-      box.style.background = '#fff';
+      box.style.background = isDark() ? '#1c2128' : '#fff';
       box.style.padding = '18px';
       box.style.borderRadius = '10px';
       box.style.minWidth = '300px';
       box.style.boxShadow = '0 8px 30px rgba(2,6,23,0.2)';
+      if (isDark()) box.style.border = '1px solid #30363d';
 
       const txt = document.createElement('div');
       txt.style.marginBottom = '12px';
-      txt.style.color = '#0f172a';
+      txt.style.color = isDark() ? '#e6edf3' : '#0f172a';
       txt.style.fontSize = '15px';
       txt.textContent = message;
       box.appendChild(txt);
@@ -116,8 +128,8 @@
       yes.textContent = opts.yesText || 'OK';
       yes.style.padding = '8px 10px';
       yes.style.border = 'none';
-      yes.style.background = '#0f172a';
-      yes.style.color = '#fff';
+  yes.style.background = isDark() ? '#2d333b' : '#0f172a';
+  yes.style.color = isDark() ? '#e6edf3' : '#fff';
       yes.style.borderRadius = '6px';
       yes.style.cursor = 'pointer';
 

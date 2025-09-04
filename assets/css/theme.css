@@ -1,0 +1,25 @@
+/* Dark mode overrides using [data-theme="dark"] attribute on <html> */
+html[data-theme="dark"] body { background-color: #0d1117; color: #e6edf3; }
+html[data-theme="dark"] header { background: rgba(22,27,34,0.85); border-color: #30363d; }
+html[data-theme="dark"] footer { background: #161b22; border-color: #30363d; color: #8b949e; }
+html[data-theme="dark"] a { color: #58a6ff; }
+html[data-theme="dark"] a:hover { text-decoration: underline; }
+html[data-theme="dark"] .border { border-color: #30363d; }
+html[data-theme="dark"] .bg-white, html[data-theme="dark"] .bg-neutral-50 { background-color: #1c2128 !important; }
+html[data-theme="dark"] .text-neutral-600, html[data-theme="dark"] .text-neutral-500 { color: #8b949e !important; }
+html[data-theme="dark"] .text-neutral-700 { color: #9da7b2 !important; }
+html[data-theme="dark"] .text-neutral-900 { color: #e6edf3 !important; }
+html[data-theme="dark"] input, html[data-theme="dark"] textarea, html[data-theme="dark"] select { background:#0d1117; color:#e6edf3; border-color:#30363d; }
+html[data-theme="dark"] input:focus, html[data-theme="dark"] textarea:focus, html[data-theme="dark"] select:focus { outline: 2px solid #2563eb; }
+html[data-theme="dark"] button { color: inherit; }
+html[data-theme="dark"] .shadow-sm, html[data-theme="dark"] .shadow, html[data-theme="dark"] .shadow-xl { box-shadow: 0 0 0 rgba(0,0,0,0.1); }
+html[data-theme="dark"] code, html[data-theme="dark"] pre { background:#161b22; color:#e6edf3; }
+html[data-theme="dark"] .tab-btn { color:#8b949e; }
+html[data-theme="dark"] .tab-btn.border-neutral-900 { border-color:#e6edf3; }
+html[data-theme="dark"] .hover\:bg-neutral-50:hover { background:#21262d !important; }
+/* Wizard progress bar */
+html[data-theme="dark"] #wizProgressFill { background:#e6edf3; }
+/* Toasts & modals (class-based adjustments will also run in JS fallback) */
+html[data-theme="dark"] #munify-toasts .munify-toast { background:#1c2128 !important; color:#e6edf3 !important; border:1px solid #30363d; }
+html[data-theme="dark"] .munify-modal-overlay > div > div { color:#e6edf3; }
+html[data-theme="dark"] .munify-modal-overlay div[style*='background: #fff'] { background:#1c2128 !important; }

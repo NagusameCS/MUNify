@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>MUNify Invite</title>
 <link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="/assets/css/theme.css">
 <script src="/assets/js/auth.js"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body class="bg-neutral-50 text-neutral-900">
+<body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col">
 <header class="border-b bg-white/70 backdrop-blur mb-6 site-foreground">
   <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
     <a href="../" class="font-semibold tracking-tight">MUNify</a>
@@ -20,12 +21,19 @@
       <a href="../info/" class="hover:underline">Info</a>
     </nav>
     <div class="flex gap-2 items-center text-sm">
+      <button data-theme-toggle class="px-2 py-1 border rounded text-xs">Dark Mode</button>
       <span id="signIndicator" class="text-green-600 hidden">Signed in</span>
       <button id="btnSignOutHome" class="underline hidden">Sign out</button>
     </div>
   </div>
 </header>
-<main class="max-w-2xl mx-auto p-6">
+<script src="/assets/js/theme.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-theme-toggle]').forEach(btn => btn.addEventListener('click', ()=> window.MUNtheme && window.MUNtheme.toggle()));
+  });
+</script>
+<main class="max-w-2xl mx-auto p-6 flex-1 w-full">
     <h1 class="text-xl font-bold mb-4">Redeem Invite</h1>
     <p class="mb-4 text-sm">Open the invite link you received. Sign in and click Redeem to be added to the form's whitelist.</p>
     <div class="mb-4">
