@@ -13,7 +13,6 @@ Features
 - Sheet picker & optional automatic provisioning (beta)
 - Minimal, responsive UI built with Tailwind
 - Global ESC key closes confirmation overlays (UX convenience)
- - Toggleable dark mode (persists; respects system preference until changed)
 
 Guided Setup Flow (Hosted / GitHub Pages)
 ----------------------------------------
@@ -68,7 +67,6 @@ Data Stored Locally (localStorage)
 - `munify_config`: JSON with `idToken`, `sheetId`, optional `key`, etc.
 - `munifyAppsScriptUrl`: User-provided or site default Apps Script URL.
 - `munifyFormCode`: Saved HTML for designed form.
-- `munifyTheme`: User-selected theme ("light" or "dark"). Remove this key to revert to system preference.
 
 Security Notes
 --------------
@@ -102,8 +100,6 @@ Directory Overview
 - `apps_script/` – Server-side Apps Script sources (deploy as Web App).
 - `assets/js/auth.js` – Auth + register + provisioning + advanced helpers.
 - `assets/js/ui.js` – Toast & confirm utilities.
- - `assets/js/theme.js` – Theme manager (applies `[data-theme]`).
- - `assets/css/theme.css` – Dark mode overrides.
 
 Extending
 ---------

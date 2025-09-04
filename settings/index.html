@@ -7,7 +7,6 @@
   <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../assets/css/style.css" />
-  <link rel="stylesheet" href="../assets/css/theme.css" />
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="../assets/js/auth.js"></script>
   <script src="../assets/js/ui.js"></script>
@@ -24,13 +23,12 @@
       <a href="../info/" class="hover:underline">Info</a>
     </nav>
     <div class="flex gap-2 items-center text-sm">
-      <button data-theme-toggle class="px-2 py-1 border rounded text-xs">Dark Mode</button>
+      
       <span id="signIndicator" class="text-green-600 hidden">Signed in</span>
       <button id="btnSignOutHome" class="underline hidden">Sign out</button>
     </div>
   </div>
 </header>
-<script src="../assets/js/theme.js"></script>
 <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8 space-y-10" aria-describedby="settingsHelp">
     <section class="bg-white border rounded-xl shadow-sm p-6" aria-labelledby="wizardHeading">
       <h2 id="wizardHeading" class="text-lg font-semibold mb-1">Guided Setup Wizard</h2>
