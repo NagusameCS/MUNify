@@ -169,15 +169,8 @@
 
       // Create new sheet (basic) via Sheets API
       document.getElementById('btnCreateSheet').addEventListener('click', async () => {
-        try {
-          const token = await (async ()=>{ try { return await window.MUNauthAdvanced.runAutoSetup({ pickSheet:false }).then(r=>null); } catch(e){ return null; } })(); // ensure signed in
-          const at = await (async ()=>{ return await (async () => { const t = await window.MUNauthAdvanced.runAutoSetup({}); return t; })(); })(); // placeholder to ensure flow
-          const access = await (async () => { try { return await (async ()=>{ return await new Promise((resolve,reject)=>{ window.google.accounts.oauth2.initTokenClient({ client_id:'73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com', scope:'https://www.googleapis.com/auth/spreadsheets', callback:(r)=> r.access_token ? resolve(r.access_token) : reject(r.error)}).requestAccessToken({prompt:''}); }); })(); } catch(e){ throw e; } })();
-          const title = 'MUNify Sheet ' + new Date().toISOString().slice(0,10);
-          const res = await fetch('https://sheets.googleapis.com/v4/spreadsheets', { method:'POST', headers:{ Authorization:'Bearer '+access, 'Content-Type':'application/json' }, body: JSON.stringify({ properties:{ title } }) });
-          if (!res.ok) throw new Error('create_failed');
-          const j = await res.json(); window.MUNauthAdvanced.setSheet(j.spreadsheetId, title); refreshCfgUI(); window.MUNui.toast('Sheet created', { type: 'success' });
-        } catch(e){ console.warn(e); window.MUNui.toast('Create sheet failed', { type: 'error' }); }
+        try { await window.MUNauth.requestAccess(); const res = await window.MUNauthAdvanced.createSheet(); window.MUNauthAdvanced.setSheet(res.spreadsheetId, res.properties?.title); refreshCfgUI(); window.MUNui.toast('Sheet created', { type:'success'}); }
+        catch(e){ console.warn(e); window.MUNui.toast('Create sheet failed', { type:'error'}); }
       });
 
       // Verify script URL

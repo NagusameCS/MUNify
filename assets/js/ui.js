@@ -1,5 +1,7 @@
 // Minimal toast UI for MUNify
 (function(){
+  // Track active overlay elements for ESC handling
+  const activeOverlays = new Set();
   function createContainer(){
     let c = document.getElementById('munify-toasts');
     if (c) return c;
@@ -75,6 +77,7 @@
     return new Promise(resolve => {
       // overlay
       const ov = document.createElement('div');
+      ov.className = 'munify-modal-overlay';
       ov.style.position = 'fixed';
       ov.style.left = 0; ov.style.top = 0; ov.style.right = 0; ov.style.bottom = 0;
       ov.style.background = 'rgba(2,6,23,0.45)';
@@ -124,11 +127,28 @@
       ov.appendChild(box);
       document.body.appendChild(ov);
 
-      function cleanup(){ if (ov && ov.parentNode) ov.parentNode.removeChild(ov); }
+      function cleanup(){ activeOverlays.delete(ov); if (ov && ov.parentNode) ov.parentNode.removeChild(ov); }
       no.addEventListener('click', ()=>{ cleanup(); resolve(false); });
       yes.addEventListener('click', ()=>{ cleanup(); resolve(true); });
+      activeOverlays.add(ov);
     });
   }
+  // Global ESC listener
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape') {
+      // Close the most recently added overlay
+      const last = Array.from(activeOverlays).pop();
+      if (last) {
+        e.preventDefault();
+        if (last.parentNode) last.parentNode.removeChild(last);
+        activeOverlays.delete(last);
+        return;
+      }
+      // Fallback: hide any element with data-esc-close attribute
+      const modal = document.querySelector('.munify-modal[data-esc-close]');
+      if (modal) modal.classList.add('hidden');
+    }
+  });
 
   window.MUNui = { toast, confirm };
 })();

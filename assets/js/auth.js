@@ -17,6 +17,17 @@
   function save(obj){ localStorage.setItem('munify_config', JSON.stringify(obj)); }
   function load(){ try { return JSON.parse(localStorage.getItem('munify_config')||'{}'); } catch(e){ return {}; } }
 
+  // One-time storage key migration (legacy keys -> new canonical keys)
+  (function migrateStorage(){
+    try {
+      const legacyScript = localStorage.getItem('munifyScriptUrl');
+      if (legacyScript && !localStorage.getItem('munifyAppsScriptUrl')) {
+        localStorage.setItem('munifyAppsScriptUrl', legacyScript);
+        localStorage.removeItem('munifyScriptUrl');
+      }
+    } catch(e) { /* ignore */ }
+  })();
+
   // Read a site-level default Apps Script URL from a meta tag (optional)
   function siteAppsScriptUrl() {
     try {
@@ -359,6 +370,18 @@
     return window.MUNauth.appendViaServer(appsScriptUrl, key, row);
   }
 
+  // Create a new spreadsheet (utility used by settings page)
+  async function createSheet(title){
+    const accessToken = await getAccessToken('https://www.googleapis.com/auth/spreadsheets');
+    const res = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+      method:'POST', headers:{ Authorization:'Bearer '+accessToken, 'Content-Type':'application/json' }, body: JSON.stringify({ properties:{ title: title || ('MUNify Sheet ' + new Date().toISOString().slice(0,10)) } })
+    });
+    if (!res.ok) throw new Error('sheet_create_failed');
+    const j = await res.json();
+    if (j.spreadsheetId) setSheet(j.spreadsheetId, title);
+    return j;
+  }
+
   // Full automatic provisioning pipeline:
   // 1) Ensure ID token (sign in)
   // 2) (Optional) Sheet selection or creation
@@ -424,4 +447,5 @@
   window.MUNauthAdvanced.pullDelegates = pullDelegates;
   window.MUNauthAdvanced.pushDelegateRow = pushDelegateRow;
   window.MUNauthAdvanced.runAutoSetup = runAutoSetup;
+  window.MUNauthAdvanced.createSheet = createSheet;
 })();

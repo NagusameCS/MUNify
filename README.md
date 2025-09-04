@@ -12,6 +12,7 @@ Features
 - Invite tokens (24h) to whitelist additional collaborators
 - Sheet picker & optional automatic provisioning (beta)
 - Minimal, responsive UI built with Tailwind
+- Global ESC key closes confirmation overlays (UX convenience)
 
 Unified Setup Flow (Hosted / GitHub Pages)
 -----------------------------------------
@@ -74,6 +75,7 @@ Security Notes
 - Server validates ID token audience, issuer, expiry, and email verification.
 - Whitelisting ensures only approved emails can append delegate rows.
 - Rate limiting (basic) in Apps Script reduces rapid repeated submissions.
+- Storage migration: legacy `munifyScriptUrl` automatically migrated to `munifyAppsScriptUrl` on load.
 
 Invite Tokens
 -------------
