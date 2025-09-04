@@ -11,9 +11,21 @@
   <script src="../assets/js/auth.js"></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900">
-  <main class="max-w-3xl mx-auto px-4 py-8">
+<header class="border-b bg-white/70 backdrop-blur mb-6">
+  <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="../" class="font-semibold tracking-tight">MUNify</a>
+    <nav class="hidden md:flex gap-6 text-sm">
+      <a href="../" class="hover:underline">Home</a>
+      <a href="../design/" class="hover:underline">Designer</a>
+      <a href="./" class="hover:underline font-medium">Form</a>
+      <a href="../settings/" class="hover:underline">Settings</a>
+      <a href="../info/" class="hover:underline">Info</a>
+    </nav>
+  </div>
+</header>
+<main class="max-w-3xl mx-auto px-4 py-8">
     <h1 class="text-2xl font-bold mb-4">Delegate Registration</h1>
-    <div id="msg" class="mb-4 text-sm text-neutral-700"></div>
+    <div id="msg" class="mb-4 text-sm text-neutral-700" aria-live="polite"></div>
 
     <form id="delegateForm" class="bg-white p-6 rounded shadow">
       <label class="block mb-3">

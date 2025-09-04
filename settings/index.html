@@ -12,24 +12,19 @@
   <script src="../assets/js/ui.js"></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col">
-  <header class="border-b bg-white/70 backdrop-blur sticky top-0 z-10">
-    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-      <a href="../" class="font-semibold tracking-tight">MUNify</a>
-      <nav class="hidden md:flex gap-6 text-sm">
-        <a href="../design/" class="hover:underline">Designer</a>
-        <a href="../form/" class="hover:underline">Form</a>
-        <a href="./" class="hover:underline font-medium">Settings</a>
-        <a href="../info/" class="hover:underline">Info</a>
-      </nav>
-      <div class="flex items-center gap-3 text-sm">
-        <span id="statusSigned" class="hidden text-green-600">Signed in</span>
-        <button id="btnSignIn" class="px-3 py-1.5 rounded bg-blue-600 text-white text-sm">Sign in</button>
-        <button id="btnSignOut" class="px-3 py-1.5 rounded border text-sm hidden">Sign out</button>
-      </div>
-    </div>
-  </header>
-
-  <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8 space-y-10">
+<header class="border-b bg-white/70 backdrop-blur sticky top-0 z-10">
+  <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="../" class="font-semibold tracking-tight">MUNify</a>
+    <nav class="hidden md:flex gap-6 text-sm">
+      <a href="../" class="hover:underline">Home</a>
+      <a href="../design/" class="hover:underline">Designer</a>
+      <a href="../form/" class="hover:underline">Form</a>
+      <a href="./" class="hover:underline font-medium">Settings</a>
+      <a href="../info/" class="hover:underline">Info</a>
+    </nav>
+  </div>
+</header>
+<main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8 space-y-10" aria-describedby="settingsHelp">
     <section class="bg-white border rounded-xl shadow-sm p-6">
       <h2 class="text-lg font-semibold mb-1">Quick Start</h2>
       <p class="text-sm text-neutral-600 mb-4">Follow these steps to connect a Google Sheet and deploy an Apps Script endpoint. You can re-run these steps any time.</p>

@@ -84,10 +84,10 @@
       <div class="bg-white rounded-2xl shadow p-6 border border-neutral-200">
   <h2 class="font-semibold mb-2 frosted-text">Quick Setup</h2>
         <ol class="list-decimal ml-5 space-y-2 text-sm">
-          <li>Click <strong><a href="https://developers.google.com/identity/gsi/web" target="_blank" rel="noopener" class="underline">Sign in with Google</a></strong>.</li>
-          <li>Paste your <strong><a href="https://developers.google.com/apps-script/guides/web" target="_blank" rel="noopener" class="underline">Apps Script Web App URL</a></strong> and <strong><a href="https://support.google.com/docs/answer/3540681" target="_blank" rel="noopener" class="underline">Sheet ID</a></strong> in <em>Settings</em>.</li>
-          <li>Go to <strong><a href="design/" class="underline">Form Designer</a></strong> and create your form.</li>
-          <li>Share <code>form/#YOUR_HASH</code> with delegates.</li>
+          <li>Click <strong>Quick Setup</strong> to launch guided onboarding.</li>
+          <li>(Optional) Paste an existing <strong>Apps Script Web App URL</strong> or let Automatic Setup provision one.</li>
+          <li>Designer: build your form and test locally.</li>
+          <li>Share <code>form/#YOUR_KEY</code> or invite users with a token.</li>
         </ol>
         <div class="mt-4 flex gap-2 items-center">
           <button id="btnConnect" class="px-3 py-2 rounded-2xl bg-blue-600 text-white">Quick Setup</button>
@@ -264,7 +264,7 @@
   let desiredCameraZ = baseDistance;
   // tuning: how far up/down and how much z shift with scrolling
   const cameraYRange = 4.0; // world units up/down total
-  const cameraZRangeFactor = 0.5; // +/- 50% of baseDistance
+  const cameraZRangeFactor = 0.12; // reduced from 0.5 for subtler depth shift
 
 
       // Scene + Lighting
@@ -336,7 +336,7 @@
       function animate() {
         requestAnimationFrame(animate);
         // Reduce rotation speed by 10x (was 0.003)
-        if (earthObj) earthObj.rotation.y += 0.0003;
+        if (earthObj) earthObj.rotation.y += 0.00012; // reduced rotation speed
 
         // Smoothly interpolate camera towards desired targets
         // (using a simple lerp for smooth motion)

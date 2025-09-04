@@ -9,7 +9,19 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900">
-  <main class="max-w-2xl mx-auto p-6">
+<header class="border-b bg-white/70 backdrop-blur mb-6">
+  <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="../" class="font-semibold tracking-tight">MUNify</a>
+    <nav class="hidden md:flex gap-6 text-sm">
+      <a href="../" class="hover:underline">Home</a>
+      <a href="../design/" class="hover:underline">Designer</a>
+      <a href="../form/" class="hover:underline">Form</a>
+      <a href="../settings/" class="hover:underline">Settings</a>
+      <a href="../info/" class="hover:underline">Info</a>
+    </nav>
+  </div>
+</header>
+<main class="max-w-2xl mx-auto p-6">
     <h1 class="text-xl font-bold mb-4">Redeem Invite</h1>
     <p class="mb-4 text-sm">Open the invite link you received. Sign in and click Redeem to be added to the form's whitelist.</p>
     <div class="mb-4">
@@ -22,6 +34,7 @@
       <button id="btnSignIn" class="px-3 py-2 border rounded">Sign in</button>
     </div>
     <div id="status" class="mt-4 text-sm"></div>
+    <p class="mb-4 text-xs text-neutral-600">Need help? See <a href="../info/" class="underline">Info</a>.</p>
   </main>
 
   <script>
