@@ -52,10 +52,18 @@
   </header>
   <script src="assets/js/theme.js"></script>
   <script>
+    // Dynamic spacer: ensures footer appears at or below the first fold
     document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
-        btn.addEventListener('click', () => window.MUNtheme && window.MUNtheme.toggle());
-      });
+      function adjustMainHeight(){
+        const main = document.querySelector('main');
+        const footer = document.querySelector('footer');
+        if (!main || !footer) return;
+        const vh = window.innerHeight;
+        const footerH = footer.getBoundingClientRect().height;
+        main.style.minHeight = Math.max(0, vh - footerH) + 'px';
+      }
+      adjustMainHeight();
+      window.addEventListener('resize', adjustMainHeight);
     });
   </script>
   <script>

@@ -35,5 +35,13 @@
   }
 
   // Initial apply ASAP
-  document.addEventListener('DOMContentLoaded', ()=> apply());
+  document.addEventListener('DOMContentLoaded', ()=> {
+    apply();
+    document.addEventListener('click', (e)=>{
+      const t = e.target;
+      if (t && t.matches && t.matches('[data-theme-toggle]')) {
+        toggle();
+      }
+    });
+  });
 })();
