@@ -7,6 +7,8 @@
   <meta name="munify-apps-script-url" content="" />
   <title>MUNify</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
   <!-- Tailwind (use compiled local CSS in production). CDN added temporarily to restore layout immediately. -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="assets/css/style.css">
@@ -48,8 +50,8 @@
     </nav>
     <div class="flex gap-2 items-center text-sm">
       <button data-theme-toggle aria-pressed="false" class="p-2 rounded hover:underline" title="Switch to dark mode">
-        <span data-icon="sun" aria-hidden="true">☀️</span>
-        <span data-icon="moon" aria-hidden="true" style="display:none">🌙</span>
+        <span data-icon="sun" aria-hidden="true" class="material-symbols-rounded align-middle">light_mode</span>
+        <span data-icon="moon" aria-hidden="true" style="display:none" class="material-symbols-rounded align-middle">dark_mode</span>
         <span class="sr-only">Toggle theme</span>
       </button>
       <div id="g_id_signin" class=""></div>
@@ -468,7 +470,18 @@ await fetch(url+'?mode=append&key='+cfg.key, {
                   earthObj = earth;
                   console.log('3D model loaded and fitted from ./earth.glb (screen-fitted)');
 
-                  // No atmosphere or material enhancement (flat, unlit appearance)
+                  // Force flat bright appearance: replace materials with MeshBasicMaterial keeping texture maps
+                  earth.traverse(node => {
+                    if (node.isMesh) {
+                      const oldMat = node.material;
+                      let map = oldMat && oldMat.map ? oldMat.map : null;
+                      if (map) { map.colorSpace = THREE.SRGBColorSpace || THREE.sRGBEncoding; }
+                      const basic = new THREE.MeshBasicMaterial({ map, color: 0xffffff });
+                      node.material = basic;
+                    }
+                  });
+                  // Slight canvas brightness for extra pop (adjust as needed)
+                  renderer.domElement.style.filter = 'brightness(1.15)';
 
                 earthObj = earth;
                 console.log('3D model loaded and fitted from ./earth.glb (scaled/offset, materials enhanced)');
