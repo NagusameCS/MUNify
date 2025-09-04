@@ -280,5 +280,133 @@
     const j = await res.json(); if (!res.ok || j.error) throw new Error(j.error || 'append_failed'); return j;
   }
 
-  window.MUNauth = { requestAccess, registerWithServer, appendViaServer, exportKeyFile, getUserEmail, getConfig, createInvite, redeemInvite, provisionUserApi, autoRegisterIfNeeded, ensureValidIdToken, checkAppsScriptHealth };
+  // Insert new advanced integration helpers below
+  if (!window.MUNauthAdvanced) {
+    window.MUNauthAdvanced = {};
+  }
+
+  // Return stored config object (reuse existing getConfig if present)
+  const _getCfg = window.MUNauth && window.MUNauth.getConfig ? window.MUNauth.getConfig : () => ({})
+
+  // Acquire an access token for generic Drive/Sheets/Script scopes (silent if possible)
+  async function getAccessToken(scopesOverride){
+    try {
+      if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) throw new Error('OAuth2 client not loaded');
+      const scopes = scopesOverride || [
+        'https://www.googleapis.com/auth/drive.readonly',
+        'https://www.googleapis.com/auth/spreadsheets.readonly'
+      ].join(' ');
+      return await new Promise((resolve, reject) => {
+        const client = window.google.accounts.oauth2.initTokenClient({
+          client_id: '73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com',
+          scope: scopes,
+          callback: (resp) => { if (resp && resp.access_token) resolve(resp.access_token); else reject(new Error(resp.error || 'no_access_token')); }
+        });
+        client.requestAccessToken({ prompt: '' });
+      });
+    } catch (e){ console.warn('getAccessToken failed', e); throw e; }
+  }
+
+  // List spreadsheets (basic) using Drive search: mimeType spreadsheet & user owns or can edit.
+  async function listSpreadsheets(limit=50){
+    const token = await getAccessToken('https://www.googleapis.com/auth/drive.metadata.readonly');
+    const q = encodeURIComponent("mimeType='application/vnd.google-apps.spreadsheet' and trashed=false");
+    const url = `https://www.googleapis.com/drive/v3/files?q=${q}&pageSize=${limit}&fields=files(id,name,modifiedTime,owners(displayName,emailAddress))`;
+    const res = await fetch(url, { headers: { Authorization: 'Bearer ' + token }});
+    if (!res.ok) throw new Error('Could not list spreadsheets');
+    const data = await res.json();
+    return data.files || [];
+  }
+
+  // Store chosen sheetId & name in munify_config
+  function setSheet(sheetId, name){
+    const cfg = _getCfg();
+    cfg.sheetId = sheetId; if (name) cfg.sheetName = name; localStorage.setItem('munify_config', JSON.stringify(cfg));
+    return cfg;
+  }
+
+  // Fetch a small sample from Delegates sheet to verify access through Apps Script endpoint
+  async function pullDelegates(appsScriptUrl, key){
+    if (!appsScriptUrl) throw new Error('missing_apps_script_url');
+    if (!key) throw new Error('missing_key');
+    const cfg = _getCfg();
+    const idToken = cfg.idToken; if (!idToken) throw new Error('not_signed_in');
+    const url = appsScriptUrl + '?action=get&key=' + encodeURIComponent(key);
+    const res = await fetch(url, { method: 'GET' });
+    if (!res.ok) throw new Error('get_failed');
+    const j = await res.json(); if (j.error) throw new Error(j.error);
+    return j.mapping || {};
+  }
+
+  // Push row convenience wrapper (delegates) via existing appendViaServer
+  async function pushDelegateRow(appsScriptUrl, key, row){
+    if (!Array.isArray(row)) throw new Error('row_not_array');
+    return window.MUNauth.appendViaServer(appsScriptUrl, key, row);
+  }
+
+  // Full automatic provisioning pipeline:
+  // 1) Ensure ID token (sign in)
+  // 2) (Optional) Sheet selection or creation
+  // 3) Register with existing Apps Script OR provision a user-owned one
+  // Returns structured result used by UI to display instructions
+  async function runAutoSetup(opts={}){
+    const result = { steps: [] };
+    const pushStep = (name, status, detail) => { result.steps.push({ name, status, detail }); };
+    try {
+      // Step 1: Sign-in / ensure id token
+      pushStep('sign_in', 'pending');
+      await window.MUNauth.requestAccess();
+      pushStep('sign_in', 'ok');
+
+      const cfg = _getCfg();
+
+      // Step 2: Sheet selection (if sheetId already chosen skip)
+      if (!cfg.sheetId && opts.pickSheet) {
+        pushStep('pick_sheet', 'pending');
+        try {
+          const sheets = await listSpreadsheets();
+          if (!sheets.length) {
+            pushStep('pick_sheet', 'empty', 'No spreadsheets found in Drive');
+          } else {
+            // choose first for auto mode unless opts.sheetId provided
+            const chosen = opts.sheetId ? sheets.find(s=>s.id===opts.sheetId) : sheets[0];
+            if (chosen) { setSheet(chosen.id, chosen.name); pushStep('pick_sheet', 'ok', chosen); }
+            else pushStep('pick_sheet', 'skipped', 'Provided sheet not found');
+          }
+        } catch(e){ pushStep('pick_sheet', 'error', e.message || String(e)); }
+      }
+
+      // Step 3: Register with existing server (if Apps Script URL known) else provisioning
+      const serverUrl = localStorage.getItem('munifyAppsScriptUrl') || opts.appsScriptUrl;
+      if (serverUrl) {
+        pushStep('register_server', 'pending', serverUrl);
+        try {
+          const title = 'MUNify - ' + (window.MUNauth.getUserEmail() || 'User');
+          const reg = await window.MUNauth.registerWithServer(serverUrl, title);
+          pushStep('register_server', 'ok', reg);
+          result.key = reg.key; result.sheetId = reg.sheetId; result.appsScriptUrl = serverUrl;
+        } catch(e){ pushStep('register_server', 'error', e.message || String(e)); }
+      } else if (opts.allowProvision) {
+        pushStep('provision_user', 'pending');
+        try {
+          const prov = await window.MUNauth.provisionUserApi('MUNify - User API');
+          pushStep('provision_user', 'ok', prov);
+          result.provision = prov; result.sheetId = prov.spreadsheetId; result.projectId = prov.projectId;
+        } catch(e){ pushStep('provision_user', 'error', e.message || String(e)); }
+      } else {
+        pushStep('register_server', 'skipped', 'No server URL and provisioning disabled');
+      }
+
+      return result;
+    } catch (e){
+      pushStep('fatal', 'error', e.message || String(e));
+      return result;
+    }
+  }
+
+  window.MUNauthAdvanced.listSpreadsheets = listSpreadsheets;
+  window.MUNauthAdvanced.setSheet = setSheet;
+  window.MUNauthAdvanced.pullDelegates = pullDelegates;
+  window.MUNauthAdvanced.pushDelegateRow = pushDelegateRow;
+  window.MUNauthAdvanced.runAutoSetup = runAutoSetup;
 })();

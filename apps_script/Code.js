@@ -8,6 +8,7 @@
 
 function doGet(e) {
   const action = e.parameter.action;
+    Logger.log('doGet action: ' + action);
   const origin = e && e.request && e.request.headers ? e.request.headers.Origin : null;
   try {
     if (action === 'get' && e.parameter.key) {
@@ -27,6 +28,7 @@ function doGet(e) {
 function doPost(e) {
   const origin = e && e.request && e.request.headers ? e.request.headers.Origin : null;
   const action = e.parameter && e.parameter.action ? e.parameter.action : (e.postData && e.postData.type ? JSON.parse(e.postData.contents).action : null);
+    Logger.log('doPost action: ' + action);
   try {
     const payload = e.postData && e.postData.contents ? JSON.parse(e.postData.contents) : {};
     if (action === 'register') return handleRegister(payload, origin);

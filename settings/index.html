@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MUNify Settings</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/ui.js"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col">
+  <header class="border-b bg-white/70 backdrop-blur sticky top-0 z-10">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="../" class="font-semibold tracking-tight">MUNify</a>
+      <nav class="hidden md:flex gap-6 text-sm">
+        <a href="../design/" class="hover:underline">Designer</a>
+        <a href="../form/" class="hover:underline">Form</a>
+        <a href="./" class="hover:underline font-medium">Settings</a>
+        <a href="../info/" class="hover:underline">Info</a>
+      </nav>
+      <div class="flex items-center gap-3 text-sm">
+        <span id="statusSigned" class="hidden text-green-600">Signed in</span>
+        <button id="btnSignIn" class="px-3 py-1.5 rounded bg-blue-600 text-white text-sm">Sign in</button>
+        <button id="btnSignOut" class="px-3 py-1.5 rounded border text-sm hidden">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8 space-y-10">
+    <section class="bg-white border rounded-xl shadow-sm p-6">
+      <h2 class="text-lg font-semibold mb-1">Quick Start</h2>
+      <p class="text-sm text-neutral-600 mb-4">Follow these steps to connect a Google Sheet and deploy an Apps Script endpoint. You can re-run these steps any time.</p>
+      <ol class="list-decimal ml-5 space-y-1 text-sm">
+        <li>Sign in with Google</li>
+        <li>Select or create a Sheet</li>
+        <li>Deploy / Register Apps Script endpoint</li>
+        <li>Use the generated Key and Sheet ID in the Designer & Form</li>
+      </ol>
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button id="btnAutoSetup" class="px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm">Run Automatic Setup</button>
+        <button id="btnShowAdvanced" class="px-4 py-2 border rounded-lg text-sm">Advanced Controls</button>
+      </div>
+      <div id="autoSetupLog" class="mt-4 text-xs font-mono bg-neutral-50 border rounded p-3 h-40 overflow-y-auto"></div>
+    </section>
+
+    <section id="advancedPanel" class="bg-white border rounded-xl shadow-sm p-6 hidden">
+      <h2 class="text-lg font-semibold mb-4">Advanced Controls</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Sheet Picker -->
+        <div>
+          <h3 class="font-medium mb-2">Sheet Selection</h3>
+          <p class="text-xs text-neutral-600 mb-3">Pick an existing spreadsheet or create a new one. The selection is stored locally.</p>
+          <div class="flex gap-2 mb-3">
+            <button id="btnListSheets" class="px-3 py-1.5 border rounded text-sm">List Sheets</button>
+            <button id="btnCreateSheet" class="px-3 py-1.5 border rounded text-sm">Create New Sheet</button>
+          </div>
+          <div id="sheetsContainer" class="space-y-2 max-h-60 overflow-y-auto pr-1 text-sm"></div>
+        </div>
+
+        <!-- Provision / Register -->
+        <div>
+          <h3 class="font-medium mb-2">Apps Script Endpoint</h3>
+          <p class="text-xs text-neutral-600 mb-3">Either register with an existing deployed web app or automatically provision one (beta).</p>
+          <label class="block mb-3 text-sm">Existing Apps Script Web App URL
+            <input id="inputScriptUrl" class="mt-1 w-full border rounded-lg p-2 text-sm" placeholder="https://script.google.com/macros/s/.../exec" />
+          </label>
+          <div class="flex flex-wrap gap-2 mb-3">
+            <button id="btnVerifyScript" class="px-3 py-1.5 border rounded text-sm">Verify URL</button>
+            <button id="btnRegisterServer" class="px-3 py-1.5 border rounded text-sm">Register with Server</button>
+            <button id="btnProvisionUser" class="px-3 py-1.5 border rounded text-sm">Provision User Script</button>
+          </div>
+          <div id="endpointStatus" class="text-xs text-neutral-600"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white border rounded-xl shadow-sm p-6">
+      <h2 class="text-lg font-semibold mb-2">Current Configuration</h2>
+      <div class="grid md:grid-cols-3 gap-4 text-sm">
+        <div>
+          <div class="text-neutral-500 text-xs">Sheet ID</div>
+          <div id="cfgSheetId" class="font-mono break-all">—</div>
+        </div>
+        <div>
+          <div class="text-neutral-500 text-xs">Key</div>
+          <div id="cfgKey" class="font-mono break-all">—</div>
+        </div>
+        <div>
+          <div class="text-neutral-500 text-xs">Apps Script URL</div>
+          <div id="cfgScript" class="font-mono break-all">—</div>
+        </div>
+      </div>
+      <div class="mt-4 flex gap-2 flex-wrap text-sm">
+        <button id="btnCopyKey" class="px-3 py-1.5 border rounded">Copy Key</button>
+        <button id="btnExportKey" class="px-3 py-1.5 border rounded">Export Key</button>
+        <button id="btnClearLocal" class="px-3 py-1.5 border rounded text-red-600">Clear Local Config</button>
+      </div>
+    </section>
+
+    <section class="bg-white border rounded-xl shadow-sm p-6">
+      <h2 class="text-lg font-semibold mb-2">Manual Instructions</h2>
+      <details class="text-sm">
+        <summary class="cursor-pointer font-medium">Deploying an Apps Script Web App</summary>
+        <ol class="list-decimal ml-5 mt-2 space-y-1">
+          <li>Create a new Google Apps Script project</li>
+          <li>Paste contents of <code>apps_script/Code.js</code> & <code>appsscript.json</code></li>
+          <li>Deploy > New Deployment > Web App (execute as: Me, access: Anyone with link)</li>
+          <li>Copy the Web App URL into the field above</li>
+          <li>Click Register with Server</li>
+        </ol>
+      </details>
+    </section>
+  </main>
+
+  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t">
+    <div class="flex flex-col md:flex-row justify-center items-center gap-2">
+      <span>© 2025 MUN Forms</span>
+      <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="hover:underline" target="_blank" rel="noopener">GitHub</a>
+      <span>GPLv3</span>
+    </div>
+  </footer>
+
+  <script>
+    function loadCfg(){ try { return JSON.parse(localStorage.getItem('munify_config')||'{}'); } catch(e){ return {}; } }
+    function saveCfg(c){ localStorage.setItem('munify_config', JSON.stringify(c)); }
+    function refreshCfgUI(){
+      const c = loadCfg();
+      document.getElementById('cfgSheetId').textContent = c.sheetId || '—';
+      document.getElementById('cfgKey').textContent = c.key || '—';
+      document.getElementById('cfgScript').textContent = localStorage.getItem('munifyAppsScriptUrl') || '—';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      refreshCfgUI();
+      const cfg = loadCfg();
+      if (cfg.idToken) { document.getElementById('statusSigned').classList.remove('hidden'); document.getElementById('btnSignIn').classList.add('hidden'); document.getElementById('btnSignOut').classList.remove('hidden'); }
+
+      document.getElementById('btnSignIn').addEventListener('click', async () => {
+        try { await window.MUNauth.requestAccess(); document.getElementById('statusSigned').classList.remove('hidden'); document.getElementById('btnSignIn').classList.add('hidden'); document.getElementById('btnSignOut').classList.remove('hidden'); window.MUNui.toast('Signed in', { type: 'success' }); } catch(e){ window.MUNui.toast('Sign-in failed', { type: 'error' }); }
+      });
+      document.getElementById('btnSignOut').addEventListener('click', () => { const c=loadCfg(); delete c.idToken; delete c.key; saveCfg(c); refreshCfgUI(); document.getElementById('statusSigned').classList.add('hidden'); document.getElementById('btnSignIn').classList.remove('hidden'); document.getElementById('btnSignOut').classList.add('hidden'); window.MUNui.toast('Signed out', { type: 'info' }); });
+
+      // Auto Setup
+      document.getElementById('btnAutoSetup').addEventListener('click', async () => {
+        const log = document.getElementById('autoSetupLog'); log.textContent='';
+        function logStep(s){ log.textContent += s + '\n'; log.scrollTop = log.scrollHeight; }
+        logStep('Starting automatic setup...');
+        try {
+          const res = await window.MUNauthAdvanced.runAutoSetup({ pickSheet: true, allowProvision: true });
+          (res.steps||[]).forEach(st => logStep(`[${st.status}] ${st.name} ${st.detail ? JSON.stringify(st.detail) : ''}`));
+          refreshCfgUI();
+          if (res.key) logStep('Key: ' + res.key);
+          window.MUNui.toast('Auto setup finished', { type: 'success' });
+        } catch(e){ logStep('Error: ' + (e.message||e)); window.MUNui.toast('Auto setup failed', { type: 'error' }); }
+      });
+
+      // Advanced toggle
+      document.getElementById('btnShowAdvanced').addEventListener('click', () => { document.getElementById('advancedPanel').classList.toggle('hidden'); });
+
+      // List sheets
+      document.getElementById('btnListSheets').addEventListener('click', async () => {
+        const box = document.getElementById('sheetsContainer'); box.innerHTML = '<div class="text-xs text-neutral-500">Loading...</div>';
+        try { const files = await window.MUNauthAdvanced.listSpreadsheets(); if (!files.length) { box.innerHTML = '<div class="text-xs text-neutral-500">No spreadsheets found.</div>'; return; } box.innerHTML=''; files.forEach(f => { const btn=document.createElement('button'); btn.className='w-full text-left px-3 py-2 border rounded hover:bg-neutral-50 flex justify-between'; btn.innerHTML = `<span>${f.name}</span><span class='text-xs text-neutral-500'>${f.id}</span>`; btn.addEventListener('click', ()=>{ window.MUNauthAdvanced.setSheet(f.id, f.name); refreshCfgUI(); window.MUNui.toast('Sheet selected', { type: 'success' }); }); box.appendChild(btn); }); } catch(e){ box.innerHTML = '<div class="text-xs text-red-600">Failed to list sheets</div>'; }
+      });
+
+      // Create new sheet (basic) via Sheets API
+      document.getElementById('btnCreateSheet').addEventListener('click', async () => {
+        try {
+          const token = await (async ()=>{ try { return await window.MUNauthAdvanced.runAutoSetup({ pickSheet:false }).then(r=>null); } catch(e){ return null; } })(); // ensure signed in
+          const at = await (async ()=>{ return await (async () => { const t = await window.MUNauthAdvanced.runAutoSetup({}); return t; })(); })(); // placeholder to ensure flow
+          const access = await (async () => { try { return await (async ()=>{ return await new Promise((resolve,reject)=>{ window.google.accounts.oauth2.initTokenClient({ client_id:'73123638661-ai7rhojisdd2kq7oc64out0t9s57k2d7.apps.googleusercontent.com', scope:'https://www.googleapis.com/auth/spreadsheets', callback:(r)=> r.access_token ? resolve(r.access_token) : reject(r.error)}).requestAccessToken({prompt:''}); }); })(); } catch(e){ throw e; } })();
+          const title = 'MUNify Sheet ' + new Date().toISOString().slice(0,10);
+          const res = await fetch('https://sheets.googleapis.com/v4/spreadsheets', { method:'POST', headers:{ Authorization:'Bearer '+access, 'Content-Type':'application/json' }, body: JSON.stringify({ properties:{ title } }) });
+          if (!res.ok) throw new Error('create_failed');
+          const j = await res.json(); window.MUNauthAdvanced.setSheet(j.spreadsheetId, title); refreshCfgUI(); window.MUNui.toast('Sheet created', { type: 'success' });
+        } catch(e){ console.warn(e); window.MUNui.toast('Create sheet failed', { type: 'error' }); }
+      });
+
+      // Verify script URL
+      document.getElementById('btnVerifyScript').addEventListener('click', async () => {
+        const url = document.getElementById('inputScriptUrl').value.trim(); if (!url) return window.MUNui.toast('Enter URL', { type:'warn' });
+        try { const ok = await window.MUNauth.checkAppsScriptHealth(url); if (ok){ localStorage.setItem('munifyAppsScriptUrl', url); refreshCfgUI(); window.MUNui.toast('Verified', { type:'success'}); } else window.MUNui.toast('Verification failed', { type:'error'}); } catch(e){ window.MUNui.toast('Verification error', { type:'error'}); }
+      });
+
+      document.getElementById('btnRegisterServer').addEventListener('click', async () => {
+        const url = localStorage.getItem('munifyAppsScriptUrl') || document.getElementById('inputScriptUrl').value.trim(); if (!url) return window.MUNui.toast('Set script URL first', { type:'warn' });
+        try { await window.MUNauth.requestAccess(); const title='MUNify - '+(window.MUNauth.getUserEmail()||'User'); const res=await window.MUNauth.registerWithServer(url, title); if(res.key){ window.MUNui.toast('Registered', { type:'success'}); refreshCfgUI(); } else window.MUNui.toast('Register incomplete', { type:'warn'}); } catch(e){ window.MUNui.toast('Register failed', { type:'error'}); }
+      });
+
+      document.getElementById('btnProvisionUser').addEventListener('click', async () => {
+        try { await window.MUNauth.requestAccess(); const res = await window.MUNauth.provisionUserApi('MUNify - User API'); document.getElementById('endpointStatus').textContent = JSON.stringify(res); window.MUNui.toast('Provisioned (manual deploy may still be required)', { type:'success'}); refreshCfgUI(); } catch(e){ window.MUNui.toast('Provision failed', { type:'error'}); }
+      });
+
+      // Copy / export / clear
+      document.getElementById('btnCopyKey').addEventListener('click', ()=>{ try { const c=loadCfg(); if (!c.key) throw new Error('no key'); navigator.clipboard.writeText(c.key); window.MUNui.toast('Key copied', { type:'success'}); } catch(e){ window.MUNui.toast('No key', { type:'warn'}); } });
+      document.getElementById('btnExportKey').addEventListener('click', ()=>{ try { window.MUNauth.exportKeyFile(); } catch(e){ window.MUNui.toast('Export failed', { type:'error'}); } });
+      document.getElementById('btnClearLocal').addEventListener('click', async ()=>{ const ok = await window.MUNui.confirm('Clear local config?'); if (!ok) return; localStorage.removeItem('munify_config'); localStorage.removeItem('munifyAppsScriptUrl'); refreshCfgUI(); window.MUNui.toast('Cleared', { type:'success'}); });
+    });
+  </script>
+</body>
+</html>
