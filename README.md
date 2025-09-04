@@ -14,15 +14,14 @@ Features
 - Minimal, responsive UI built with Tailwind
 - Global ESC key closes confirmation overlays (UX convenience)
 
-Unified Setup Flow (Hosted / GitHub Pages)
------------------------------------------
-1. Open the site root (`index.html`). Click Get Started (takes you to Settings).
-2. Sign in with your Google account (ID token only; no refresh token stored).
-3. In Settings run Automatic Setup (creates/chooses Sheet then registers or provisions endpoint) OR:
-   - Provide an existing Apps Script Web App URL you deployed manually and click Register with Server.
-   - Use Provision User Script (beta) to have a personal Script + Sheet created for you (then manually deploy if URL not auto-returned).
-4. Your key and sheet ID are stored locally in `localStorage` (`munify_config`).
-5. Open Designer, customize your form, then share `form/#<KEY>` or invite others to whitelist them.
+Guided Setup Flow (Hosted / GitHub Pages)
+----------------------------------------
+1. Open the site root (`index.html`). Click Get Started to open Settings.
+2. Use the Guided Wizard: Sign In → Sheet → Endpoint → Finish.
+   - Sheet step: select an existing spreadsheet or create a new one.
+   - Endpoint step: verify & register an existing Apps Script Web App URL OR Provision (beta) a personal script.
+3. At Finish you'll see Sheet ID, Key, and (if available) Apps Script URL. Copy/export as needed.
+4. Open Designer, customize your form, then share `form/#<KEY>`; invite collaborators if needed.
 
 Building CSS (Tailwind)
 -----------------------
