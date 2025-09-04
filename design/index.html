@@ -9,9 +9,10 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="../assets/js/auth.js"></script>
+  <script src="../assets/js/ui.js"></script>
 </head>
-<body class="bg-neutral-50 text-neutral-900">
-<header class="border-b bg-white/70 backdrop-blur mb-6 site-foreground">
+<body class="bg-neutral-50 dark:bg-neutral-900 text-neutral-900 min-h-screen flex flex-col">
+<header class="border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/70 backdrop-blur mb-6 site-foreground">
   <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
     <a href="../" class="font-semibold tracking-tight">MUNify</a>
     <nav class="hidden md:flex gap-6 text-sm">
@@ -22,6 +23,17 @@
       <a href="../info/" class="hover:underline">Info</a>
     </nav>
     <div class="flex gap-2 items-center text-sm">
+      <!-- Dark Mode Toggle -->
+      <button data-dark-mode-toggle onclick="window.MUNui.toggleDarkMode()" 
+              class="p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+              aria-label="Toggle dark mode">
+        <svg data-icon="moon" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+        </svg>
+        <svg data-icon="sun" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+        </svg>
+      </button>
       <span id="signIndicator" class="text-green-600 hidden">Signed in</span>
       <button id="btnSignOutHome" class="underline hidden">Sign out</button>
     </div>
@@ -50,39 +62,39 @@
   </div>
 
   <!-- MAIN DESIGNER -->
-  <main class="max-w-5xl mx-auto px-4 py-6 hidden pop-target">
+  <main class="flex-1 max-w-5xl mx-auto px-4 py-6 hidden pop-target">
     <div id="status" class="mb-4 text-sm"></div>
 
     <!-- Toolbar -->
     <div class="flex justify-between items-center mb-4">
-      <div class="text-sm text-neutral-600">Designer</div>
+      <div class="text-sm text-neutral-600 dark:text-neutral-400">Designer</div>
       <div class="flex items-center gap-2">
         <button id="btnSaveForm" class="px-3 py-1 bg-neutral-900 text-white rounded">Save</button>
-        <button id="btnResetTemplate" class="px-3 py-1 border rounded">Reset</button>
-        <button id="btnSignOut" class="px-3 py-1 text-neutral-700 hover:underline">Sign out</button>
+        <button id="btnResetTemplate" class="px-3 py-1 border border-neutral-200 dark:border-neutral-700 rounded">Reset</button>
+        <button id="btnSignOut" class="px-3 py-1 text-neutral-700 dark:text-neutral-300 hover:underline">Sign out</button>
       </div>
     </div>
 
     <!-- Tabs -->
-    <div class="border-b mb-4 flex">
-      <button id="tabPreview" class="tab-btn px-4 py-2 border-b-2 border-neutral-900 font-medium">Preview</button>
-      <button id="tabCode" class="tab-btn px-4 py-2 border-b-2 border-transparent text-neutral-600">Code</button>
+    <div class="border border-neutral-200 dark:border-neutral-700 mb-4 flex">
+      <button id="tabPreview" class="tab-btn px-4 py-2 border border-neutral-200 dark:border-neutral-700-2 border border-neutral-200 dark:border-neutral-700-neutral-900 font-medium">Preview</button>
+      <button id="tabCode" class="tab-btn px-4 py-2 border border-neutral-200 dark:border-neutral-700-2 border border-neutral-200 dark:border-neutral-700-transparent text-neutral-600 dark:text-neutral-400">Code</button>
     </div>
 
     <!-- Preview Tab -->
-    <div id="previewTab" class="bg-white p-6 rounded-lg border shadow-sm">
+    <div id="previewTab" class="bg-white dark:bg-neutral-800 p-6 rounded-lg border border-neutral-200 dark:border-neutral-700 shadow-sm">
       <div id="editablePreview" contenteditable="true" class="min-h-[500px] outline-none"></div>
     </div>
 
     <!-- Code Tab -->
     <div id="codeTab" class="hidden">
   <label for="formCode" class="sr-only">Form HTML code editor</label>
-  <textarea id="formCode" title="Form HTML code editor" placeholder="Paste or edit your form HTML here" class="w-full h-[500px] border rounded-lg p-3 font-mono text-sm"></textarea>
+  <textarea id="formCode" title="Form HTML code editor" placeholder="Paste or edit your form HTML here" class="w-full h-[500px] border border-neutral-200 dark:border-neutral-700 rounded-lg p-3 font-mono text-sm"></textarea>
     </div>
   </main>
 
   <!-- FOOTER -->
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200">
+  <footer class="bg-neutral-100 dark:bg-neutral-800 mt-12 py-6 text-center text-sm text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700-t border border-neutral-200 dark:border-neutral-700-neutral-200">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
       <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
@@ -147,21 +159,21 @@
       const baseTemplate = `
 <div class="max-w-xl mx-auto">
   <h1 class="text-3xl font-bold mb-2">Example MUNify Form</h1>
-  <p class="mb-6 text-neutral-700">Please complete this registration form for the upcoming Model UN conference.</p>
+  <p class="mb-6 text-neutral-700 dark:text-neutral-300">Please complete this registration form for the upcoming Model UN conference.</p>
   
   <label class="block mb-4">
     <span class="block font-medium">Full Name</span>
-    <input type="text" name="name" class="mt-1 block w-full border rounded-lg p-2" required>
+    <input type="text" name="name" class="mt-1 block w-full border border-neutral-200 dark:border-neutral-700 rounded-lg p-2" required>
   </label>
 
   <label class="block mb-4">
     <span class="block font-medium">Country</span>
-    <input type="text" name="country" class="mt-1 block w-full border rounded-lg p-2" required>
+    <input type="text" name="country" class="mt-1 block w-full border border-neutral-200 dark:border-neutral-700 rounded-lg p-2" required>
   </label>
 
   <label class="block mb-6">
     <span class="block font-medium">Opening Speech</span>
-    <textarea name="speech" rows="4" class="mt-1 block w-full border rounded-lg p-2" required></textarea>
+    <textarea name="speech" rows="4" class="mt-1 block w-full border border-neutral-200 dark:border-neutral-700 rounded-lg p-2" required></textarea>
   </label>
 
   <button type="submit" class="bg-neutral-900 text-white px-4 py-2 rounded-lg">Submit</button>
@@ -258,11 +270,11 @@
       function setActiveTab(activeId) {
         document.querySelectorAll(".tab-btn").forEach(btn => {
           if (btn.id === activeId) {
-            btn.classList.add("border-neutral-900", "text-neutral-900");
-            btn.classList.remove("border-transparent", "text-neutral-600");
+            btn.classList.add("border border-neutral-200 dark:border-neutral-700-neutral-900", "text-neutral-900");
+            btn.classList.remove("border border-neutral-200 dark:border-neutral-700-transparent", "text-neutral-600 dark:text-neutral-400");
           } else {
-            btn.classList.add("border-transparent", "text-neutral-600");
-            btn.classList.remove("border-neutral-900", "text-neutral-900");
+            btn.classList.add("border border-neutral-200 dark:border-neutral-700-transparent", "text-neutral-600 dark:text-neutral-400");
+            btn.classList.remove("border border-neutral-200 dark:border-neutral-700-neutral-900", "text-neutral-900");
           }
         });
       }

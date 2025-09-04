@@ -11,8 +11,8 @@
   <script src="../assets/js/auth.js"></script>
   <script src="../assets/js/ui.js"></script>
 </head>
-<body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col">
-<header class="border-b bg-white/70 backdrop-blur sticky top-0 z-10 site-foreground">
+<body class="bg-neutral-50 dark:bg-neutral-900 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 min-h-screen flex flex-col">
+<header class="border-b border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800/70 backdrop-blur sticky top-0 z-10 site-foreground">
   <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
     <a href="../" class="font-semibold tracking-tight">MUNify</a>
     <nav class="hidden md:flex gap-6 text-sm">
@@ -23,18 +23,29 @@
       <a href="../info/" class="hover:underline">Info</a>
     </nav>
     <div class="flex gap-2 items-center text-sm">
+      <!-- Dark Mode Toggle -->
+      <button data-dark-mode-toggle onclick="window.MUNui.toggleDarkMode()" 
+              class="p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+              aria-label="Toggle dark mode">
+        <svg data-icon="moon" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+        </svg>
+        <svg data-icon="sun" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+        </svg>
+      </button>
       <span id="signIndicator" class="text-green-600 hidden">Signed in</span>
       <button id="btnSignOutHome" class="underline hidden">Sign out</button>
     </div>
   </div>
 </header>
 <main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8 space-y-10" aria-describedby="settingsHelp">
-    <section class="bg-white border rounded-xl shadow-sm p-6" aria-labelledby="wizardHeading">
+    <section class="bg-white dark:bg-neutral-800 border border border-neutral-200 dark:border-neutral-700-neutral-200 dark:border border-neutral-200 dark:border-neutral-700-neutral-700 rounded-xl shadow-sm p-6" aria-labelledby="wizardHeading">
       <h2 id="wizardHeading" class="text-lg font-semibold mb-1">Guided Setup Wizard</h2>
-      <p class="text-sm text-neutral-600 mb-4">Follow the steps below. Your progress is saved locally. You can return any time.</p>
+      <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-4">Follow the steps below. Your progress is saved locally. You can return any time.</p>
       <div class="mb-4">
         <div class="flex justify-between text-xs font-medium mb-1">
-          <span id="wizLabel">Step 1 of 4</span><span id="wizStepName" class="text-neutral-500">Sign In</span>
+          <span id="wizLabel">Step 1 of 4</span><span id="wizStepName" class="text-neutral-500 dark:text-neutral-400">Sign In</span>
         </div>
         <div class="h-2 w-full bg-neutral-200 rounded-full overflow-hidden" aria-label="Setup progress" role="progressbar" aria-valuemin="0" aria-valuemax="4" aria-valuenow="1" id="wizProgressBar">
           <div id="wizProgressFill" class="h-full bg-neutral-900 transition-all duration-300" style="width:25%"></div>
@@ -44,7 +55,7 @@
         <!-- Step 1: Sign In -->
         <div data-step="0" class="wiz-step">
           <h3 class="font-medium mb-2">Sign In</h3>
-          <p class="text-sm text-neutral-600 mb-3">Sign in with Google to begin. Only a short‑lived ID token is stored locally.</p>
+          <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Sign in with Google to begin. Only a short‑lived ID token is stored locally.</p>
           <div class="flex gap-2 items-center">
             <button id="wizSignIn" class="px-4 py-2 rounded-lg bg-neutral-900 text-white text-sm">Sign In with Google</button>
             <span id="wizSignInStatus" class="text-xs text-green-600 hidden">Signed in ✓</span>
@@ -53,63 +64,63 @@
         <!-- Step 2: Sheet -->
         <div data-step="1" class="wiz-step hidden">
           <h3 class="font-medium mb-2">Select or Create Sheet</h3>
-          <p class="text-sm text-neutral-600 mb-3">Choose an existing spreadsheet or create a new one for storing form submissions.</p>
+          <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Choose an existing spreadsheet or create a new one for storing form submissions.</p>
           <div class="flex gap-2 mb-3 flex-wrap">
-            <button id="wizListSheets" class="px-3 py-1.5 border rounded text-sm">List Sheets</button>
-            <button id="wizCreateSheet" class="px-3 py-1.5 border rounded text-sm">Create New Sheet</button>
+            <button id="wizListSheets" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded text-sm">List Sheets</button>
+            <button id="wizCreateSheet" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded text-sm">Create New Sheet</button>
           </div>
-          <div id="wizSheetsBox" class="space-y-2 max-h-52 overflow-y-auto text-sm border rounded p-2 bg-neutral-50"></div>
-          <div id="wizSheetChosen" class="text-xs text-neutral-600 mt-2"></div>
+          <div id="wizSheetsBox" class="space-y-2 max-h-52 overflow-y-auto text-sm border border-neutral-200 dark:border-neutral-700 rounded p-2 bg-neutral-50 dark:bg-neutral-900"></div>
+          <div id="wizSheetChosen" class="text-xs text-neutral-600 dark:text-neutral-400 mt-2"></div>
         </div>
         <!-- Step 3: Endpoint -->
         <div data-step="2" class="wiz-step hidden">
           <h3 class="font-medium mb-2">Apps Script Endpoint</h3>
-            <p class="text-sm text-neutral-600 mb-3">Either register with an existing deployed Web App URL or provision a personal script (beta).</p>
+            <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-3">Either register with an existing deployed Web App URL or provision a personal script (beta).</p>
             <label class="block mb-3 text-sm">Existing Web App URL
-              <input id="wizScriptUrl" class="mt-1 w-full border rounded-lg p-2 text-sm" placeholder="https://script.google.com/macros/s/.../exec" />
+              <input id="wizScriptUrl" class="mt-1 w-full border border-neutral-200 dark:border-neutral-700 rounded-lg p-2 text-sm" placeholder="https://script.google.com/macros/s/.../exec" />
             </label>
             <div class="flex flex-wrap gap-2 mb-3">
-              <button id="wizVerifyUrl" class="px-3 py-1.5 border rounded text-sm">Verify</button>
-              <button id="wizRegister" class="px-3 py-1.5 border rounded text-sm">Register</button>
-              <button id="wizProvision" class="px-3 py-1.5 border rounded text-sm">Provision (Beta)</button>
+              <button id="wizVerifyUrl" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded text-sm">Verify</button>
+              <button id="wizRegister" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded text-sm">Register</button>
+              <button id="wizProvision" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded text-sm">Provision (Beta)</button>
             </div>
-            <div id="wizEndpointStatus" class="text-xs text-neutral-600"></div>
+            <div id="wizEndpointStatus" class="text-xs text-neutral-600 dark:text-neutral-400"></div>
         </div>
         <!-- Step 4: Finish -->
         <div data-step="3" class="wiz-step hidden">
           <h3 class="font-medium mb-2">Complete</h3>
-          <p class="text-sm text-neutral-600 mb-3">You're all set. Use the Designer to customize your form and share the public form link.</p>
+          <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-3">You're all set. Use the Designer to customize your form and share the public form link.</p>
           <div class="grid md:grid-cols-3 gap-4 text-xs mb-4">
-            <div><div class="text-neutral-500">Sheet ID</div><div id="wizOutSheet" class="font-mono break-all">—</div></div>
-            <div><div class="text-neutral-500">Key</div><div id="wizOutKey" class="font-mono break-all">—</div></div>
-            <div><div class="text-neutral-500">Script URL</div><div id="wizOutScript" class="font-mono break-all">—</div></div>
+            <div><div class="text-neutral-500 dark:text-neutral-400">Sheet ID</div><div id="wizOutSheet" class="font-mono break-all">—</div></div>
+            <div><div class="text-neutral-500 dark:text-neutral-400">Key</div><div id="wizOutKey" class="font-mono break-all">—</div></div>
+            <div><div class="text-neutral-500 dark:text-neutral-400">Script URL</div><div id="wizOutScript" class="font-mono break-all">—</div></div>
           </div>
           <div class="flex gap-2 flex-wrap text-sm">
-            <a href="../design/" class="px-3 py-2 border rounded">Open Designer</a>
-            <a href="../form/" class="px-3 py-2 border rounded">Open Form</a>
-            <button id="wizCopyKey" class="px-3 py-2 border rounded">Copy Key</button>
+            <a href="../design/" class="px-3 py-2 border border-neutral-200 dark:border-neutral-700 rounded">Open Designer</a>
+            <a href="../form/" class="px-3 py-2 border border-neutral-200 dark:border-neutral-700 rounded">Open Form</a>
+            <button id="wizCopyKey" class="px-3 py-2 border border-neutral-200 dark:border-neutral-700 rounded">Copy Key</button>
           </div>
         </div>
       </div>
       <div class="mt-6 flex items-center justify-between">
-        <button id="wizPrev" class="px-3 py-2 border rounded text-sm disabled:opacity-40" disabled>Back</button>
+        <button id="wizPrev" class="px-3 py-2 border border-neutral-200 dark:border-neutral-700 rounded text-sm disabled:opacity-40" disabled>Back</button>
         <div class="flex gap-2">
-          <button id="btnShowAdvanced" class="px-3 py-2 border rounded text-sm">Advanced Panel</button>
+          <button id="btnShowAdvanced" class="px-3 py-2 border border-neutral-200 dark:border-neutral-700 rounded text-sm">Advanced Panel</button>
           <button id="wizNext" class="px-4 py-2 bg-neutral-900 text-white rounded text-sm">Next</button>
         </div>
       </div>
     </section>
 
-    <section id="advancedPanel" class="bg-white border rounded-xl shadow-sm p-6 hidden">
+    <section id="advancedPanel" class="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6 hidden">
       <h2 class="text-lg font-semibold mb-4">Advanced Controls</h2>
       <div class="grid md:grid-cols-2 gap-6">
         <!-- Sheet Picker -->
         <div>
           <h3 class="font-medium mb-2">Sheet Selection</h3>
-          <p class="text-xs text-neutral-600 mb-3">Pick an existing spreadsheet or create a new one. The selection is stored locally.</p>
+          <p class="text-xs text-neutral-600 dark:text-neutral-400 mb-3">Pick an existing spreadsheet or create a new one. The selection is stored locally.</p>
           <div class="flex gap-2 mb-3">
-            <button id="btnListSheets" class="px-3 py-1.5 border rounded text-sm">List Sheets</button>
-            <button id="btnCreateSheet" class="px-3 py-1.5 border rounded text-sm">Create New Sheet</button>
+            <button id="btnListSheets" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded text-sm">List Sheets</button>
+            <button id="btnCreateSheet" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded text-sm">Create New Sheet</button>
           </div>
           <div id="sheetsContainer" class="space-y-2 max-h-60 overflow-y-auto pr-1 text-sm"></div>
         </div>
@@ -117,44 +128,44 @@
         <!-- Provision / Register -->
         <div>
           <h3 class="font-medium mb-2">Apps Script Endpoint</h3>
-          <p class="text-xs text-neutral-600 mb-3">Either register with an existing deployed web app or automatically provision one (beta).</p>
+          <p class="text-xs text-neutral-600 dark:text-neutral-400 mb-3">Either register with an existing deployed web app or automatically provision one (beta).</p>
           <label class="block mb-3 text-sm">Existing Apps Script Web App URL
-            <input id="inputScriptUrl" class="mt-1 w-full border rounded-lg p-2 text-sm" placeholder="https://script.google.com/macros/s/.../exec" />
+            <input id="inputScriptUrl" class="mt-1 w-full border border-neutral-200 dark:border-neutral-700 rounded-lg p-2 text-sm" placeholder="https://script.google.com/macros/s/.../exec" />
           </label>
           <div class="flex flex-wrap gap-2 mb-3">
-            <button id="btnVerifyScript" class="px-3 py-1.5 border rounded text-sm">Verify URL</button>
-            <button id="btnRegisterServer" class="px-3 py-1.5 border rounded text-sm">Register with Server</button>
-            <button id="btnProvisionUser" class="px-3 py-1.5 border rounded text-sm">Provision User Script</button>
+            <button id="btnVerifyScript" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded text-sm">Verify URL</button>
+            <button id="btnRegisterServer" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded text-sm">Register with Server</button>
+            <button id="btnProvisionUser" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded text-sm">Provision User Script</button>
           </div>
-          <div id="endpointStatus" class="text-xs text-neutral-600"></div>
+          <div id="endpointStatus" class="text-xs text-neutral-600 dark:text-neutral-400"></div>
         </div>
       </div>
     </section>
 
-    <section class="bg-white border rounded-xl shadow-sm p-6">
+    <section class="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6">
       <h2 class="text-lg font-semibold mb-2">Current Configuration</h2>
       <div class="grid md:grid-cols-3 gap-4 text-sm">
         <div>
-          <div class="text-neutral-500 text-xs">Sheet ID</div>
+          <div class="text-neutral-500 dark:text-neutral-400 text-xs">Sheet ID</div>
           <div id="cfgSheetId" class="font-mono break-all">—</div>
         </div>
         <div>
-          <div class="text-neutral-500 text-xs">Key</div>
+          <div class="text-neutral-500 dark:text-neutral-400 text-xs">Key</div>
           <div id="cfgKey" class="font-mono break-all">—</div>
         </div>
         <div>
-          <div class="text-neutral-500 text-xs">Apps Script URL</div>
+          <div class="text-neutral-500 dark:text-neutral-400 text-xs">Apps Script URL</div>
           <div id="cfgScript" class="font-mono break-all">—</div>
         </div>
       </div>
       <div class="mt-4 flex gap-2 flex-wrap text-sm">
-        <button id="btnCopyKey" class="px-3 py-1.5 border rounded">Copy Key</button>
-        <button id="btnExportKey" class="px-3 py-1.5 border rounded">Export Key</button>
-        <button id="btnClearLocal" class="px-3 py-1.5 border rounded text-red-600">Clear Local Config</button>
+        <button id="btnCopyKey" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded">Copy Key</button>
+        <button id="btnExportKey" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded">Export Key</button>
+        <button id="btnClearLocal" class="px-3 py-1.5 border border-neutral-200 dark:border-neutral-700 rounded text-red-600">Clear Local Config</button>
       </div>
     </section>
 
-    <section class="bg-white border rounded-xl shadow-sm p-6">
+    <section class="bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl shadow-sm p-6">
       <h2 class="text-lg font-semibold mb-2">Manual Instructions</h2>
       <details class="text-sm">
         <summary class="cursor-pointer font-medium">Deploying an Apps Script Web App</summary>
@@ -169,7 +180,7 @@
     </section>
   </main>
 
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t">
+  <footer class="bg-neutral-100 dark:bg-neutral-800 mt-12 py-6 text-center text-sm text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700-t">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
       <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="hover:underline" target="_blank" rel="noopener">GitHub</a>
@@ -253,8 +264,8 @@
 
       // Step 2 actions (sheet)
       document.getElementById('wizListSheets').addEventListener('click', async () => {
-        const box = document.getElementById('wizSheetsBox'); box.innerHTML = '<div class="text-xs text-neutral-500">Loading...</div>';
-        try { const files = await window.MUNauthAdvanced.listSpreadsheets(); if (!files.length) { box.innerHTML='<div class="text-xs text-neutral-500">No spreadsheets found.</div>'; return; } box.innerHTML=''; files.forEach(f=>{ const b=document.createElement('button'); b.className='w-full text-left px-3 py-2 border rounded hover:bg-neutral-50 flex justify-between'; b.innerHTML = `<span>${f.name}</span><span class='text-xs text-neutral-500'>${f.id}</span>`; b.addEventListener('click',()=>{ window.MUNauthAdvanced.setSheet(f.id, f.name); document.getElementById('wizSheetChosen').textContent = 'Selected: '+f.name; updateWizardUi(); }); box.appendChild(b); }); }
+        const box = document.getElementById('wizSheetsBox'); box.innerHTML = '<div class="text-xs text-neutral-500 dark:text-neutral-400">Loading...</div>';
+        try { const files = await window.MUNauthAdvanced.listSpreadsheets(); if (!files.length) { box.innerHTML='<div class="text-xs text-neutral-500 dark:text-neutral-400">No spreadsheets found.</div>'; return; } box.innerHTML=''; files.forEach(f=>{ const b=document.createElement('button'); b.className='w-full text-left px-3 py-2 border border-neutral-200 dark:border-neutral-700 rounded hover:bg-neutral-50 dark:bg-neutral-900 flex justify-between'; b.innerHTML = `<span>${f.name}</span><span class='text-xs text-neutral-500 dark:text-neutral-400'>${f.id}</span>`; b.addEventListener('click',()=>{ window.MUNauthAdvanced.setSheet(f.id, f.name); document.getElementById('wizSheetChosen').textContent = 'Selected: '+f.name; updateWizardUi(); }); box.appendChild(b); }); }
         catch(e){ box.innerHTML = '<div class="text-xs text-red-600">Failed to list sheets</div>'; }
       });
       document.getElementById('wizCreateSheet').addEventListener('click', async ()=>{
@@ -287,8 +298,8 @@
 
       // List sheets
       document.getElementById('btnListSheets').addEventListener('click', async () => {
-        const box = document.getElementById('sheetsContainer'); box.innerHTML = '<div class="text-xs text-neutral-500">Loading...</div>';
-        try { const files = await window.MUNauthAdvanced.listSpreadsheets(); if (!files.length) { box.innerHTML = '<div class="text-xs text-neutral-500">No spreadsheets found.</div>'; return; } box.innerHTML=''; files.forEach(f => { const btn=document.createElement('button'); btn.className='w-full text-left px-3 py-2 border rounded hover:bg-neutral-50 flex justify-between'; btn.innerHTML = `<span>${f.name}</span><span class='text-xs text-neutral-500'>${f.id}</span>`; btn.addEventListener('click', ()=>{ window.MUNauthAdvanced.setSheet(f.id, f.name); refreshCfgUI(); window.MUNui.toast('Sheet selected', { type: 'success' }); }); box.appendChild(btn); }); } catch(e){ box.innerHTML = '<div class="text-xs text-red-600">Failed to list sheets</div>'; }
+        const box = document.getElementById('sheetsContainer'); box.innerHTML = '<div class="text-xs text-neutral-500 dark:text-neutral-400">Loading...</div>';
+        try { const files = await window.MUNauthAdvanced.listSpreadsheets(); if (!files.length) { box.innerHTML = '<div class="text-xs text-neutral-500 dark:text-neutral-400">No spreadsheets found.</div>'; return; } box.innerHTML=''; files.forEach(f => { const btn=document.createElement('button'); btn.className='w-full text-left px-3 py-2 border border-neutral-200 dark:border-neutral-700 rounded hover:bg-neutral-50 dark:bg-neutral-900 flex justify-between'; btn.innerHTML = `<span>${f.name}</span><span class='text-xs text-neutral-500 dark:text-neutral-400'>${f.id}</span>`; btn.addEventListener('click', ()=>{ window.MUNauthAdvanced.setSheet(f.id, f.name); refreshCfgUI(); window.MUNui.toast('Sheet selected', { type: 'success' }); }); box.appendChild(btn); }); } catch(e){ box.innerHTML = '<div class="text-xs text-red-600">Failed to list sheets</div>'; }
       });
 
       // Create new sheet (basic) via Sheets API

@@ -29,7 +29,7 @@
     .pop-target { position: relative; z-index: 10; }
   </style>
 </head>
-<body class="bg-neutral-50 text-neutral-900">
+<body class="bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 min-h-screen flex flex-col">
   <!-- Rotating Earth Background -->
   <div id="earth-bg"></div>
 
@@ -44,6 +44,17 @@
       <a href="info/" class="hover:underline">Info</a>
     </nav>
     <div class="flex gap-2 items-center text-sm">
+      <!-- Dark Mode Toggle -->
+      <button data-dark-mode-toggle onclick="window.MUNui.toggleDarkMode()" 
+              class="p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+              aria-label="Toggle dark mode">
+        <svg data-icon="moon" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+        </svg>
+        <svg data-icon="sun" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+        </svg>
+      </button>
       <div id="g_id_signin" class=""></div>
       <button id="btnSignOutHome" class="underline hidden">Sign out</button>
     </div>
@@ -93,7 +104,7 @@
     }
     </style>
   <!-- Main -->
-  <main class="max-w-5xl mx-auto px-4 pop-target site-foreground">
+  <main class="flex-1 max-w-5xl mx-auto px-4 pop-target site-foreground">
     <section class="grid md:grid-cols-2 gap-8 items-center site-foreground">
       <div class="space-y-4">
         <h1 class="text-3xl md:text-5xl font-bold leading-tight frosted-text">
@@ -106,7 +117,7 @@
           <a href="info/" class="px-4 py-2 rounded-lg border">Help</a>
         </div>
       </div>
-      <div class="bg-white/80 backdrop-blur rounded-2xl shadow p-6 border border-neutral-200">
+      <div class="bg-white/80 dark:bg-neutral-800/80 backdrop-blur rounded-2xl shadow p-6 border border-neutral-200 dark:border-neutral-700">
         <h2 class="font-semibold mb-2 frosted-text">Unified Flow</h2>
         <ol class="list-decimal ml-5 space-y-2 text-sm">
           <li>Sign in (top-right if not signed in).</li>
@@ -114,7 +125,7 @@
           <li>Design your form and distribute <code>form/#KEY</code>.</li>
           <li>Manage invites & config anytime in Settings.</li>
         </ol>
-        <p class="mt-3 text-xs text-neutral-500">The legacy Quick Setup modal has been removed; everything lives in Settings now.</p>
+        <p class="mt-3 text-xs text-neutral-500 dark:text-neutral-400">The legacy Quick Setup modal has been removed; everything lives in Settings now.</p>
       </div>
     </section>
     <!-- Settings section removed from landing to enforce single canonical flow -->
@@ -122,7 +133,7 @@
   <!-- Onboarding modal removed for unified flow -->
 
   <!-- Footer -->
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200 pop-target site-foreground">
+  <footer class="bg-neutral-100 dark:bg-neutral-800 mt-12 py-6 text-center text-sm text-neutral-600 dark:text-neutral-300 border-t border-neutral-200 dark:border-neutral-700 pop-target site-foreground">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
       <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">

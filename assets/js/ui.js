@@ -2,6 +2,66 @@
 (function(){
   // Track active overlay elements for ESC handling
   const activeOverlays = new Set();
+  
+  // Dark mode functionality
+  function initDarkMode() {
+    // Check for saved dark mode preference or default to light mode
+    const isDarkMode = localStorage.getItem('munify-dark-mode') === 'true';
+    
+    // Apply dark mode to document
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    
+    // Update any existing toggle buttons
+    updateDarkModeToggleState(isDarkMode);
+  }
+  
+  function toggleDarkMode() {
+    const isDarkMode = document.documentElement.classList.contains('dark');
+    const newDarkMode = !isDarkMode;
+    
+    // Toggle the class
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    
+    // Save preference
+    localStorage.setItem('munify-dark-mode', newDarkMode.toString());
+    
+    // Update toggle buttons
+    updateDarkModeToggleState(newDarkMode);
+    
+    // Show toast
+    toast(newDarkMode ? 'Dark mode enabled' : 'Light mode enabled', { type: 'success', duration: 2000 });
+  }
+  
+  function updateDarkModeToggleState(isDarkMode) {
+    const toggleButtons = document.querySelectorAll('[data-dark-mode-toggle]');
+    toggleButtons.forEach(btn => {
+      const sunIcon = btn.querySelector('[data-icon="sun"]');
+      const moonIcon = btn.querySelector('[data-icon="moon"]');
+      if (sunIcon && moonIcon) {
+        if (isDarkMode) {
+          sunIcon.classList.remove('hidden');
+          moonIcon.classList.add('hidden');
+        } else {
+          sunIcon.classList.add('hidden');
+          moonIcon.classList.remove('hidden');
+        }
+      }
+      // Update aria-label
+      btn.setAttribute('aria-label', isDarkMode ? 'Switch to light mode' : 'Switch to dark mode');
+    });
+  }
+  
+  // Initialize dark mode on page load
+  document.addEventListener('DOMContentLoaded', initDarkMode);
+  
   function createContainer(){
     let c = document.getElementById('munify-toasts');
     if (c) return c;
@@ -150,5 +210,5 @@
     }
   });
 
-  window.MUNui = { toast, confirm };
+  window.MUNui = { toast, confirm, toggleDarkMode, initDarkMode };
 })();
