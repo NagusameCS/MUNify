@@ -34,8 +34,8 @@
 </head>
 <body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col dark:bg-neutral-900 dark:text-neutral-100">
   <!-- Rotating Earth Background -->
+  <div class="earth-gradient"></div>
   <div id="earth-bg"></div>
-  <div class="globe-overlay"></div>
 
   <!-- Header -->
   <header class="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between site-foreground">
@@ -163,6 +163,11 @@
   <div class="reveal frost-pane p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700/60" data-frost>
           <h3 class="font-medium mb-1">Own Your Data</h3>
           <p class="text-sm text-neutral-600 leading-relaxed">All submissions land directly in <strong>your</strong> Google Sheet. Export, pivot, archive without proprietary lock‑in.</p>
+          /* New gradient moved behind the earth (further back) */
+          .earth-gradient { position:fixed; inset:0; pointer-events:none; z-index:-3; background:
+            radial-gradient(circle at 60% 35%, rgba(0,0,0,0.42), rgba(0,0,0,0) 55%),
+            linear-gradient(to bottom, rgba(0,0,0,0.72), rgba(0,0,0,0.34) 30%, rgba(0,0,0,0) 60%);
+          }
         </div>
   <div class="reveal frost-pane p-5 rounded-xl border bg-white shadow-sm hover:bg-neutral-50 transition dark:bg-neutral-800 dark:border-neutral-700 dark:hover:bg-neutral-700/60" data-frost>
           <h3 class="font-medium mb-1">Rapid Provisioning</h3>
