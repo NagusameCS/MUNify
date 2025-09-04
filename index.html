@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -16,8 +16,7 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="assets/js/auth.js"></script>
   <script src="assets/js/ui.js"></script>
-  <script src="assets/js/theme.js"></script>
-  <script>/* early theme apply */(function(){try{var m=localStorage.getItem('munify-dark-mode');if(m==='true'){document.documentElement.classList.add('dark');}}catch(e){}})();</script>
+  <!-- theme.js removed: dark mode forced -->
   <style>
     /* Ensure earth background never overlays foreground content */
     #earth-bg, #earth-bg canvas {
@@ -49,11 +48,7 @@
       <a href="info/" class="hover:underline">Info</a>
     </nav>
     <div class="flex gap-2 items-center text-sm">
-      <button data-theme-toggle aria-pressed="false" class="p-2 rounded hover:underline" title="Switch to dark mode">
-        <span data-icon="sun" aria-hidden="true" class="material-symbols-rounded align-middle">light_mode</span>
-        <span data-icon="moon" aria-hidden="true" style="display:none" class="material-symbols-rounded align-middle">dark_mode</span>
-        <span class="sr-only">Toggle theme</span>
-      </button>
+  <!-- Theme toggle removed (dark only) -->
       <div id="g_id_signin" class=""></div>
       <button id="btnSignOutHome" class="underline hidden">Sign out</button>
     </div>
@@ -147,7 +142,7 @@
         </div>
       </div>
   <div class="glow-card frost-pane rounded-2xl p-6 border relative overflow-hidden dark:bg-neutral-800/70 dark:border-neutral-700" data-frost>
-        <h2 class="font-semibold mb-3 flex items-center gap-2 text-neutral-800">
+  <h2 class="font-semibold mb-3 flex items-center gap-2 text-white">
           <span class="inline-block w-5 h-5 rounded-full bg-blue-600"></span> Unified Flow
         </h2>
         <ol class="list-decimal ml-5 space-y-2 text-sm relative">
