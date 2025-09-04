@@ -1,12 +1,15 @@
 // Dark mode toggle logic for MUNify (class-based)
 (function(){
   const STORAGE_KEY = 'munify-dark-mode';
-  function isDark(){ return document.documentElement.classList.contains('dark'); }
-  function apply(d){
-    document.documentElement.classList.toggle('dark', !!d);
-    try { localStorage.setItem(STORAGE_KEY, d ? 'true' : 'false'); } catch(e){}
-    const btns = document.querySelectorAll('[data-theme-toggle]');
-    btns.forEach(b=>{
+  const root = document.documentElement;
+  const prefersDark = () => window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  let lastToastTime = 0;
+
+  function isDark(){ return root.classList.contains('dark'); }
+  function setAttr(d){ root.classList.toggle('dark', !!d); }
+  function persist(d){ try { localStorage.setItem(STORAGE_KEY, d ? 'true':'false'); } catch(e){} }
+  function updateButtons(d){
+    document.querySelectorAll('[data-theme-toggle]').forEach(b=>{
       b.setAttribute('aria-pressed', d ? 'true':'false');
       const sun = b.querySelector('[data-icon=sun]');
       const moon = b.querySelector('[data-icon=moon]');
@@ -14,21 +17,66 @@
       if (moon) moon.style.display = d ? 'inline-block':'none';
       b.title = d ? 'Switch to light mode' : 'Switch to dark mode';
     });
-    if (window.MUNui && window.MUNui.toast) {
-      window.MUNui.toast(d ? 'Dark mode enabled' : 'Light mode enabled', { type:'info', duration: 2000 });
-    }
   }
-  function toggle(){ apply(!isDark()); }
+  function announce(d){
+    let live = document.getElementById('theme-status-live');
+    if(!live){
+      live = document.createElement('div');
+      live.id='theme-status-live';
+      live.className='sr-only';
+      live.setAttribute('role','status');
+      live.setAttribute('aria-live','polite');
+      document.body.appendChild(live);
+    }
+    live.textContent = d ? 'Dark mode' : 'Light mode';
+  }
+  function maybeToast(d){
+    const now = Date.now();
+    if (!window.MUNui || !window.MUNui.toast) return;
+    if (now - lastToastTime < 800) return; // throttle bursts (e.g. shortcut spam)
+    lastToastTime = now;
+    window.MUNui.toast(d ? 'Dark mode' : 'Light mode', { type:'info', duration:1600 });
+  }
+  function apply(d, opts={}){
+    setAttr(d);
+    persist(d);
+    updateButtons(d);
+    announce(d);
+    if(!opts.quiet) maybeToast(d);
+  }
+  function toggle(opts={}){ apply(!isDark(), opts); }
+
+  // Initialization after DOM ready
   document.addEventListener('DOMContentLoaded', ()=>{
-    const saved = (function(){ try { return localStorage.getItem(STORAGE_KEY); } catch(e){ return null; } })();
-    if (saved === 'true') document.documentElement.classList.add('dark');
-    apply(document.documentElement.classList.contains('dark'));
+    // Add transition class once page loaded to avoid FOUC
+    requestAnimationFrame(()=>{ root.classList.add('theme-transition'); });
+    const saved = (()=>{ try { return localStorage.getItem(STORAGE_KEY); } catch(e){ return null; } })();
+    if (saved === null) {
+      // default to system preference
+      setAttr(prefersDark());
+    } else if (saved === 'true') {
+      setAttr(true);
+    }
+    apply(isDark(), { quiet:true });
     document.body.addEventListener('click', (e)=>{
       const t = e.target.closest('[data-theme-toggle]');
       if (!t) return;
       e.preventDefault();
       toggle();
     });
+    // Keyboard shortcut: Alt+T
+    window.addEventListener('keydown', (e)=>{
+      if ((e.altKey || e.metaKey) && (e.key==='t' || e.key==='T')) { e.preventDefault(); toggle(); }
+    });
+    // React to system preference changes if user never explicitly chose
+    if (window.matchMedia){
+      try {
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ev=>{
+          const explicit = (()=>{ try { return localStorage.getItem(STORAGE_KEY); } catch(e){ return null; } })();
+          if (explicit === null) { apply(ev.matches, { quiet:false }); }
+        });
+      } catch(_){/* ignore */}
+    }
   });
-  window.MUNtheme = { toggle, apply };
+  window.MUNtheme = { toggle, apply, isDark };
 })();

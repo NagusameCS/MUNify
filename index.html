@@ -276,7 +276,6 @@ await fetch(url+'?mode=append&key='+cfg.key, {
 
   const THREE = await import('https://esm.sh/three@0.155.0');
   const { GLTFLoader } = await import('https://esm.sh/three@0.155.0/examples/jsm/loaders/GLTFLoader.js');
-  const { RGBELoader } = await import('https://esm.sh/three@0.155.0/examples/jsm/loaders/RGBELoader.js');
 
       const container = document.getElementById('earth-bg');
       if (!container) return;
@@ -291,8 +290,8 @@ await fetch(url+'?mode=append&key='+cfg.key, {
   renderer.setClearColor(0x000000, 0);
   renderer.setSize(width, height);
   renderer.setPixelRatio(window.devicePixelRatio || 1);
-  // Use ACES filmic tone mapping and a slightly higher exposure for punchier colors
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  // Disable tone mapping (flat look, no post exposure)
+  renderer.toneMapping = THREE.NoToneMapping;
   renderer.toneMappingExposure = 1;
 
   // Ensure the canvas covers the viewport and doesn't block UI interactions
@@ -324,17 +323,7 @@ await fetch(url+'?mode=append&key='+cfg.key, {
       // Scene + Lighting
   const scene = new THREE.Scene();
       
-      // --- HDRI ENVIRONMENT ---
-      // Use a small, public domain HDRI from Polyhaven (2k, ~1MB)
-      // You can swap this for any .hdr you prefer
-      const hdriUrl = 'https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/studio_small_08_2k.hdr';
-      new RGBELoader()
-        .setDataType(THREE.FloatType)
-        .load(hdriUrl, function (texture) {
-          texture.mapping = THREE.EquirectangularReflectionMapping;
-          scene.environment = texture;
-          //scene.background = null; // keep transparent, comment out to use HDRI as bg
-        });
+      // No environment lighting (flat lighting requested)
 
       let earthObj = null;
       const loader = new GLTFLoader();
@@ -342,13 +331,7 @@ await fetch(url+'?mode=append&key='+cfg.key, {
       // Fallback sphere if GLB fails
       function createFallbackSphere() {
   const geom = new THREE.SphereGeometry(2.0, 32, 32);
-        const mat = new THREE.MeshStandardMaterial({
-          color: 0x4aa3df,
-          metalness: 0.1,
-          roughness: 0.8,
-          emissive: 0x072434,
-          emissiveIntensity: 0.02
-        });
+  const mat = new THREE.MeshBasicMaterial({ color: 0x4aa3df });
         const sphere = new THREE.Mesh(geom, mat);
   // Scale the fallback so its diameter occupies the desired fraction of the screen width
   const fov = camera.fov * (Math.PI / 180);
@@ -360,29 +343,7 @@ await fetch(url+'?mode=append&key='+cfg.key, {
   sphere.position.y = 0;
         scene.add(sphere);
         earthObj = sphere;
-        // Add a thin atmosphere glow for the fallback globe
-        try {
-          const worldRadius = (sphere.geometry.parameters.radius || 2) * (sphere.scale.x || 1);
-          const atmGeom = new THREE.SphereGeometry(worldRadius * 1.06, 48, 48);
-          const atmMat = new THREE.ShaderMaterial({
-            uniforms: {
-              coeficient: { value: 0.08 },
-              power: { value: 2.6 },
-              glowColor: { value: new THREE.Color(0x7aa9db) }
-            },
-            vertexShader: `varying vec3 vNormal; varying vec3 vPosition; void main(){ vNormal = normalize(normalMatrix * normal); vPosition = (modelViewMatrix * vec4(position,1.0)).xyz; gl_Position = projectionMatrix * vec4(vPosition,1.0); }`,
-            fragmentShader: `uniform vec3 glowColor; uniform float coeficient; uniform float power; varying vec3 vNormal; varying vec3 vPosition; void main(){ float intensity = pow(coeficient + dot(vNormal, normalize(-vPosition)), power); gl_FragColor = vec4(glowColor, intensity); }`,
-            side: THREE.BackSide,
-            blending: THREE.AdditiveBlending,
-            transparent: true,
-            depthWrite: false
-          });
-          const atm = new THREE.Mesh(atmGeom, atmMat);
-          atm.position.copy(sphere.position);
-          scene.add(atm);
-        } catch (e) {
-          console.warn('Could not create atmosphere for fallback', e);
-        }
+  // No atmosphere shader for fallback (flat look)
         console.warn('Using fallback procedural globe (scaled/offset).');
       }
 
@@ -507,59 +468,7 @@ await fetch(url+'?mode=append&key='+cfg.key, {
                   earthObj = earth;
                   console.log('3D model loaded and fitted from ./earth.glb (screen-fitted)');
 
-                  // Add a thin atmosphere/glow around the loaded GLTF model
-                  try {
-                    // radius is the computed world-space radius of the fitted model
-                    const worldRadius = radius || (radiusModel * (earth.scale.x || 1));
-                    const atmGeom = new THREE.SphereGeometry(worldRadius * 1.06, 64, 64);
-                    const atmMat = new THREE.ShaderMaterial({
-                      uniforms: {
-                        coeficient: { value: 0.08 },
-                        power: { value: 2.6 },
-                        glowColor: { value: new THREE.Color(0x7aa9db) }
-                      },
-                      vertexShader: `varying vec3 vNormal; varying vec3 vPosition; void main(){ vNormal = normalize(normalMatrix * normal); vPosition = (modelViewMatrix * vec4(position,1.0)).xyz; gl_Position = projectionMatrix * vec4(vPosition,1.0); }`,
-                      fragmentShader: `uniform vec3 glowColor; uniform float coeficient; uniform float power; varying vec3 vNormal; varying vec3 vPosition; void main(){ float intensity = pow(coeficient + dot(vNormal, normalize(-vPosition)), power); gl_FragColor = vec4(glowColor, intensity); }`,
-                      side: THREE.BackSide,
-                      blending: THREE.AdditiveBlending,
-                      transparent: true,
-                      depthWrite: false
-                    });
-                    const atm = new THREE.Mesh(atmGeom, atmMat);
-                    atm.name = 'globe-atmosphere';
-                    // Parent the atmosphere to the earth so it follows transforms/scale
-                    earth.add(atm);
-                  } catch (err) {
-                    console.warn('Could not create atmosphere for GLTF model', err);
-                  }
-
-                  // Boost material vibrancy: increase saturation, reduce roughness slightly, add subtle emissive tint
-                earth.traverse((node) => {
-                  if (node.isMesh && node.material) {
-                    const mats = Array.isArray(node.material) ? node.material : [node.material];
-                    mats.forEach((mat) => {
-                      if (mat && mat.color) {
-                        // increase saturation
-                        const hsl = {};
-                        mat.color.getHSL(hsl);
-                        hsl.s = Math.min(1, hsl.s * 1.25 + 0.03);
-                        mat.color.setHSL(hsl.h, hsl.s, hsl.l);
-
-                        // tweak metalness/roughness to appear livelier
-                        if (typeof mat.metalness === 'number') mat.metalness = Math.min(1, mat.metalness * 1.1 + 0.05);
-                        if (typeof mat.roughness === 'number') mat.roughness = Math.max(0.02, mat.roughness * 0.85);
-
-                        // subtle emissive based on color
-                        if (mat.emissive) {
-                          mat.emissive.copy(mat.color).multiplyScalar(0.04);
-                          mat.emissiveIntensity = (mat.emissiveIntensity || 0) + 0.35;
-                        }
-
-                        mat.needsUpdate = true;
-                      }
-                    });
-                  }
-                });
+                  // No atmosphere or material enhancement (flat, unlit appearance)
 
                 earthObj = earth;
                 console.log('3D model loaded and fitted from ./earth.glb (scaled/offset, materials enhanced)');
