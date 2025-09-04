@@ -1,44 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MUNify Settings</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <!-- Material Symbols -->
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+  <!-- Tailwind (use compiled local CSS in production). CDN added temporarily to restore layout immediately. -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <!-- Google Identity -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="../assets/js/auth.js"></script>
   <script src="../assets/js/ui.js"></script>
-  <script src="../assets/js/theme.js"></script>
-  <script>/* early theme apply */(function(){try{var m=localStorage.getItem('munify-dark-mode');if(m==='true'){document.documentElement.classList.add('dark');}}catch(e){}})();</script>
+  <!-- theme.js removed: dark mode forced -->
+  <style>
+    /* Ensure earth background never overlays foreground content */
+    #earth-bg, #earth-bg canvas {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: -1 !important; /* push strictly behind */
+      pointer-events: none !important;
+    }
+    /* Foreground utility */
+    .site-foreground { position: relative; z-index: 10; }
+    .pop-target { position: relative; z-index: 10; }
+  </style>
 </head>
 <body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col dark:bg-neutral-900 dark:text-neutral-100">
-<header class="border-b bg-white/70 backdrop-blur sticky top-0 z-10 site-foreground">
-  <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-    <a href="../" class="font-semibold tracking-tight">MUNify</a>
-    <nav class="hidden md:flex gap-6 text-sm">
+  <!-- Rotating Earth Background -->
+  <div class="earth-gradient"></div>
+  <div id="earth-bg"></div>
+  <!-- Header -->
+  <header class="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between site-foreground">
+    <a href="../" class="flex items-center gap-2 font-semibold">MUNify</a>
+    <nav class="text-sm hidden sm:flex gap-6">
       <a href="../" class="hover:underline font-medium">Home</a>
       <a href="../design/" class="hover:underline">Designer</a>
       <a href="../form/" class="hover:underline">Form</a>
       <a href="./" class="hover:underline font-medium">Settings</a>
       <a href="../info/" class="hover:underline">Info</a>
     </nav>
-    <div class="flex gap-2 items-center text-sm">
-      <button data-theme-toggle aria-pressed="false" class="p-2 rounded hover:underline" title="Switch to dark mode">
-        <span data-icon="sun" aria-hidden="true" class="material-symbols-rounded align-middle">light_mode</span>
-        <span data-icon="moon" aria-hidden="true" style="display:none" class="material-symbols-rounded align-middle">dark_mode</span>
-        <span class="sr-only">Toggle theme</span>
-      </button>
-      
-      <span id="signIndicator" class="text-green-600 hidden">Signed in</span>
-      <button id="btnSignOutHome" class="underline hidden">Sign out</button>
+  <!-- Auth controls moved to hero -->
+  </header>
+<main class="max-w-6xl mx-auto px-4 pop-target site-foreground flex-1 w-full">
+  <section class="pt-4 md:pt-12 pb-16 relative">
+    <div class="space-y-6">
+      <h1 class="text-3xl md:text-5xl font-bold leading-tight text-glow-light">
+        MUNify <span class="bg-blue-600 text-white px-2 py-0.5 rounded-md">Settings</span>
+      </h1>
+      <p class="text-lg text-neutral-200 max-w-xl">Configure your Google Sheets integration and Apps Script endpoint. Follow the guided setup wizard or use advanced controls.</p>
     </div>
-  </div>
-</header>
-<main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8 space-y-10" aria-describedby="settingsHelp">
-  <section class="bg-white border rounded-xl shadow-sm p-6 dark:bg-neutral-800 dark:border-neutral-700" aria-labelledby="wizardHeading">
+  </section>
+
+  <section class="py-12 md:py-16 space-y-10">
+  <section class="reveal frost-pane bg-white border rounded-xl shadow-sm p-6 dark:bg-neutral-800/70 dark:border-neutral-700" data-frost aria-labelledby="wizardHeading">
       <h2 id="wizardHeading" class="text-lg font-semibold mb-1">Guided Setup Wizard</h2>
   <p class="text-sm text-neutral-700 dark:text-neutral-300 mb-4">Follow the steps below. Your progress is saved locally. You can return any time.</p>
       <div class="mb-4">
@@ -109,7 +128,7 @@
       </div>
     </section>
 
-  <section id="advancedPanel" class="bg-white border rounded-xl shadow-sm p-6 hidden dark:bg-neutral-800 dark:border-neutral-700">
+  <section id="advancedPanel" class="reveal frost-pane bg-white border rounded-xl shadow-sm p-6 hidden dark:bg-neutral-800/70 dark:border-neutral-700" data-frost>
       <h2 class="text-lg font-semibold mb-4">Advanced Controls</h2>
       <div class="grid md:grid-cols-2 gap-6">
         <!-- Sheet Picker -->
@@ -140,7 +159,7 @@
       </div>
     </section>
 
-    <section class="bg-white border rounded-xl shadow-sm p-6">
+    <section class="reveal frost-pane bg-white border rounded-xl shadow-sm p-6 dark:bg-neutral-800/70 dark:border-neutral-700" data-frost>
       <h2 class="text-lg font-semibold mb-2">Current Configuration</h2>
       <div class="grid md:grid-cols-3 gap-4 text-sm">
         <div>
@@ -163,7 +182,7 @@
       </div>
     </section>
 
-    <section class="bg-white border rounded-xl shadow-sm p-6">
+    <section class="reveal frost-pane bg-white border rounded-xl shadow-sm p-6 dark:bg-neutral-800/70 dark:border-neutral-700" data-frost>
       <h2 class="text-lg font-semibold mb-2">Manual Instructions</h2>
       <details class="text-sm">
         <summary class="cursor-pointer font-medium">Deploying an Apps Script Web App</summary>
@@ -176,15 +195,302 @@
         </ol>
       </details>
     </section>
+  </section>
   </main>
 
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t">
+  <!-- Footer -->
+  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200 pop-target site-foreground dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
-      <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="hover:underline" target="_blank" rel="noopener">GitHub</a>
-      <span>GPLv3</span>
+      <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="flex items-center gap-1 hover:underline" target="_blank" rel="noopener">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 018 4.59c.68 0 1.36.09 2 .26 1.53-1.03 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        GitHub
+      </a>
+      <span>Licensed under GNU GPLv3</span>
     </div>
   </footer>
+
+  <!-- App Script -->
+  <script type="module">
+  async function initLazyThree() {
+    try {
+      // Import Three.js + GLTFLoader
+
+  const THREE = await import('https://esm.sh/three@0.155.0');
+  const { GLTFLoader } = await import('https://esm.sh/three@0.155.0/examples/jsm/loaders/GLTFLoader.js');
+
+      const container = document.getElementById('earth-bg');
+      if (!container) return;
+
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  // Desired fraction of screen width the earth should occupy
+  const screenFraction = 0.5;
+
+  // Renderer
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  renderer.setClearColor(0x000000, 0);
+  renderer.setSize(width, height);
+  renderer.setPixelRatio(window.devicePixelRatio || 1);
+  // Disable tone mapping (flat look, no post exposure)
+  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.toneMappingExposure = 1;
+
+  // Ensure the canvas covers the viewport and doesn't block UI interactions
+  renderer.domElement.style.position = 'fixed';
+  renderer.domElement.style.top = '0';
+  renderer.domElement.style.left = '0';
+  renderer.domElement.style.width = '100%';
+  renderer.domElement.style.height = '100%';
+  renderer.domElement.style.zIndex = '-2';
+  renderer.domElement.style.pointerEvents = 'none';
+
+  container.appendChild(renderer.domElement);
+
+  // Camera
+  const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+  camera.position.set(0, 0, 7);
+  // Scroll-interaction targets (will be initialized further after model fits)
+  let baseDistance = camera.position.z;
+  let desiredCameraY = 0;
+  let desiredCameraZ = baseDistance;
+  // tuning: how far up/down and how much z shift with scrolling
+  const cameraYRange = 4.0; // world units up/down total
+  const cameraZRangeFactor = 0.12; // reduced from 0.5 for subtler depth shift
+
+
+      // Scene + Lighting
+  const scene = new THREE.Scene();
+      
+      // No environment lighting (flat lighting requested)
+
+      let earthObj = null;
+      const loader = new GLTFLoader();
+
+      // Fallback sphere if GLB fails
+      function createFallbackSphere() {
+  const geom = new THREE.SphereGeometry(2.0, 32, 32);
+  const mat = new THREE.MeshBasicMaterial({ color: 0x4aa3df });
+        const sphere = new THREE.Mesh(geom, mat);
+  // Scale the fallback so its diameter occupies the desired fraction of the screen width
+  const fov = camera.fov * (Math.PI / 180);
+  const aspect = width / height;
+  const desiredWorldWidth = 2 * camera.position.z * Math.tan(fov / 2) * aspect * screenFraction;
+  const sphereScale = desiredWorldWidth / 4; // geom diameter is 4 (radius 2)
+  sphere.scale.setScalar(sphereScale || 1);
+  // Center the fallback vertically
+  sphere.position.y = 0;
+        scene.add(sphere);
+        earthObj = sphere;
+  // No atmosphere shader for fallback (flat look)
+        console.warn('Using fallback procedural globe (scaled/offset).');
+      }
+
+      // Animate
+      function animate() {
+        requestAnimationFrame(animate);
+        // Reduce rotation speed by 10x (was 0.003)
+        if (earthObj) earthObj.rotation.y += 0.00012; // reduced rotation speed
+
+        // Smoothly interpolate camera towards desired targets
+        // (using a simple lerp for smooth motion)
+        camera.position.y += (desiredCameraY - camera.position.y) * 0.08;
+        camera.position.z += (desiredCameraZ - camera.position.z) * 0.08;
+        camera.lookAt(0, 0, 0);
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Expose a tiny runtime API so you can play with the camera from the browser console.
+      // Usage examples:
+      //  - EarthCamera.get()
+      //  - EarthCamera.setPosition(0, 0, 12)           // smoothly move camera to z=12 (keeps smoothing behavior)
+      //  - EarthCamera.setPosition(0, 0, 8, true)     // jump instantly to position
+      //  - EarthCamera.setDesired(y, z)               // set desiredCamera targets for smooth motion
+      //  - EarthCamera.setBaseDistance(z)             // set baseDistance used by scroll math
+      //  - EarthCamera.help()
+      window.EarthCamera = {
+        setPosition: (x = 0, y = 0, z = undefined, instant = false) => {
+          if (typeof x === 'object') { const o = x; x = o.x ?? 0; y = o.y ?? 0; z = o.z; }
+          if (z === undefined) z = camera.position.z;
+          if (instant) {
+            camera.position.set(x, y, z);
+            desiredCameraY = y;
+            desiredCameraZ = z;
+            baseDistance = z;
+          } else {
+            // update desired targets so the animation lerps there
+            desiredCameraY = y;
+            desiredCameraZ = z;
+          }
+          console.log('EarthCamera.setPosition ->', EarthCamera.get());
+        },
+        setDesired: (y, z) => {
+          if (typeof y === 'number') desiredCameraY = y;
+          if (typeof z === 'number') desiredCameraZ = z;
+          console.log('EarthCamera.setDesired ->', EarthCamera.get());
+        },
+        setBaseDistance: (z) => {
+          baseDistance = z;
+          desiredCameraZ = z;
+          camera.position.z = z;
+          console.log('EarthCamera.setBaseDistance ->', EarthCamera.get());
+        },
+        get: () => ({ x: camera.position.x, y: camera.position.y, z: camera.position.z, desiredY: desiredCameraY, desiredZ: desiredCameraZ, baseDistance }),
+        help: () => console.log('EarthCamera API: get(), setPosition(x,y,z,instant=false), setDesired(y,z), setBaseDistance(z)')
+      };
+
+      // Load model
+      function tryLoad() {
+        loader.load(
+          '../earth.glb',
+          (gltf) => {
+              try {
+                const earth = gltf.scene || (gltf.scenes && gltf.scenes[0]);
+                if (!earth) throw new Error('GLTF has no scene');
+
+                // Add to scene first
+                scene.add(earth);
+
+                // Compute bounding box and center the model
+                const box = new THREE.Box3().setFromObject(earth);
+                const size = new THREE.Vector3();
+                box.getSize(size);
+                const center = new THREE.Vector3();
+                box.getCenter(center);
+
+                // Recenter model so its bounding box center is at the origin
+                earth.position.x = center.x;
+                earth.position.y = center.y;
+                earth.position.z = center.z;
+
+                // Compute a reasonable scale if the model is unusually small/large
+                  // Compute scale so the model occupies the desired fraction of screen width
+                  const boundingSphere = box.getBoundingSphere(new THREE.Sphere());
+                  const radiusModel = boundingSphere.radius; // in model units
+
+                  // Convert camera FOV and aspect to world width at a certain distance
+                  const fov = camera.fov * (Math.PI / 180);
+                  // We want the model projected width (2 * radiusModel * scale) to equal desiredWorldWidth
+                  const desiredWorldWidth = 2 * camera.position.z * Math.tan(fov / 2) * (width / height) * screenFraction;
+                  const scale = desiredWorldWidth / (2 * radiusModel);
+                  earth.scale.setScalar(scale || 1);
+
+                  // Recompute radius after scaling and position camera to frame model
+                  const radius = radiusModel * (earth.scale.x || 1);
+                  const distance = Math.abs(radius / Math.sin(fov / 2)) * 1.05; // small padding
+                  // Use a fixed camera distance preferred by the user so the globe appears at the chosen scale
+                  camera.position.set(0, 0, 6);
+                  camera.lookAt(0, 0, 0);
+
+                  // Center model vertically (no downward offset)
+                  earth.position.y = 0;
+
+                  // initialize baseDistance and desired targets so scroll math can use them
+                  baseDistance = camera.position.z;
+                  desiredCameraZ = baseDistance;
+                  desiredCameraY = 0;
+
+                  // add scroll listener to update desired camera positions
+                  window.addEventListener('scroll', () => {
+                    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+                    const frac = Math.min(1, window.scrollY / maxScroll);
+                    // center around 0: -0.5..+0.5
+                    const centered = frac - 0.5;
+                    desiredCameraY = centered * cameraYRange * -1; // invert so scrolling down moves camera up visually
+                    desiredCameraZ = baseDistance * (1 + centered * cameraZRangeFactor);
+                  }, { passive: true });
+
+                  earth.rotation.x = 0.4; // tilt for realism
+
+                  earthObj = earth;
+                  console.log('3D model loaded and fitted from ../earth.glb (screen-fitted)');
+
+                  // Force flat bright appearance: replace materials with MeshBasicMaterial keeping texture maps
+                  earth.traverse(node => {
+                    if (node.isMesh) {
+                      const oldMat = node.material;
+                      let map = oldMat && oldMat.map ? oldMat.map : null;
+                      if (map) { map.colorSpace = THREE.SRGBColorSpace || THREE.sRGBEncoding; }
+                      const basic = new THREE.MeshBasicMaterial({ map, color: 0xffffff });
+                      node.material = basic;
+                    }
+                  });
+                  // Slight canvas brightness for extra pop (adjust as needed)
+                  renderer.domElement.style.filter = 'brightness(1.15)';
+
+                earthObj = earth;
+                console.log('3D model loaded and fitted from ../earth.glb (scaled/offset, materials enhanced)');
+              } catch (e) {
+                console.error('Error parsing GLTF', e);
+                createFallbackSphere();
+              }
+          },
+          undefined,
+          (err) => {
+            console.error('Failed to load GLTF ../earth.glb', err);
+            createFallbackSphere();
+          }
+        );
+      }
+      tryLoad();
+
+      // Resize handling
+      window.addEventListener('resize', () => {
+        const w = window.innerWidth, h = window.innerHeight;
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      });
+
+    } catch (e) {
+      console.error('Lazy import failed or initialization error:', e);
+    }
+  }
+
+  // Initialize after page loads
+  window.addEventListener('DOMContentLoaded', () => {
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => initLazyThree(), { timeout: 2000 });
+    } else {
+      setTimeout(initLazyThree, 1000);
+    }
+  });
+  </script>
+
+<!-- Reveal & counter animations -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // IntersectionObserver for .reveal elements
+  const reveals = Array.from(document.querySelectorAll('.reveal'));
+  const frosts = Array.from(document.querySelectorAll('[data-frost]'));
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.18 });
+    reveals.forEach(r => io.observe(r));
+    // Frost panes: animate in when >30% visible, remove active when fully out
+    const ioFrost = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if (entry.isIntersecting) entry.target.classList.add('frost-active');
+        else if (entry.intersectionRatio === 0) entry.target.classList.remove('frost-active');
+      });
+    }, { threshold: [0,0.3] });
+    frosts.forEach(f=> ioFrost.observe(f));
+  } else {
+    reveals.forEach(r => r.classList.add('visible'));
+    frosts.forEach(f=> f.classList.add('frost-active'));
+  }
+});
+</script>
 
   <script>
     function loadCfg(){ try { return JSON.parse(localStorage.getItem('munify_config')||'{}'); } catch(e){ return {}; } }
