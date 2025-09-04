@@ -20,3 +20,11 @@
 .reveal{opacity:0;transform:translateY(20px);transition:opacity .8s ease,transform .8s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
 .focus-outline:focus{outline:2px solid #2563eb;outline-offset:2px}
+/* readability enhancements over 3D globe */
+.globe-overlay{position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(circle at 70% 40%,rgba(255,255,255,0.55),rgba(255,255,255,0) 55%),linear-gradient(to bottom,rgba(255,255,255,0.85),rgba(255,255,255,0.4) 30%,rgba(255,255,255,0) 60%);}
+.dark .globe-overlay{background:radial-gradient(circle at 60% 35%,rgba(0,0,0,0.55),rgba(0,0,0,0) 55%),linear-gradient(to bottom,rgba(0,0,0,0.85),rgba(0,0,0,0.4) 30%,rgba(0,0,0,0) 60%);} 
+.text-glow-light{position:relative}
+.text-glow-light:before{content:"";position:absolute;inset:0;filter:blur(14px);opacity:.7;background:linear-gradient(90deg,rgba(255,255,255,0.7),rgba(255,255,255,0));z-index:-1}
+.dark .text-glow-light:before{background:linear-gradient(90deg,rgba(59,130,246,0.35),rgba(59,130,246,0));}
+.panel-blur{background:rgba(255,255,255,0.75);backdrop-filter:blur(10px)}
+.dark .panel-blur{background:rgba(23,23,23,0.7)}
