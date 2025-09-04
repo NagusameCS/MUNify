@@ -38,26 +38,23 @@
     window.MUNui.toast(d ? 'Dark mode' : 'Light mode', { type:'info', duration:1600 });
   }
   function apply(d, opts={}){
-    setAttr(d);
-    persist(d);
-    updateButtons(d);
-    announce(d);
-    if(!opts.quiet) maybeToast(d);
+    // Force dark mode regardless of requested value
+    d = true;
+    setAttr(true);
+    persist(true);
+    updateButtons(true);
+    announce(true);
+    if(!opts.quiet) maybeToast(true);
   }
-  function toggle(opts={}){ apply(!isDark(), opts); }
+  function toggle(opts={}){ /* disabled: always dark */ apply(true, opts); }
 
   // Initialization after DOM ready
   document.addEventListener('DOMContentLoaded', ()=>{
     // Add transition class once page loaded to avoid FOUC
     requestAnimationFrame(()=>{ root.classList.add('theme-transition'); });
-    const saved = (()=>{ try { return localStorage.getItem(STORAGE_KEY); } catch(e){ return null; } })();
-    if (saved === null) {
-      // default to system preference
-      setAttr(prefersDark());
-    } else if (saved === 'true') {
-      setAttr(true);
-    }
-    apply(isDark(), { quiet:true });
+  // Always enforce dark mode
+  setAttr(true);
+  apply(true, { quiet:true });
     document.body.addEventListener('click', (e)=>{
       const t = e.target.closest('[data-theme-toggle]');
       if (!t) return;
@@ -66,7 +63,7 @@
     });
     // Keyboard shortcut: Alt+T
     window.addEventListener('keydown', (e)=>{
-      if ((e.altKey || e.metaKey) && (e.key==='t' || e.key==='T')) { e.preventDefault(); toggle(); }
+  if ((e.altKey || e.metaKey) && (e.key==='t' || e.key==='T')) { e.preventDefault(); /* disabled */ }
     });
     // React to system preference changes if user never explicitly chose
     if (window.matchMedia){
