@@ -1,44 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MUNify Settings</title>
+  <title>MUNify – Settings</title>
   <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <script src="../assets/js/theme.js" defer></script>
+  <script type="module" src="../assets/js/core.js" data-auto></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="../assets/js/auth.js"></script>
   <script src="../assets/js/ui.js"></script>
-  <script src="../assets/js/theme.js"></script>
-  <script>/* early theme apply */(function(){try{var m=localStorage.getItem('munify-dark-mode');if(m==='true'){document.documentElement.classList.add('dark');}}catch(e){}})();</script>
+  <script>/* early theme apply */(function(){try{var m=localStorage.getItem('munify-dark-mode');if(m==='true')document.documentElement.classList.add('dark');}catch(e){} })();</script>
+  <style>
+    #earth-bg, #earth-bg canvas {position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+    .site-foreground { position: relative; z-index: 2; }
+  </style>
 </head>
 <body class="bg-neutral-50 text-neutral-900 min-h-screen flex flex-col dark:bg-neutral-900 dark:text-neutral-100">
-<header class="border-b bg-white/70 backdrop-blur sticky top-0 z-10 site-foreground">
-  <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-    <a href="../" class="font-semibold tracking-tight">MUNify</a>
-    <nav class="hidden md:flex gap-6 text-sm">
-      <a href="../" class="hover:underline font-medium">Home</a>
+  <a href="#mainContent" class="sr-only focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 focus:ring-offset-neutral-900">Skip to content</a>
+  <div id="earth-bg"></div>
+  <header class="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between site-foreground">
+    <a href="../" class="flex items-center gap-2 font-semibold">MUNify</a>
+    <nav class="text-sm hidden sm:flex gap-6" aria-label="Primary">
+      <a href="../" class="hover:underline">Home</a>
       <a href="../design/" class="hover:underline">Designer</a>
       <a href="../form/" class="hover:underline">Form</a>
-      <a href="./" class="hover:underline font-medium">Settings</a>
+      <a href="./" class="hover:underline font-medium" aria-current="page">Settings</a>
       <a href="../info/" class="hover:underline">Info</a>
     </nav>
-    <div class="flex gap-2 items-center text-sm">
-      <button data-theme-toggle aria-pressed="false" class="p-2 rounded hover:underline" title="Switch to dark mode">
-        <span data-icon="sun" aria-hidden="true" class="material-symbols-rounded align-middle">light_mode</span>
-        <span data-icon="moon" aria-hidden="true" style="display:none" class="material-symbols-rounded align-middle">dark_mode</span>
-        <span class="sr-only">Toggle theme</span>
+    <div class="flex items-center gap-3">
+      <button data-theme-toggle aria-pressed="true" class="p-2 rounded-md border border-neutral-700/40 dark:border-neutral-600 text-xs flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-600" title="Toggle theme">
+        <span data-icon="sun" class="material-symbols-rounded" style="display:none">light_mode</span>
+        <span data-icon="moon" class="material-symbols-rounded">dark_mode</span>
+        <span class="sr-only">Toggle color theme</span>
       </button>
-      
-      <span id="signIndicator" class="text-green-600 hidden">Signed in</span>
-      <button id="btnSignOutHome" class="underline hidden">Sign out</button>
+      <button id="btnSignOutHome" class="text-xs underline hidden">Sign out</button>
     </div>
-  </div>
-</header>
-<main class="flex-1 max-w-6xl mx-auto w-full px-4 py-8 space-y-10" aria-describedby="settingsHelp">
-  <section class="bg-white border rounded-xl shadow-sm p-6 dark:bg-neutral-800 dark:border-neutral-700" aria-labelledby="wizardHeading">
+  </header>
+<main id="mainContent" class="flex-1 max-w-6xl mx-auto w-full px-4 py-8 space-y-10 site-foreground" aria-describedby="settingsHelp">
+  <section class="frost-pane p-6 rounded-xl border" data-frost aria-labelledby="wizardHeading">
       <h2 id="wizardHeading" class="text-lg font-semibold mb-1">Guided Setup Wizard</h2>
   <p class="text-sm text-neutral-700 dark:text-neutral-300 mb-4">Follow the steps below. Your progress is saved locally. You can return any time.</p>
       <div class="mb-4">
@@ -109,7 +112,7 @@
       </div>
     </section>
 
-  <section id="advancedPanel" class="bg-white border rounded-xl shadow-sm p-6 hidden dark:bg-neutral-800 dark:border-neutral-700">
+  <section id="advancedPanel" class="frost-pane p-6 rounded-xl border hidden" data-frost>
       <h2 class="text-lg font-semibold mb-4">Advanced Controls</h2>
       <div class="grid md:grid-cols-2 gap-6">
         <!-- Sheet Picker -->
@@ -140,7 +143,7 @@
       </div>
     </section>
 
-    <section class="bg-white border rounded-xl shadow-sm p-6">
+  <section class="frost-pane p-6 rounded-xl border" data-frost>
       <h2 class="text-lg font-semibold mb-2">Current Configuration</h2>
       <div class="grid md:grid-cols-3 gap-4 text-sm">
         <div>
@@ -163,7 +166,7 @@
       </div>
     </section>
 
-    <section class="bg-white border rounded-xl shadow-sm p-6">
+  <section class="frost-pane p-6 rounded-xl border" data-frost>
       <h2 class="text-lg font-semibold mb-2">Manual Instructions</h2>
       <details class="text-sm">
         <summary class="cursor-pointer font-medium">Deploying an Apps Script Web App</summary>
@@ -178,7 +181,7 @@
     </section>
   </main>
 
-  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t">
+  <footer class="bg-neutral-100 mt-12 py-6 text-center text-sm text-neutral-600 border-t border-neutral-200 dark:bg-neutral-800 dark:text-neutral-400 dark:border-neutral-700 site-foreground">
     <div class="flex flex-col md:flex-row justify-center items-center gap-2">
       <span>© 2025 MUN Forms</span>
       <a href="https://github.com/NagusameCS/MUNify/tree/gh-pages" class="hover:underline" target="_blank" rel="noopener">GitHub</a>
