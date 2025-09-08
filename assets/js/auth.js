@@ -235,17 +235,10 @@
     if (!updateRes.ok) { const t = await updateRes.text(); throw new Error('Script update content failed: ' + t); }
 
     // 5) create a deployment (web app)
-    // Create a new version first
-    const versionRes = await fetch(`https://script.googleapis.com/v1/projects/${projectId}/versions`, {
-      method: 'POST', headers: { 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }, body: JSON.stringify({ versionNumber: 1, description: 'Initial MUNify deployment' })
-    });
-    // Note: the versions create endpoint may reject manual versionNumber; fall back to deploy directly if that fails
-    // Try to create a deployment
     const depBody = {
       deploymentConfig: {
         description: 'MUNify web app',
-        manifestFileName: 'appsscript',
-        versionNumber: 1
+        manifestFileName: 'appsscript'
       }
     };
     const deployRes = await fetch(`https://script.googleapis.com/v1/projects/${projectId}/deployments`, {

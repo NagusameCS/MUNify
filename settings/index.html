@@ -224,8 +224,8 @@
           const hasSheet = !!loadCfg().sheetId;
             nextBtn.disabled = !hasSheet;
         } else if (current === 2) {
-          const hasKeyOrProvision = !!loadCfg().key || !!localStorage.getItem('munifyAppsScriptUrl');
-          nextBtn.disabled = !hasKeyOrProvision;
+          const hasKey = !!loadCfg().key;
+          nextBtn.disabled = !hasKey;
         } else {
           nextBtn.disabled = false;
         }
