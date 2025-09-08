@@ -156,3 +156,28 @@
 
   window.MUNui = { toast, confirm };
 })();
+
+// Shared reveal + frost activation across pages
+(function(){
+  document.addEventListener('DOMContentLoaded', () => {
+    const reveals = Array.from(document.querySelectorAll('.reveal'));
+    const frosts = Array.from(document.querySelectorAll('[data-frost]'));
+    if (!reveals.length && !frosts.length) return;
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+      }, { threshold: 0.18 });
+      reveals.forEach(r=> io.observe(r));
+      const ioFrost = new IntersectionObserver((entries)=>{
+        entries.forEach(entry=>{ if (entry.isIntersecting) entry.target.classList.add('frost-active'); else if (entry.intersectionRatio===0) entry.target.classList.remove('frost-active'); });
+      }, { threshold: [0,0.3] });
+      frosts.forEach(f=> ioFrost.observe(f));
+    } else {
+      reveals.forEach(r=> r.classList.add('visible'));
+      frosts.forEach(f=> f.classList.add('frost-active'));
+    }
+    // Stagger pop-targets
+    const items = Array.from(document.querySelectorAll('.pop-target'));
+    items.forEach((el,i)=> setTimeout(()=> el.classList.add('pop-animate'), i*80+60));
+  });
+})();
